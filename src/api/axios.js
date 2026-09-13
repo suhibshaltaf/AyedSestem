@@ -2,7 +2,7 @@ import axios from "axios";
 import useAuthStore from "../store/useAuthStore.js";
 
 const authAxiosInstance = axios.create({
-  baseURL: "https://localhost:7082/api",
+  baseURL: "https://goldsystemapi.runasp.net/api",
   headers: { "Content-Type": "application/json" },
 });
 
