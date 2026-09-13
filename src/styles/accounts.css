@@ -1,0 +1,324 @@
+/* ===============================
+   Container
+   =============================== */
+.accounts-container {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px 8px 40px;
+}
+
+/* ===============================
+   Header
+   =============================== */
+.accounts-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.accounts-header-icon {
+  width: 58px;
+  height: 58px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.accounts-title {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.85rem !important;
+  font-weight: 700 !important;
+  color: #1e3a5f !important;
+  margin-bottom: 4px !important;
+}
+
+[data-theme="dark"] .accounts-title {
+  color: #80a9d4 !important;
+}
+
+.accounts-subtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.85rem !important;
+  color: var(--text-muted) !important;
+}
+
+/* ===============================
+   Toolbar
+   =============================== */
+.accounts-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.accounts-search {
+  flex: 1;
+  min-width: 220px;
+  max-width: 400px;
+}
+
+.accounts-search .MuiOutlinedInput-root {
+  background-color: var(--bg-paper);
+  border-radius: 10px;
+  height: 44px;
+}
+
+.accounts-search .MuiOutlinedInput-root fieldset {
+  border-color: var(--border-gold-strong);
+}
+
+.accounts-search .MuiOutlinedInput-root:hover fieldset {
+  border-color: var(--gold-soft);
+}
+
+.accounts-search .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: var(--gold-primary);
+}
+
+.accounts-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.accounts-refresh-btn {
+  color: var(--gold-primary) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 10px !important;
+  background-color: var(--bg-paper) !important;
+  width: 44px;
+  height: 44px;
+}
+
+.accounts-refresh-btn:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+}
+
+.accounts-add-btn {
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  height: 44px !important;
+  padding: 0 20px !important;
+  font-weight: 700 !important;
+  font-family: "Cairo", sans-serif !important;
+  text-transform: none !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
+}
+
+.accounts-add-btn:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+/* ===============================
+   Table Paper
+   =============================== */
+.accounts-table-paper {
+  border-radius: 14px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold) !important;
+  box-shadow: var(--shadow-soft) !important;
+  overflow: hidden;
+}
+
+.accounts-loading,
+.accounts-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  color: var(--text-muted);
+  font-family: "Cairo", sans-serif;
+}
+
+/* ===============================
+   Table
+   =============================== */
+.accounts-table-head-row {
+  background-color: rgba(184, 134, 11, 0.06) !important;
+}
+
+.accounts-th {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  color: var(--gold-primary) !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid var(--border-gold-strong) !important;
+  white-space: nowrap;
+}
+
+.accounts-table-row {
+  transition: background-color 0.2s ease;
+}
+
+.accounts-table-row:hover {
+  background-color: rgba(184, 134, 11, 0.04);
+}
+
+.accounts-td {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  color: var(--text-primary) !important;
+  padding: 14px 16px !important;
+  border-bottom: 1px solid var(--border-gold) !important;
+}
+
+.accounts-td-name {
+  font-weight: 600 !important;
+}
+
+/* ===============================
+   Role Chip
+   =============================== */
+.accounts-role-chip {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  border-radius: 6px !important;
+}
+
+.accounts-role-chip-admin {
+  background-color: rgba(184, 134, 11, 0.15) !important;
+  color: #b8860b !important;
+}
+
+.accounts-role-chip-user {
+  background-color: rgba(30, 58, 95, 0.1) !important;
+  color: #1e3a5f !important;
+}
+
+[data-theme="dark"] .accounts-role-chip-user {
+  color: #80a9d4 !important;
+  background-color: rgba(128, 169, 212, 0.15) !important;
+}
+
+/* ===============================
+   Action Buttons
+   =============================== */
+.accounts-action-btn {
+  width: 34px !important;
+  height: 34px !important;
+  margin: 0 2px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.accounts-edit-btn {
+  color: #1e3a5f !important;
+}
+
+.accounts-edit-btn:hover {
+  background-color: rgba(30, 58, 95, 0.08) !important;
+}
+
+[data-theme="dark"] .accounts-edit-btn {
+  color: #80a9d4 !important;
+}
+
+.accounts-delete-btn {
+  color: var(--danger) !important;
+}
+
+.accounts-delete-btn:hover {
+  background-color: rgba(211, 47, 47, 0.08) !important;
+}
+
+/* ===============================
+   Dialog
+   =============================== */
+.accounts-dialog {
+  border-radius: 14px !important;
+  min-width: 340px;
+}
+
+.accounts-dialog-title {
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+}
+
+.accounts-dialog-text {
+  font-family: "Cairo", sans-serif !important;
+  color: var(--text-secondary) !important;
+  line-height: 1.8 !important;
+}
+
+.accounts-dialog-text strong {
+  color: var(--gold-primary);
+}
+
+.accounts-dialog-actions {
+  padding: 12px 20px 20px !important;
+  gap: 8px;
+}
+
+.accounts-dialog-cancel {
+  color: var(--text-secondary) !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-family: "Cairo", sans-serif !important;
+  padding: 8px 20px !important;
+}
+
+.accounts-dialog-confirm {
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  border-radius: 8px !important;
+  text-transform: none !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  padding: 8px 20px !important;
+  min-width: 90px;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
+}
+
+.accounts-dialog-confirm:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+/* ===============================
+   Responsive
+   =============================== */
+@media (max-width: 700px) {
+  .accounts-title {
+    font-size: 1.5rem !important;
+  }
+
+  .accounts-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .accounts-search {
+    max-width: 100%;
+  }
+
+  .accounts-actions {
+    justify-content: space-between;
+  }
+
+  .accounts-add-btn {
+    flex: 1;
+  }
+
+  .accounts-th,
+  .accounts-td {
+    padding: 10px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .accounts-dialog {
+    min-width: unset;
+    width: 90%;
+  }
+}

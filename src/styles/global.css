@@ -1,0 +1,148 @@
+/* ===============================
+   Global Reset
+   =============================== */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  width: 100%;
+}
+
+body {
+  margin: 0;
+  direction: rtl;
+  font-family: "Cairo", "Arial", sans-serif;
+  background-color: var(--bg-default);
+  color: var(--text-primary);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+button,
+input,
+textarea,
+select {
+  font-family: inherit;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===============================
+   CSS Variables (Light Mode)
+   =============================== */
+:root {
+  /* ✅ الخلفية + Sidebar + Header = نفس اللون */
+  --bg-default: #faf6ee;
+  --bg-sidebar: #faf6ee;
+  --bg-header: #faf6ee;
+
+  /* الكروت بيضاء لتبرز */
+  --bg-paper: #ffffff;
+
+  --text-primary: #2b2b2b;
+  --text-secondary: #6b6b6b;
+  --text-muted: #8a8a8a;
+
+  --gold-primary: #b8860b;
+  --gold-light: #d4af6a;
+  --gold-dark: #8b6914;
+  --gold-soft: #c9a44c;
+
+  --border-gold: rgba(184, 134, 11, 0.15);
+  --border-gold-strong: rgba(184, 134, 11, 0.3);
+
+  --shadow-soft: 0 4px 16px rgba(184, 134, 11, 0.06);
+  --shadow-medium: 0 8px 24px rgba(184, 134, 11, 0.12);
+
+  --danger: #d32f2f;
+  --success: #2e7d32;
+
+  --sidebar-width: 240px;
+  --header-height: 56px;
+}
+
+/* ===============================
+   CSS Variables (Dark Mode)
+   =============================== */
+[data-theme="dark"] {
+  /* ✅ الخلفية + Sidebar + Header = نفس اللون */
+  --bg-default: #1a1510;
+  --bg-sidebar: #1a1510;
+  --bg-header: #1a1510;
+
+  /* الكروت أفتح قليلاً لتبرز */
+  --bg-paper: #2b2113;
+
+  --text-primary: #f1f1f1;
+  --text-secondary: #b0b0b0;
+  --text-muted: #888;
+
+  --gold-primary: #d4af6a;
+  --gold-light: #e6c878;
+  --gold-dark: #b8860b;
+  --gold-soft: #c9a44c;
+
+  --border-gold: rgba(212, 175, 106, 0.2);
+  --border-gold-strong: rgba(212, 175, 106, 0.35);
+
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.3);
+  --shadow-medium: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  --danger: #ef5350;
+  --success: #66bb6a;
+}
+
+/* ===============================
+   Scrollbar
+   =============================== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-default);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold-primary);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-dark);
+}
+
+/* ===============================
+   Utility Classes
+   =============================== */
+.gold-text {
+  color: var(--gold-primary);
+}
+
+.gold-gradient-text {
+  background: linear-gradient(90deg, var(--gold-primary), var(--gold-light));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}

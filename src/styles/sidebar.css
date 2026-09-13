@@ -1,0 +1,103 @@
+/* ===============================
+   Sidebar Layout
+   =============================== */
+.sidebar-desktop {
+  min-height: 100vh;
+  background-color: var(--bg-sidebar);
+  border-left: 1px solid var(--border-gold);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 20px 12px;
+}
+
+/* ===============================
+   Sidebar Header (Logo)
+   =============================== */
+.sidebar-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-gold);
+}
+
+.sidebar-title {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--gold-primary) !important;
+  text-align: center;
+  margin-top: 6px !important;
+  line-height: 1.4 !important;
+}
+
+/* ===============================
+   Sidebar Menu
+   =============================== */
+.sidebar-list {
+  flex-grow: 1;
+  padding: 0 !important;
+}
+
+.sidebar-item {
+  border-radius: 8px !important;
+  margin-bottom: 4px !important;
+  padding: 8px 12px !important;
+  color: var(--text-primary) !important;
+  transition: all 0.2s ease !important;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+}
+
+.sidebar-item-active {
+  background-color: var(--gold-primary) !important;
+  color: #ffffff !important;
+}
+
+.sidebar-item-active:hover {
+  background-color: var(--gold-dark) !important;
+}
+
+.sidebar-icon {
+  min-width: 30px !important;
+  color: var(--gold-primary) !important;
+}
+
+.sidebar-icon-active {
+  color: #ffffff !important;
+}
+
+.sidebar-divider {
+  border-color: var(--border-gold) !important;
+  margin: 8px 0 !important;
+}
+
+/* ===============================
+   Logout Button
+   =============================== */
+.sidebar-logout {
+  border-radius: 8px !important;
+  padding: 8px 12px !important;
+  color: var(--danger) !important;
+}
+
+.sidebar-logout:hover {
+  background-color: rgba(211, 47, 47, 0.06) !important;
+}
+
+.sidebar-logout-icon {
+  min-width: 30px !important;
+  color: var(--danger) !important;
+}
