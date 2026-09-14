@@ -101,3 +101,13 @@
   min-width: 30px !important;
   color: var(--danger) !important;
 }
+/* ===============================
+   Sidebar Logo Image
+   =============================== */
+.sidebar-logo {
+  width: 50%;
+  height: 50%;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}

@@ -2,7 +2,7 @@ import axios from "axios";
 import useAuthStore from "../store/useAuthStore.js";
 
 const authAxiosInstance = axios.create({
-  baseURL: "https://goldsystemapi.runasp.net/api",
+  baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 

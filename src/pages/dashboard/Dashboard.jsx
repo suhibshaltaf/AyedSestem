@@ -67,7 +67,7 @@ export default function Dashboard() {
       <div className="dashboard-welcome">
         <Typography className="dashboard-welcome-sub">مرحباً بك في</Typography>
         <Typography className="dashboard-welcome-title">
-          مجموعة عايد وإخوانه
+          مجموعة عايد دعنا
         </Typography>
       </div>
 

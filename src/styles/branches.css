@@ -1,7 +1,7 @@
 /* ===============================
    Container
    =============================== */
-.accounts-container {
+.branches-container {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
@@ -11,14 +11,14 @@
 /* ===============================
    Header
    =============================== */
-.accounts-header {
+.branches-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.accounts-header-icon {
+.branches-header-icon {
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -30,7 +30,7 @@
   margin-bottom: 10px;
 }
 
-.accounts-title {
+.branches-title {
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
@@ -38,11 +38,11 @@
   margin-bottom: 4px !important;
 }
 
-[data-theme="dark"] .accounts-title {
+[data-theme="dark"] .branches-title {
   color: #80a9d4 !important;
 }
 
-.accounts-subtitle {
+.branches-subtitle {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   color: var(--text-muted) !important;
@@ -51,7 +51,7 @@
 /* ===============================
    Toolbar
    =============================== */
-.accounts-toolbar {
+.branches-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,37 +60,37 @@
   flex-wrap: wrap;
 }
 
-.accounts-search {
+.branches-search {
   flex: 1;
   min-width: 220px;
   max-width: 400px;
 }
 
-.accounts-search .MuiOutlinedInput-root {
+.branches-search .MuiOutlinedInput-root {
   background-color: var(--bg-paper);
   border-radius: 10px;
   height: 44px;
 }
 
-.accounts-search .MuiOutlinedInput-root fieldset {
+.branches-search .MuiOutlinedInput-root fieldset {
   border-color: var(--border-gold-strong);
 }
 
-.accounts-search .MuiOutlinedInput-root:hover fieldset {
+.branches-search .MuiOutlinedInput-root:hover fieldset {
   border-color: var(--gold-soft);
 }
 
-.accounts-search .MuiOutlinedInput-root.Mui-focused fieldset {
+.branches-search .MuiOutlinedInput-root.Mui-focused fieldset {
   border-color: var(--gold-primary);
 }
 
-.accounts-actions {
+.branches-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.accounts-refresh-btn {
+.branches-refresh-btn {
   color: var(--gold-primary) !important;
   border: 1px solid var(--border-gold-strong) !important;
   border-radius: 10px !important;
@@ -99,11 +99,11 @@
   height: 44px;
 }
 
-.accounts-refresh-btn:hover {
+.branches-refresh-btn:hover {
   background-color: rgba(184, 134, 11, 0.08) !important;
 }
 
-.accounts-add-btn {
+.branches-add-btn {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 10px !important;
@@ -115,14 +115,14 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.accounts-add-btn:hover {
+.branches-add-btn:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 /* ===============================
    Table Paper
    =============================== */
-.accounts-table-paper {
+.branches-table-paper {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
   border: 1px solid var(--border-gold) !important;
@@ -130,8 +130,8 @@
   overflow: hidden;
 }
 
-.accounts-loading,
-.accounts-empty {
+.branches-loading,
+.branches-empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,11 +143,11 @@
 /* ===============================
    Table
    =============================== */
-.accounts-table-head-row {
+.branches-table-head-row {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.accounts-th {
+.branches-th {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   font-weight: 700 !important;
@@ -157,15 +157,15 @@
   white-space: nowrap;
 }
 
-.accounts-table-row {
+.branches-table-row {
   transition: background-color 0.2s ease;
 }
 
-.accounts-table-row:hover {
+.branches-table-row:hover {
   background-color: rgba(184, 134, 11, 0.04);
 }
 
-.accounts-td {
+.branches-td {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.88rem !important;
   color: var(--text-primary) !important;
@@ -173,48 +173,64 @@
   border-bottom: 1px solid var(--border-gold) !important;
 }
 
-.accounts-td-name {
+.branches-td-name {
   font-weight: 600 !important;
 }
 
-/* ✅ Email Column */
-.accounts-td-email {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.82rem !important;
-  color: var(--text-secondary) !important;
+.branches-td-phone {
   direction: ltr;
   text-align: right;
 }
 
 /* ===============================
-   Role Chip
+   Chips
    =============================== */
-.accounts-role-chip {
+.branches-code-chip {
+  font-family: "Courier New", monospace !important;
+  font-size: 0.78rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  background-color: rgba(30, 58, 95, 0.1) !important;
+  color: #1e3a5f !important;
+  border-radius: 6px !important;
+}
+
+[data-theme="dark"] .branches-code-chip {
+  background-color: rgba(128, 169, 212, 0.15) !important;
+  color: #80a9d4 !important;
+}
+
+.branches-status-chip {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
   border-radius: 6px !important;
 }
 
-.accounts-role-chip-admin {
-  background-color: rgba(184, 134, 11, 0.15) !important;
-  color: #b8860b !important;
+.branches-status-chip-active {
+  background-color: rgba(46, 125, 50, 0.15) !important;
+  color: #2e7d32 !important;
 }
 
-.accounts-role-chip-user {
-  background-color: rgba(30, 58, 95, 0.1) !important;
-  color: #1e3a5f !important;
+[data-theme="dark"] .branches-status-chip-active {
+  background-color: rgba(102, 187, 106, 0.15) !important;
+  color: #66bb6a !important;
 }
 
-[data-theme="dark"] .accounts-role-chip-user {
-  color: #80a9d4 !important;
-  background-color: rgba(128, 169, 212, 0.15) !important;
+.branches-status-chip-inactive {
+  background-color: rgba(211, 47, 47, 0.12) !important;
+  color: #d32f2f !important;
+}
+
+[data-theme="dark"] .branches-status-chip-inactive {
+  background-color: rgba(239, 83, 80, 0.15) !important;
+  color: #ef5350 !important;
 }
 
 /* ===============================
    Action Buttons
    =============================== */
-.accounts-action-btn {
+.branches-action-btn {
   width: 34px !important;
   height: 34px !important;
   margin: 0 2px !important;
@@ -222,57 +238,57 @@
   transition: all 0.2s ease !important;
 }
 
-.accounts-edit-btn {
+.branches-edit-btn {
   color: #1e3a5f !important;
 }
 
-.accounts-edit-btn:hover {
+.branches-edit-btn:hover {
   background-color: rgba(30, 58, 95, 0.08) !important;
 }
 
-[data-theme="dark"] .accounts-edit-btn {
+[data-theme="dark"] .branches-edit-btn {
   color: #80a9d4 !important;
 }
 
-.accounts-delete-btn {
+.branches-delete-btn {
   color: var(--danger) !important;
 }
 
-.accounts-delete-btn:hover {
+.branches-delete-btn:hover {
   background-color: rgba(211, 47, 47, 0.08) !important;
 }
 
 /* ===============================
-   Delete Dialog
+   Dialogs
    =============================== */
-.accounts-dialog {
+.branches-dialog {
   border-radius: 14px !important;
   min-width: 340px;
-  max-width: 90vw; /* ✅ يمنع التجاوز على الشاشات الصغيرة */
+  max-width: 90vw;
 }
 
-.accounts-dialog-title {
+.branches-dialog-title {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--text-primary) !important;
 }
 
-.accounts-dialog-text {
+.branches-dialog-text {
   font-family: "Cairo", sans-serif !important;
   color: var(--text-secondary) !important;
   line-height: 1.8 !important;
 }
 
-.accounts-dialog-text strong {
+.branches-dialog-text strong {
   color: var(--gold-primary);
 }
 
-.accounts-dialog-actions {
+.branches-dialog-actions {
   padding: 12px 20px 20px !important;
   gap: 8px;
 }
 
-.accounts-dialog-cancel {
+.branches-dialog-cancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -280,7 +296,7 @@
   padding: 8px 20px !important;
 }
 
-.accounts-dialog-confirm {
+.branches-dialog-confirm {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -292,19 +308,19 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.accounts-dialog-confirm:hover {
+.branches-dialog-confirm:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 /* ===============================
-   Form Dialog (Add/Edit)
+   Form Dialog
    =============================== */
-.accounts-form-dialog {
+.branches-form-dialog {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.accounts-form-title {
+.branches-form-title {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--gold-primary) !important;
@@ -313,54 +329,64 @@
   padding-bottom: 12px !important;
 }
 
-.accounts-form-content {
+.branches-form-content {
   padding: 16px 24px !important;
-  max-height: 60vh; /* ✅ يمنع التجاوز */
-  overflow-y: auto; /* ✅ تمرير عند الحاجة */
+  max-height: 60vh;
+  overflow-y: auto;
 }
 
-.accounts-form-field {
+.branches-form-field {
   margin-bottom: 8px !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root {
+.branches-form-field .MuiOutlinedInput-root {
   border-radius: 10px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root fieldset {
+.branches-form-field .MuiOutlinedInput-root fieldset {
   border-color: var(--border-gold-strong) !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root:hover fieldset {
+.branches-form-field .MuiOutlinedInput-root:hover fieldset {
   border-color: var(--gold-soft) !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root.Mui-focused fieldset {
+.branches-form-field .MuiOutlinedInput-root.Mui-focused fieldset {
   border-color: var(--gold-primary) !important;
 }
 
-.accounts-form-field .MuiInputLabel-root {
+.branches-form-field .MuiInputLabel-root {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.9rem !important;
 }
 
-.accounts-form-field .MuiInputLabel-root.Mui-focused {
+.branches-form-field .MuiInputLabel-root.Mui-focused {
   color: var(--gold-primary) !important;
 }
 
-.accounts-form-field .MuiFormHelperText-root {
+.branches-form-field .MuiFormHelperText-root {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.72rem !important;
 }
 
-.accounts-form-actions {
+.branches-form-switch {
+  margin-top: 12px !important;
+}
+
+.branches-form-switch .MuiFormControlLabel-label {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  color: var(--text-primary) !important;
+}
+
+.branches-form-actions {
   padding: 12px 24px 20px !important;
   gap: 8px;
   border-top: 1px solid var(--border-gold) !important;
 }
 
-.accounts-form-cancel {
+.branches-form-cancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -368,11 +394,11 @@
   padding: 8px 20px !important;
 }
 
-.accounts-form-cancel:hover {
+.branches-form-cancel:hover {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.accounts-form-save {
+.branches-form-save {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -383,93 +409,88 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.accounts-form-save:hover {
+.branches-form-save:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
-.accounts-form-save.Mui-disabled {
+.branches-form-save.Mui-disabled {
   background: linear-gradient(90deg, #d4b98a, #c0a068) !important;
   color: #fff !important;
 }
 
 /* ===============================
-   Responsive (Tablet & Mobile)
+   Responsive
    =============================== */
 @media (max-width: 900px) {
-  .accounts-title {
+  .branches-title {
     font-size: 1.6rem !important;
   }
 
-  .accounts-th,
-  .accounts-td {
+  .branches-th,
+  .branches-td {
     padding: 12px 10px !important;
     font-size: 0.82rem !important;
   }
 }
 
 @media (max-width: 700px) {
-  .accounts-container {
+  .branches-container {
     padding: 12px 4px 32px;
   }
 
-  .accounts-title {
+  .branches-title {
     font-size: 1.5rem !important;
   }
 
-  .accounts-toolbar {
+  .branches-toolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .accounts-search {
+  .branches-search {
     max-width: 100%;
   }
 
-  .accounts-actions {
+  .branches-actions {
     justify-content: space-between;
   }
 
-  .accounts-add-btn {
+  .branches-add-btn {
     flex: 1;
   }
 
-  .accounts-th,
-  .accounts-td {
+  .branches-th,
+  .branches-td {
     padding: 10px 8px !important;
     font-size: 0.78rem !important;
   }
 
-  /* Dialog */
-  .accounts-dialog {
+  .branches-dialog {
     min-width: unset;
     width: 92%;
   }
 
-  /* Form Dialog */
-  .accounts-form-content {
+  .branches-form-content {
     padding: 12px 16px !important;
     max-height: 55vh;
   }
 
-  .accounts-form-actions {
+  .branches-form-actions {
     padding: 10px 16px 16px !important;
     flex-direction: column-reverse;
   }
 
-  .accounts-form-cancel,
-  .accounts-form-save {
+  .branches-form-cancel,
+  .branches-form-save {
     width: 100% !important;
     justify-content: center !important;
   }
-}
 
-/* ✅ جدول قابل للتمرير على الجوال */
-@media (max-width: 700px) {
-  .accounts-table-paper {
+  .branches-table-paper {
     overflow-x: auto;
   }
 
-  .accounts-table-paper .MuiTable-root {
-    min-width: 640px;
+  .branches-table-paper .MuiTable-root {
+    min-width: 720px;
   }
 }

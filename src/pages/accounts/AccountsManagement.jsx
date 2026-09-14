@@ -21,6 +21,7 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  MenuItem,
 } from "@mui/material";
 import { toast } from "react-toastify";
 
@@ -30,22 +31,48 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import SaveIcon from "@mui/icons-material/Save";
+import CloseIcon from "@mui/icons-material/Close";
 
 import authService from "../../services/authService.js";
 import useAuthStore from "../../store/useAuthStore.js";
 import "../../styles/accounts.css";
 
+// ===============================
+// القيم الافتراضية للنموذج
+// ===============================
+const emptyForm = {
+  userName: "",
+  email: "",
+  fullName: "",
+  password: "",
+  role: "",
+};
+
 export default function AccountsManagement() {
   const currentUser = useAuthStore((state) => state.user);
 
   const [users, setUsers] = useState([]);
+  const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Dialog الحذف
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     user: null,
   });
   const [deleting, setDeleting] = useState(false);
+
+  // Dialog الإضافة/التعديل
+  const [formDialog, setFormDialog] = useState({
+    open: false,
+    mode: "add", // "add" | "edit"
+    user: null,
+  });
+  const [formData, setFormData] = useState(emptyForm);
+  const [formErrors, setFormErrors] = useState({});
+  const [saving, setSaving] = useState(false);
 
   // ===============================
   // جلب المستخدمين
@@ -71,12 +98,33 @@ export default function AccountsManagement() {
     }
   };
 
+  // ===============================
+  // جلب الصلاحيات المتاحة
+  // ===============================
+  const fetchRoles = async () => {
+    try {
+      const result = await authService.getAvailableRoles();
+
+      if (result?.success && Array.isArray(result.data)) {
+        setRoles(result.data);
+      } else if (Array.isArray(result)) {
+        setRoles(result);
+      } else {
+        setRoles([]);
+      }
+    } catch (error) {
+      console.error("Fetch Roles Error:", error);
+      // لا نعرض Toast لأنها اختيارية
+    }
+  };
+
   useEffect(() => {
     fetchUsers();
+    fetchRoles();
   }, []);
 
   // ===============================
-  // فلترة المستخدمين حسب البحث
+  // فلترة المستخدمين
   // ===============================
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return users;
@@ -85,17 +133,156 @@ export default function AccountsManagement() {
       const fullName = (u.fullName || "").toLowerCase();
       const userName = (u.userName || "").toLowerCase();
       const email = (u.email || "").toLowerCase();
-      const roles = (u.roles || [])
+      const userRoles = (u.roles || [])
         .map((r) => (r.displayName || r.name || "").toLowerCase())
         .join(" ");
       return (
         fullName.includes(q) ||
         userName.includes(q) ||
         email.includes(q) ||
-        roles.includes(q)
+        userRoles.includes(q)
       );
     });
   }, [users, searchQuery]);
+
+  // ===============================
+  // فتح Dialog الإضافة
+  // ===============================
+  const handleAddClick = () => {
+    setFormData(emptyForm);
+    setFormErrors({});
+    setFormDialog({ open: true, mode: "add", user: null });
+  };
+
+  // ===============================
+  // فتح Dialog التعديل
+  // ===============================
+  const handleEditClick = (user) => {
+    setFormData({
+      userName: user.userName || "",
+      email: user.email || "",
+      fullName: user.fullName || "",
+      password: "", // لا نعرض كلمة المرور
+      role: user.roles?.[0]?.name || "",
+    });
+    setFormErrors({});
+    setFormDialog({ open: true, mode: "edit", user });
+  };
+
+  // ===============================
+  // إغلاق Dialog النموذج
+  // ===============================
+  const handleCloseFormDialog = () => {
+    if (!saving) {
+      setFormDialog({ open: false, mode: "add", user: null });
+      setFormData(emptyForm);
+      setFormErrors({});
+    }
+  };
+
+  // ===============================
+  // تحديث حقل في النموذج
+  // ===============================
+  const handleFormChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (formErrors[field]) {
+      setFormErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+  };
+
+  // ===============================
+  // التحقق من النموذج
+  // ===============================
+  const validateForm = () => {
+    const errors = {};
+
+    if (!formData.userName.trim()) {
+      errors.userName = "اسم المستخدم مطلوب";
+    }
+
+    if (!formData.email.trim()) {
+      errors.email = "البريد الإلكتروني مطلوب";
+    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+      errors.email = "البريد الإلكتروني غير صحيح";
+    }
+
+    if (!formData.fullName.trim()) {
+      errors.fullName = "اسم الموظف مطلوب";
+    }
+
+    if (formDialog.mode === "add") {
+      if (!formData.password) {
+        errors.password = "كلمة المرور مطلوبة";
+      } else if (formData.password.length < 6) {
+        errors.password = "كلمة المرور يجب أن تكون 6 أحرف على الأقل";
+      }
+    }
+
+    if (!formData.role) {
+      errors.role = "الصلاحية مطلوبة";
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  // ===============================
+  // حفظ (إضافة أو تعديل)
+  // ===============================
+  const handleSave = async () => {
+    if (!validateForm()) return;
+
+    try {
+      setSaving(true);
+
+      if (formDialog.mode === "add") {
+        // إضافة
+        const payload = {
+          userName: formData.userName.trim(),
+          email: formData.email.trim(),
+          fullName: formData.fullName.trim(),
+          password: formData.password,
+          role: formData.role,
+        };
+
+        const result = await authService.createEmployee(payload);
+
+        if (result?.success) {
+          toast.success(result?.message || "تم إضافة الموظف بنجاح");
+          handleCloseFormDialog();
+          fetchUsers();
+        } else {
+          toast.error(result?.message || "فشل إضافة الموظف");
+        }
+      } else {
+        // تعديل
+        const payload = {
+          email: formData.email.trim(),
+          fullName: formData.fullName.trim(),
+        };
+
+        const result = await authService.updateUser(
+          formDialog.user.id,
+          payload
+        );
+
+        if (result?.success) {
+          toast.success(result?.message || "تم تعديل الموظف بنجاح");
+          handleCloseFormDialog();
+          fetchUsers();
+        } else {
+          toast.error(result?.message || "فشل تعديل الموظف");
+        }
+      }
+    } catch (error) {
+      console.error("Save User Error:", error);
+      toast.error(
+        error?.response?.data?.message || "حدث خطأ أثناء الحفظ"
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // ===============================
   // فتح Dialog الحذف
@@ -137,35 +324,30 @@ export default function AccountsManagement() {
   };
 
   // ===============================
-  // إغلاق Dialog
+  // إغلاق Dialog الحذف
   // ===============================
-  const handleCloseDialog = () => {
+  const handleCloseDeleteDialog = () => {
     if (!deleting) {
       setDeleteDialog({ open: false, user: null });
     }
   };
 
   // ===============================
-  // اسم الصلاحية (displayName)
+  // مساعدات
   // ===============================
   const getRoleName = (user) => {
     if (!user?.roles || user.roles.length === 0) return "—";
     return user.roles[0]?.displayName || user.roles[0]?.name || "—";
   };
 
-  // ===============================
-  // هل المستخدم Admin/SuperAdmin؟
-  // ===============================
   const isAdminUser = (user) => {
-    const roles = user?.roles?.map((r) => r.name) || [];
-    return roles.includes("SuperAdmin") || roles.includes("Admin");
+    const userRoles = user?.roles?.map((r) => r.name) || [];
+    return userRoles.includes("SuperAdmin") || userRoles.includes("Admin");
   };
 
   return (
     <div className="accounts-container">
-      {/* ===============================
-          Header
-      =============================== */}
+      {/* Header */}
       <div className="accounts-header">
         <div className="accounts-header-icon">
           <ManageAccountsIcon sx={{ fontSize: 34 }} />
@@ -178,9 +360,7 @@ export default function AccountsManagement() {
         </Typography>
       </div>
 
-      {/* ===============================
-          Toolbar
-      =============================== */}
+      {/* Toolbar */}
       <div className="accounts-toolbar">
         <TextField
           placeholder="البحث عن مستخدم..."
@@ -210,18 +390,14 @@ export default function AccountsManagement() {
             variant="contained"
             startIcon={<AddIcon />}
             className="accounts-add-btn"
-            onClick={() => {
-              toast.info("صفحة إضافة موظف جديد (قريباً)");
-            }}
+            onClick={handleAddClick}
           >
             إضافة موظف
           </Button>
         </div>
       </div>
 
-      {/* ===============================
-          Table
-      =============================== */}
+      {/* Table */}
       <Paper elevation={0} className="accounts-table-paper">
         {loading ? (
           <Box className="accounts-loading">
@@ -243,6 +419,7 @@ export default function AccountsManagement() {
                   <TableCell className="accounts-th">#</TableCell>
                   <TableCell className="accounts-th">اسم الموظف</TableCell>
                   <TableCell className="accounts-th">اسم المستخدم</TableCell>
+                  <TableCell className="accounts-th">البريد الإلكتروني</TableCell>
                   <TableCell className="accounts-th">الصلاحيات</TableCell>
                   <TableCell className="accounts-th" align="center">
                     الإجراءات
@@ -253,9 +430,7 @@ export default function AccountsManagement() {
               <TableBody>
                 {filteredUsers.map((user, index) => (
                   <TableRow key={user.id} className="accounts-table-row">
-                    <TableCell className="accounts-td">
-                      {index + 1}
-                    </TableCell>
+                    <TableCell className="accounts-td">{index + 1}</TableCell>
 
                     <TableCell className="accounts-td accounts-td-name">
                       {user.fullName || "—"}
@@ -263,6 +438,10 @@ export default function AccountsManagement() {
 
                     <TableCell className="accounts-td">
                       {user.userName || "—"}
+                    </TableCell>
+
+                    <TableCell className="accounts-td accounts-td-email">
+                      {user.email || "—"}
                     </TableCell>
 
                     <TableCell className="accounts-td">
@@ -282,9 +461,7 @@ export default function AccountsManagement() {
                         <IconButton
                           size="small"
                           className="accounts-action-btn accounts-edit-btn"
-                          onClick={() => {
-                            toast.info(`تعديل: ${user.fullName} (قريباً)`);
-                          }}
+                          onClick={() => handleEditClick(user)}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
@@ -309,11 +486,141 @@ export default function AccountsManagement() {
       </Paper>
 
       {/* ===============================
+          Dialog الإضافة / التعديل
+      =============================== */}
+      <Dialog
+        open={formDialog.open}
+        onClose={handleCloseFormDialog}
+        PaperProps={{ className: "accounts-form-dialog" }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle className="accounts-form-title">
+          {formDialog.mode === "add" ? "إضافة موظف جديد" : "تعديل بيانات الموظف"}
+        </DialogTitle>
+
+        <DialogContent className="accounts-form-content">
+          {/* Full Name */}
+          <TextField
+            fullWidth
+            label="اسم الموظف"
+            value={formData.fullName}
+            onChange={(e) => handleFormChange("fullName", e.target.value)}
+            error={!!formErrors.fullName}
+            helperText={formErrors.fullName}
+            margin="dense"
+            className="accounts-form-field"
+          />
+
+          {/* UserName */}
+          <TextField
+            fullWidth
+            label="اسم المستخدم"
+            value={formData.userName}
+            onChange={(e) => handleFormChange("userName", e.target.value)}
+            error={!!formErrors.userName}
+            helperText={formErrors.userName}
+            margin="dense"
+            disabled={formDialog.mode === "edit"}
+            className="accounts-form-field"
+          />
+
+          {/* Email */}
+          <TextField
+            fullWidth
+            label="البريد الإلكتروني"
+            type="email"
+            value={formData.email}
+            onChange={(e) => handleFormChange("email", e.target.value)}
+            error={!!formErrors.email}
+            helperText={formErrors.email}
+            margin="dense"
+            className="accounts-form-field"
+          />
+
+          {/* Password (add only) */}
+          {formDialog.mode === "add" && (
+            <TextField
+              fullWidth
+              label="كلمة المرور"
+              type="password"
+              value={formData.password}
+              onChange={(e) => handleFormChange("password", e.target.value)}
+              error={!!formErrors.password}
+              helperText={formErrors.password}
+              margin="dense"
+              className="accounts-form-field"
+            />
+          )}
+
+          {/* Role */}
+          <TextField
+            fullWidth
+            select
+            label="الصلاحية"
+            value={formData.role}
+            onChange={(e) => handleFormChange("role", e.target.value)}
+            error={!!formErrors.role}
+            helperText={formErrors.role}
+            margin="dense"
+            className="accounts-form-field"
+            disabled={formDialog.mode === "edit"}
+          >
+            {roles.length === 0 ? (
+              <MenuItem value="" disabled>
+                جاري التحميل...
+              </MenuItem>
+            ) : (
+              roles.map((role) => (
+                <MenuItem
+                  key={role.name || role}
+                  value={role.name || role}
+                >
+                  {role.displayName || role.name || role}
+                </MenuItem>
+              ))
+            )}
+          </TextField>
+        </DialogContent>
+
+        <DialogActions className="accounts-form-actions">
+          <Button
+            onClick={handleCloseFormDialog}
+            disabled={saving}
+            className="accounts-form-cancel"
+            startIcon={<CloseIcon />}
+          >
+            إلغاء
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            disabled={saving}
+            variant="contained"
+            className="accounts-form-save"
+            startIcon={
+              saving ? (
+                <CircularProgress size={16} sx={{ color: "#fff" }} />
+              ) : (
+                <SaveIcon />
+              )
+            }
+          >
+            {saving
+              ? "جاري الحفظ..."
+              : formDialog.mode === "add"
+              ? "إضافة"
+              : "حفظ التعديلات"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ===============================
           Dialog الحذف
       =============================== */}
       <Dialog
         open={deleteDialog.open}
-        onClose={handleCloseDialog}
+        onClose={handleCloseDeleteDialog}
         PaperProps={{ className: "accounts-dialog" }}
       >
         <DialogTitle className="accounts-dialog-title">
@@ -331,7 +638,7 @@ export default function AccountsManagement() {
 
         <DialogActions className="accounts-dialog-actions">
           <Button
-            onClick={handleCloseDialog}
+            onClick={handleCloseDeleteDialog}
             disabled={deleting}
             className="accounts-dialog-cancel"
           >

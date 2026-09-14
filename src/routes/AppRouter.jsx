@@ -4,6 +4,7 @@ import Login from "../pages/login/Login.jsx";
 import Dashboard from "../pages/dashboard/Dashboard.jsx";
 import Profile from "../pages/profile/Profile.jsx";
 import AccountsManagement from "../pages/accounts/AccountsManagement.jsx";
+import BranchesManagement from "../pages/branches/BranchesManagement.jsx";
 import ChangePassword from "../pages/profile/ChangePassword.jsx";
 import Unauthorized from "../pages/unauthorized/Unauthorized.jsx";
 
@@ -41,6 +42,7 @@ export default function AppRouter() {
             }
           >
             <Route path="/accounts" element={<AccountsManagement />} />
+            <Route path="/branches" element={<BranchesManagement />} />
           </Route>
         </Route>
       </Route>
