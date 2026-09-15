@@ -1,7 +1,7 @@
 /* ===============================
    Container
    =============================== */
-.accounts-container {
+.workshops-container {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
@@ -11,14 +11,14 @@
 /* ===============================
    Header
    =============================== */
-.accounts-header {
+.workshops-header {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.accounts-header-icon {
+.workshops-header-icon {
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -30,7 +30,7 @@
   margin-bottom: 10px;
 }
 
-.accounts-title {
+.workshops-title {
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
@@ -38,11 +38,11 @@
   margin-bottom: 4px !important;
 }
 
-[data-theme="dark"] .accounts-title {
+[data-theme="dark"] .workshops-title {
   color: #80a9d4 !important;
 }
 
-.accounts-subtitle {
+.workshops-subtitle {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   color: var(--text-muted) !important;
@@ -51,7 +51,7 @@
 /* ===============================
    Toolbar
    =============================== */
-.accounts-toolbar {
+.workshops-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,37 +60,37 @@
   flex-wrap: wrap;
 }
 
-.accounts-search {
+.workshops-search {
   flex: 1;
   min-width: 220px;
   max-width: 400px;
 }
 
-.accounts-search .MuiOutlinedInput-root {
+.workshops-search .MuiOutlinedInput-root {
   background-color: var(--bg-paper);
   border-radius: 10px;
   height: 44px;
 }
 
-.accounts-search .MuiOutlinedInput-root fieldset {
+.workshops-search .MuiOutlinedInput-root fieldset {
   border-color: var(--border-gold-strong);
 }
 
-.accounts-search .MuiOutlinedInput-root:hover fieldset {
+.workshops-search .MuiOutlinedInput-root:hover fieldset {
   border-color: var(--gold-soft);
 }
 
-.accounts-search .MuiOutlinedInput-root.Mui-focused fieldset {
+.workshops-search .MuiOutlinedInput-root.Mui-focused fieldset {
   border-color: var(--gold-primary);
 }
 
-.accounts-actions {
+.workshops-actions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.accounts-refresh-btn {
+.workshops-refresh-btn {
   color: var(--gold-primary) !important;
   border: 1px solid var(--border-gold-strong) !important;
   border-radius: 10px !important;
@@ -99,11 +99,11 @@
   height: 44px;
 }
 
-.accounts-refresh-btn:hover {
+.workshops-refresh-btn:hover {
   background-color: rgba(184, 134, 11, 0.08) !important;
 }
 
-.accounts-add-btn {
+.workshops-add-btn {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 10px !important;
@@ -115,14 +115,14 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.accounts-add-btn:hover {
+.workshops-add-btn:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 /* ===============================
    Table Paper
    =============================== */
-.accounts-table-paper {
+.workshops-table-paper {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
   border: 1px solid var(--border-gold) !important;
@@ -130,8 +130,8 @@
   overflow: hidden;
 }
 
-.accounts-loading,
-.accounts-empty {
+.workshops-loading,
+.workshops-empty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,11 +143,11 @@
 /* ===============================
    Table
    =============================== */
-.accounts-table-head-row {
+.workshops-table-head-row {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.accounts-th {
+.workshops-th {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   font-weight: 700 !important;
@@ -157,15 +157,15 @@
   white-space: nowrap;
 }
 
-.accounts-table-row {
+.workshops-table-row {
   transition: background-color 0.2s ease;
 }
 
-.accounts-table-row:hover {
+.workshops-table-row:hover {
   background-color: rgba(184, 134, 11, 0.04);
 }
 
-.accounts-td {
+.workshops-td {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.88rem !important;
   color: var(--text-primary) !important;
@@ -173,86 +173,41 @@
   border-bottom: 1px solid var(--border-gold) !important;
 }
 
-.accounts-td-name {
+.workshops-td-name {
   font-weight: 600 !important;
 }
 
-.accounts-td-username {
-  font-weight: 500 !important;
-}
-
-.accounts-td-date {
-  font-size: 0.82rem !important;
-  color: var(--text-secondary) !important;
-  white-space: nowrap;
-}
-
-/* ===============================
-   Role Chip
-   =============================== */
-.accounts-role-chip {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.75rem !important;
-  font-weight: 600 !important;
-  border-radius: 6px !important;
-}
-
-.accounts-role-chip-admin {
-  background-color: rgba(184, 134, 11, 0.15) !important;
-  color: #b8860b !important;
-}
-
-.accounts-role-chip-user {
-  background-color: rgba(30, 58, 95, 0.1) !important;
-  color: #1e3a5f !important;
-}
-
-[data-theme="dark"] .accounts-role-chip-user {
-  color: #80a9d4 !important;
-  background-color: rgba(128, 169, 212, 0.15) !important;
+.workshops-td-phone {
+  direction: ltr;
+  text-align: right;
 }
 
 /* ===============================
    Status Chip
    =============================== */
-.accounts-status-chip {
+.workshops-status-chip {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.75rem !important;
-  font-weight: 700 !important;
+  font-weight: 600 !important;
   border-radius: 6px !important;
-  min-width: 70px;
-  justify-content: center !important;
 }
 
-/* ✅ متصل الآن — أخضر فاتح */
-.accounts-status-chip-online {
+.workshops-status-chip-active {
   background-color: rgba(46, 125, 50, 0.15) !important;
   color: #2e7d32 !important;
 }
 
-[data-theme="dark"] .accounts-status-chip-online {
-  background-color: rgba(102, 187, 106, 0.2) !important;
+[data-theme="dark"] .workshops-status-chip-active {
+  background-color: rgba(102, 187, 106, 0.15) !important;
   color: #66bb6a !important;
 }
 
-/* ✅ نشط — رمادي/أزرق فاتح */
-.accounts-status-chip-active {
-  background-color: rgba(100, 116, 139, 0.12) !important;
-  color: #64748b !important;
-}
-
-[data-theme="dark"] .accounts-status-chip-active {
-  background-color: rgba(148, 163, 184, 0.15) !important;
-  color: #94a3b8 !important;
-}
-
-/* ✅ غير نشط — أحمر فاتح */
-.accounts-status-chip-inactive {
+.workshops-status-chip-inactive {
   background-color: rgba(211, 47, 47, 0.12) !important;
   color: #d32f2f !important;
 }
 
-[data-theme="dark"] .accounts-status-chip-inactive {
+[data-theme="dark"] .workshops-status-chip-inactive {
   background-color: rgba(239, 83, 80, 0.15) !important;
   color: #ef5350 !important;
 }
@@ -260,7 +215,7 @@
 /* ===============================
    Action Buttons
    =============================== */
-.accounts-action-btn {
+.workshops-action-btn {
   width: 34px !important;
   height: 34px !important;
   margin: 0 2px !important;
@@ -268,104 +223,57 @@
   transition: all 0.2s ease !important;
 }
 
-.accounts-edit-btn {
+.workshops-edit-btn {
   color: #1e3a5f !important;
 }
 
-.accounts-edit-btn:hover {
+.workshops-edit-btn:hover {
   background-color: rgba(30, 58, 95, 0.08) !important;
 }
 
-[data-theme="dark"] .accounts-edit-btn {
+[data-theme="dark"] .workshops-edit-btn {
   color: #80a9d4 !important;
 }
 
-.accounts-password-btn {
-  color: #b8860b !important;
-}
-
-.accounts-password-btn:hover {
-  background-color: rgba(184, 134, 11, 0.1) !important;
-}
-
-[data-theme="dark"] .accounts-password-btn {
-  color: #d4af6a !important;
-}
-
-.accounts-delete-btn {
+.workshops-delete-btn {
   color: var(--danger) !important;
 }
 
-.accounts-delete-btn:hover {
+.workshops-delete-btn:hover {
   background-color: rgba(211, 47, 47, 0.08) !important;
-}
-
-/* ===============================
-   Pagination
-   =============================== */
-.accounts-pagination {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 20px;
-  border-top: 1px solid var(--border-gold);
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.accounts-pagination-info {
-  font-family: "Cairo", sans-serif;
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-}
-
-.accounts-pagination-control .MuiPaginationItem-root {
-  font-family: "Cairo", sans-serif !important;
-  color: var(--text-primary) !important;
-  border-radius: 8px !important;
-}
-
-.accounts-pagination-control .Mui-selected {
-  background-color: var(--gold-primary) !important;
-  color: #fff !important;
-  font-weight: 700 !important;
-}
-
-.accounts-pagination-control .Mui-selected:hover {
-  background-color: var(--gold-dark) !important;
 }
 
 /* ===============================
    Dialogs
    =============================== */
-.accounts-dialog {
+.workshops-dialog {
   border-radius: 14px !important;
   min-width: 340px;
   max-width: 90vw;
 }
 
-.accounts-dialog-title {
+.workshops-dialog-title {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--text-primary) !important;
 }
 
-.accounts-dialog-text {
+.workshops-dialog-text {
   font-family: "Cairo", sans-serif !important;
   color: var(--text-secondary) !important;
   line-height: 1.8 !important;
 }
 
-.accounts-dialog-text strong {
+.workshops-dialog-text strong {
   color: var(--gold-primary);
 }
 
-.accounts-dialog-actions {
+.workshops-dialog-actions {
   padding: 12px 20px 20px !important;
   gap: 8px;
 }
 
-.accounts-dialog-cancel {
+.workshops-dialog-cancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -373,7 +281,7 @@
   padding: 8px 20px !important;
 }
 
-.accounts-dialog-confirm {
+.workshops-dialog-confirm {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -385,19 +293,19 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.accounts-dialog-confirm:hover {
+.workshops-dialog-confirm:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 /* ===============================
    Form Dialog
    =============================== */
-.accounts-form-dialog {
+.workshops-form-dialog {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.accounts-form-title {
+.workshops-form-title {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--gold-primary) !important;
@@ -406,54 +314,64 @@
   padding-bottom: 12px !important;
 }
 
-.accounts-form-content {
+.workshops-form-content {
   padding: 16px 24px !important;
   max-height: 60vh;
   overflow-y: auto;
 }
 
-.accounts-form-field {
+.workshops-form-field {
   margin-bottom: 8px !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root {
+.workshops-form-field .MuiOutlinedInput-root {
   border-radius: 10px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root fieldset {
+.workshops-form-field .MuiOutlinedInput-root fieldset {
   border-color: var(--border-gold-strong) !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root:hover fieldset {
+.workshops-form-field .MuiOutlinedInput-root:hover fieldset {
   border-color: var(--gold-soft) !important;
 }
 
-.accounts-form-field .MuiOutlinedInput-root.Mui-focused fieldset {
+.workshops-form-field .MuiOutlinedInput-root.Mui-focused fieldset {
   border-color: var(--gold-primary) !important;
 }
 
-.accounts-form-field .MuiInputLabel-root {
+.workshops-form-field .MuiInputLabel-root {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.9rem !important;
 }
 
-.accounts-form-field .MuiInputLabel-root.Mui-focused {
+.workshops-form-field .MuiInputLabel-root.Mui-focused {
   color: var(--gold-primary) !important;
 }
 
-.accounts-form-field .MuiFormHelperText-root {
+.workshops-form-field .MuiFormHelperText-root {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.72rem !important;
 }
 
-.accounts-form-actions {
+.workshops-form-switch {
+  margin-top: 12px !important;
+}
+
+.workshops-form-switch .MuiFormControlLabel-label {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  color: var(--text-primary) !important;
+}
+
+.workshops-form-actions {
   padding: 12px 24px 20px !important;
   gap: 8px;
   border-top: 1px solid var(--border-gold) !important;
 }
 
-.accounts-form-cancel {
+.workshops-form-cancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -461,11 +379,11 @@
   padding: 8px 20px !important;
 }
 
-.accounts-form-cancel:hover {
+.workshops-form-cancel:hover {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.accounts-form-save {
+.workshops-form-save {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -476,11 +394,11 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.accounts-form-save:hover {
+.workshops-form-save:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
-.accounts-form-save.Mui-disabled {
+.workshops-form-save.Mui-disabled {
   background: linear-gradient(90deg, #d4b98a, #c0a068) !important;
   color: #fff !important;
 }
@@ -489,80 +407,75 @@
    Responsive
    =============================== */
 @media (max-width: 900px) {
-  .accounts-title {
+  .workshops-title {
     font-size: 1.6rem !important;
   }
 
-  .accounts-th,
-  .accounts-td {
+  .workshops-th,
+  .workshops-td {
     padding: 12px 10px !important;
     font-size: 0.82rem !important;
   }
 }
 
 @media (max-width: 700px) {
-  .accounts-container {
+  .workshops-container {
     padding: 12px 4px 32px;
   }
 
-  .accounts-title {
+  .workshops-title {
     font-size: 1.5rem !important;
   }
 
-  .accounts-toolbar {
+  .workshops-toolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .accounts-search {
+  .workshops-search {
     max-width: 100%;
   }
 
-  .accounts-actions {
+  .workshops-actions {
     justify-content: space-between;
   }
 
-  .accounts-add-btn {
+  .workshops-add-btn {
     flex: 1;
   }
 
-  .accounts-th,
-  .accounts-td {
+  .workshops-th,
+  .workshops-td {
     padding: 10px 8px !important;
     font-size: 0.78rem !important;
   }
 
-  .accounts-dialog {
+  .workshops-dialog {
     min-width: unset;
     width: 92%;
   }
 
-  .accounts-form-content {
+  .workshops-form-content {
     padding: 12px 16px !important;
     max-height: 55vh;
   }
 
-  .accounts-form-actions {
+  .workshops-form-actions {
     padding: 10px 16px 16px !important;
     flex-direction: column-reverse;
   }
 
-  .accounts-form-cancel,
-  .accounts-form-save {
+  .workshops-form-cancel,
+  .workshops-form-save {
     width: 100% !important;
     justify-content: center !important;
   }
 
-  .accounts-pagination {
-    flex-direction: column;
-    align-items: center;
-  }
-
-  .accounts-table-paper {
+  .workshops-table-paper {
     overflow-x: auto;
   }
 
-  .accounts-table-paper .MuiTable-root {
-    min-width: 820px;
+  .workshops-table-paper .MuiTable-root {
+    min-width: 640px;
   }
-}
+}   

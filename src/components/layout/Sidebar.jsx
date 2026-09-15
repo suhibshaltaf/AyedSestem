@@ -15,6 +15,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import PersonIcon from "@mui/icons-material/Person";
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import StorefrontIcon from "@mui/icons-material/Storefront";
+import BuildIcon from "@mui/icons-material/Build";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SettingsIcon from "@mui/icons-material/Settings";
 
@@ -68,6 +69,12 @@ function SidebarContent({ onClose }) {
       label: "إدارة الفروع",
       icon: <StorefrontIcon fontSize="small" />,
       path: "/branches",
+      roles: ["SuperAdmin", "Admin","BranchManager"],
+    },
+    {
+      label: "إدارة الورش",
+      icon: <BuildIcon fontSize="small" />,
+      path: "/workshops",
       roles: ["SuperAdmin", "Admin"],
     },
     {
@@ -93,7 +100,7 @@ function SidebarContent({ onClose }) {
       <div className="sidebar-header">
         <img
           src={companyLogo}
-          alt="مجموعة عايد وإخوانه"
+          alt="مجموعة عايد دعنا"
           className="sidebar-logo"
         />
 

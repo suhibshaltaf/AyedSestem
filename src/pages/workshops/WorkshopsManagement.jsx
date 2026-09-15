@@ -27,7 +27,7 @@ import {
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import StorefrontIcon from "@mui/icons-material/Storefront";
+import BuildIcon from "@mui/icons-material/Build";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
@@ -37,42 +37,41 @@ import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 
 import {
-  useBranches,
-  useCreateBranch,
-  useUpdateBranch,
-  useDeleteBranch,
-} from "../../hooks/useBranches.js";
-import branchSchema from "./branchSchema.js";
-import "../../styles/branches.css";
+  useWorkshops,
+  useCreateWorkshop,
+  useUpdateWorkshop,
+  useDeleteWorkshop,
+} from "../../hooks/useWorkshops.js";
+import workshopSchema from "./workshopSchema.js";
+import "../../styles/workshops.css";
 
 // ===============================
 // القيم الافتراضية
 // ===============================
 const emptyForm = {
   name: "",
-  code: "",
   address: "",
   phoneNumber: "",
   isActive: true,
 };
 
-export default function BranchesManagement() {
+export default function WorkshopsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
   const [formDialog, setFormDialog] = useState({
     open: false,
     mode: "add",
-    branch: null,
+    workshop: null,
   });
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
-    branch: null,
+    workshop: null,
   });
 
   // React Query
-  const { data: branches = [], isLoading, refetch } = useBranches();
-  const createMutation = useCreateBranch();
-  const updateMutation = useUpdateBranch();
-  const deleteMutation = useDeleteBranch();
+  const { data: workshops = [], isLoading, refetch } = useWorkshops();
+  const createMutation = useCreateWorkshop();
+  const updateMutation = useUpdateWorkshop();
+  const deleteMutation = useDeleteWorkshop();
 
   const saving = createMutation.isPending || updateMutation.isPending;
   const deleting = deleteMutation.isPending;
@@ -86,48 +85,45 @@ export default function BranchesManagement() {
     control,
     setValue,
   } = useForm({
-    resolver: yupResolver(branchSchema),
+    resolver: yupResolver(workshopSchema),
     defaultValues: emptyForm,
   });
 
   // ===============================
   // فلترة
   // ===============================
-  const filteredBranches = useMemo(() => {
-    if (!searchQuery.trim()) return branches;
+  const filteredWorkshops = useMemo(() => {
+    if (!searchQuery.trim()) return workshops;
     const q = searchQuery.toLowerCase();
-    return branches.filter((b) => {
+    return workshops.filter((w) => {
       return (
-        (b.name || "").toLowerCase().includes(q) ||
-        (b.code || "").toLowerCase().includes(q) ||
-        (b.address || "").toLowerCase().includes(q) ||
-        (b.phoneNumber || "").toLowerCase().includes(q) ||
-        (b.managerName || "").toLowerCase().includes(q) ||
-        (b.accountantName || "").toLowerCase().includes(q)
+        (w.name || "").toLowerCase().includes(q) ||
+        (w.address || "").toLowerCase().includes(q) ||
+        (w.phoneNumber || "").toLowerCase().includes(q) ||
+        (w.managerName || "").toLowerCase().includes(q)
       );
     });
-  }, [branches, searchQuery]);
+  }, [workshops, searchQuery]);
 
   // ===============================
   // فتح Dialog الإضافة
   // ===============================
   const handleAddClick = () => {
     reset(emptyForm);
-    setFormDialog({ open: true, mode: "add", branch: null });
+    setFormDialog({ open: true, mode: "add", workshop: null });
   };
 
   // ===============================
   // فتح Dialog التعديل
   // ===============================
-  const handleEditClick = (branch) => {
+  const handleEditClick = (workshop) => {
     reset({
-      name: branch.name || "",
-      code: branch.code || "",
-      address: branch.address || "",
-      phoneNumber: branch.phoneNumber || "",
-      isActive: branch.isActive ?? true,
+      name: workshop.name || "",
+      address: workshop.address || "",
+      phoneNumber: workshop.phoneNumber || "",
+      isActive: workshop.isActive ?? true,
     });
-    setFormDialog({ open: true, mode: "edit", branch });
+    setFormDialog({ open: true, mode: "edit", workshop });
   };
 
   // ===============================
@@ -135,7 +131,7 @@ export default function BranchesManagement() {
   // ===============================
   const handleCloseFormDialog = () => {
     if (!saving) {
-      setFormDialog({ open: false, mode: "add", branch: null });
+      setFormDialog({ open: false, mode: "add", workshop: null });
       reset(emptyForm);
     }
   };
@@ -146,9 +142,9 @@ export default function BranchesManagement() {
   const onSubmit = async (data) => {
     const payload = {
       name: data.name.trim(),
-      code: data.code.trim().toUpperCase(),
       address: data.address?.trim() || null,
       phoneNumber: data.phoneNumber?.trim() || null,
+      isActive: data.isActive,
     };
 
     if (formDialog.mode === "add") {
@@ -158,8 +154,8 @@ export default function BranchesManagement() {
       }
     } else {
       const result = await updateMutation.mutateAsync({
-        id: formDialog.branch.id,
-        data: { ...payload, isActive: data.isActive },
+        id: formDialog.workshop.id,
+        data: payload,
       });
       if (result?.success) {
         handleCloseFormDialog();
@@ -170,49 +166,49 @@ export default function BranchesManagement() {
   // ===============================
   // حذف
   // ===============================
-  const handleDeleteClick = (branch) => {
-    setDeleteDialog({ open: true, branch });
+  const handleDeleteClick = (workshop) => {
+    setDeleteDialog({ open: true, workshop });
   };
 
   const handleConfirmDelete = async () => {
-    const branch = deleteDialog.branch;
-    if (!branch) return;
+    const workshop = deleteDialog.workshop;
+    if (!workshop) return;
 
-    const result = await deleteMutation.mutateAsync(branch.id);
+    const result = await deleteMutation.mutateAsync(workshop.id);
     if (result?.success) {
-      setDeleteDialog({ open: false, branch: null });
+      setDeleteDialog({ open: false, workshop: null });
     }
   };
 
   const handleCloseDeleteDialog = () => {
     if (!deleting) {
-      setDeleteDialog({ open: false, branch: null });
+      setDeleteDialog({ open: false, workshop: null });
     }
   };
 
   return (
-    <div className="branches-container">
+    <div className="workshops-container">
       {/* Header */}
-      <div className="branches-header">
-        <div className="branches-header-icon">
-          <StorefrontIcon sx={{ fontSize: 34 }} />
+      <div className="workshops-header">
+        <div className="workshops-header-icon">
+          <BuildIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="branches-title">إدارة الفروع</Typography>
+        <Typography className="workshops-title">إدارة الورش</Typography>
 
-        <Typography className="branches-subtitle">
-          إدارة فروع الشركة وبياناتها
+        <Typography className="workshops-subtitle">
+          إدارة الورش وبياناتها
         </Typography>
       </div>
 
       {/* Toolbar */}
-      <div className="branches-toolbar">
+      <div className="workshops-toolbar">
         <TextField
-          placeholder="البحث عن فرع..."
+          placeholder="البحث عن ورشة..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
-          className="branches-search"
+          className="workshops-search"
           slotProps={{
             input: {
               startAdornment: (
@@ -224,11 +220,11 @@ export default function BranchesManagement() {
           }}
         />
 
-        <div className="branches-actions">
+        <div className="workshops-actions">
           <Tooltip title="تحديث">
             <IconButton
               onClick={() => refetch()}
-              className="branches-refresh-btn"
+              className="workshops-refresh-btn"
             >
               <RefreshIcon />
             </IconButton>
@@ -237,118 +233,95 @@ export default function BranchesManagement() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            className="branches-add-btn"
+            className="workshops-add-btn"
             onClick={handleAddClick}
           >
-            إضافة فرع
+            إضافة ورشة
           </Button>
         </div>
       </div>
 
       {/* Table */}
-      <Paper elevation={0} className="branches-table-paper">
+      <Paper elevation={0} className="workshops-table-paper">
         {isLoading ? (
-          <Box className="branches-loading">
+          <Box className="workshops-loading">
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
-        ) : filteredBranches.length === 0 ? (
-          <Box className="branches-empty">
+        ) : filteredWorkshops.length === 0 ? (
+          <Box className="workshops-empty">
             <Typography>
               {searchQuery
                 ? "لا توجد نتائج مطابقة للبحث"
-                : "لا يوجد فروع لعرضها"}
+                : "لا يوجد ورش لعرضها"}
             </Typography>
           </Box>
         ) : (
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow className="branches-table-head-row">
-                  <TableCell className="branches-th">#</TableCell>
-                  <TableCell className="branches-th">اسم الفرع</TableCell>
-                  <TableCell className="branches-th">الكود</TableCell>
-                  <TableCell className="branches-th">العنوان</TableCell>
-                  <TableCell className="branches-th">الهاتف</TableCell>
-                  <TableCell className="branches-th">المدير المسؤول</TableCell>
-                  <TableCell className="branches-th">المحاسب المسؤول</TableCell>
-                  <TableCell className="branches-th">الحالة</TableCell>
-                  <TableCell className="branches-th" align="center">
+                <TableRow className="workshops-table-head-row">
+                  <TableCell className="workshops-th">#</TableCell>
+                  <TableCell className="workshops-th">اسم الورشة</TableCell>
+                  <TableCell className="workshops-th">العنوان</TableCell>
+                  <TableCell className="workshops-th">الهاتف</TableCell>
+                  <TableCell className="workshops-th">المسؤول</TableCell>
+                  <TableCell className="workshops-th">الحالة</TableCell>
+                  <TableCell className="workshops-th" align="center">
                     الإجراءات
                   </TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {filteredBranches.map((branch, index) => (
-                  <TableRow key={branch.id} className="branches-table-row">
-                    <TableCell className="branches-td">
+                {filteredWorkshops.map((workshop, index) => (
+                  <TableRow key={workshop.id} className="workshops-table-row">
+                    <TableCell className="workshops-td">
                       {index + 1}
                     </TableCell>
 
-                    <TableCell className="branches-td branches-td-name">
-                      {branch.name || "—"}
+                    <TableCell className="workshops-td workshops-td-name">
+                      {workshop.name || "—"}
                     </TableCell>
 
-                    <TableCell className="branches-td">
-                      <Chip
-                        label={branch.code || "—"}
-                        size="small"
-                        className="branches-code-chip"
-                      />
+                    <TableCell className="workshops-td">
+                      {workshop.address || "—"}
                     </TableCell>
 
-                    <TableCell className="branches-td">
-                      {branch.address || "—"}
+                    <TableCell className="workshops-td workshops-td-phone">
+                      {workshop.phoneNumber || "—"}
                     </TableCell>
 
-                    <TableCell className="branches-td branches-td-phone">
-                      {branch.phoneNumber || "—"}
-                    </TableCell>
-
-                    {/* ✅ المدير المسؤول */}
-                    <TableCell className="branches-td branches-td-manager">
-                      {branch.managerName ? (
+                    {/* ✅ المسؤول */}
+                    <TableCell className="workshops-td workshops-td-manager">
+                      {workshop.managerName ? (
                         <Chip
-                          label={branch.managerName}
+                          label={workshop.managerName}
                           size="small"
-                          className="branches-manager-chip"
+                          className="workshops-manager-chip"
                         />
                       ) : (
-                        <span className="branches-td-empty">—</span>
+                        <span className="workshops-td-empty">—</span>
                       )}
                     </TableCell>
 
-                    {/* ✅ المحاسب المسؤول */}
-                    <TableCell className="branches-td branches-td-accountant">
-                      {branch.accountantName ? (
-                        <Chip
-                          label={branch.accountantName}
-                          size="small"
-                          className="branches-accountant-chip"
-                        />
-                      ) : (
-                        <span className="branches-td-empty">—</span>
-                      )}
-                    </TableCell>
-
-                    <TableCell className="branches-td">
+                    <TableCell className="workshops-td">
                       <Chip
-                        label={branch.isActive ? "نشط" : "معطل"}
+                        label={workshop.isActive ? "نشطة" : "معطلة"}
                         size="small"
-                        className={`branches-status-chip ${
-                          branch.isActive
-                            ? "branches-status-chip-active"
-                            : "branches-status-chip-inactive"
+                        className={`workshops-status-chip ${
+                          workshop.isActive
+                            ? "workshops-status-chip-active"
+                            : "workshops-status-chip-inactive"
                         }`}
                       />
                     </TableCell>
 
-                    <TableCell className="branches-td" align="center">
+                    <TableCell className="workshops-td" align="center">
                       <Tooltip title="تعديل">
                         <IconButton
                           size="small"
-                          className="branches-action-btn branches-edit-btn"
-                          onClick={() => handleEditClick(branch)}
+                          className="workshops-action-btn workshops-edit-btn"
+                          onClick={() => handleEditClick(workshop)}
                         >
                           <EditIcon fontSize="small" />
                         </IconButton>
@@ -357,8 +330,8 @@ export default function BranchesManagement() {
                       <Tooltip title="حذف">
                         <IconButton
                           size="small"
-                          className="branches-action-btn branches-delete-btn"
-                          onClick={() => handleDeleteClick(branch)}
+                          className="workshops-action-btn workshops-delete-btn"
+                          onClick={() => handleDeleteClick(workshop)}
                         >
                           <DeleteIcon fontSize="small" />
                         </IconButton>
@@ -378,43 +351,27 @@ export default function BranchesManagement() {
       <Dialog
         open={formDialog.open}
         onClose={handleCloseFormDialog}
-        PaperProps={{ className: "branches-form-dialog" }}
+        PaperProps={{ className: "workshops-form-dialog" }}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="branches-form-title">
-          {formDialog.mode === "add" ? "إضافة فرع جديد" : "تعديل بيانات الفرع"}
+        <DialogTitle className="workshops-form-title">
+          {formDialog.mode === "add"
+            ? "إضافة ورشة جديدة"
+            : "تعديل بيانات الورشة"}
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <DialogContent className="branches-form-content">
+          <DialogContent className="workshops-form-content">
             {/* Name */}
             <TextField
               fullWidth
-              label="اسم الفرع"
+              label="اسم الورشة"
               margin="dense"
               {...register("name")}
               error={!!errors.name}
               helperText={errors.name?.message}
-              className="branches-form-field"
-            />
-
-            {/* Code */}
-            <TextField
-              fullWidth
-              label="كود الفرع"
-              margin="dense"
-              placeholder="مثال: AMM-01"
-              {...register("code")}
-              error={!!errors.code}
-              helperText={
-                errors.code?.message ||
-                "يُستخدم هذا الكود في توليد الباركود لاحقاً"
-              }
-              className="branches-form-field"
-              inputProps={{
-                style: { textTransform: "uppercase" },
-              }}
+              className="workshops-form-field"
             />
 
             {/* Address */}
@@ -425,7 +382,7 @@ export default function BranchesManagement() {
               {...register("address")}
               error={!!errors.address}
               helperText={errors.address?.message}
-              className="branches-form-field"
+              className="workshops-form-field"
             />
 
             {/* Phone */}
@@ -444,7 +401,7 @@ export default function BranchesManagement() {
               })}
               error={!!errors.phoneNumber}
               helperText={errors.phoneNumber?.message}
-              className="branches-form-field"
+              className="workshops-form-field"
               inputProps={{
                 inputMode: "numeric",
                 maxLength: 10,
@@ -465,19 +422,19 @@ export default function BranchesManagement() {
                         color="primary"
                       />
                     }
-                    label="الفرع نشط"
-                    className="branches-form-switch"
+                    label="الورشة نشطة"
+                    className="workshops-form-switch"
                   />
                 )}
               />
             )}
           </DialogContent>
 
-          <DialogActions className="branches-form-actions">
+          <DialogActions className="workshops-form-actions">
             <Button
               onClick={handleCloseFormDialog}
               disabled={saving}
-              className="branches-form-cancel"
+              className="workshops-form-cancel"
               startIcon={<CloseIcon />}
               type="button"
             >
@@ -488,7 +445,7 @@ export default function BranchesManagement() {
               type="submit"
               disabled={saving}
               variant="contained"
-              className="branches-form-save"
+              className="workshops-form-save"
               startIcon={
                 saving ? (
                   <CircularProgress size={16} sx={{ color: "#fff" }} />
@@ -513,26 +470,26 @@ export default function BranchesManagement() {
       <Dialog
         open={deleteDialog.open}
         onClose={handleCloseDeleteDialog}
-        PaperProps={{ className: "branches-dialog" }}
+        PaperProps={{ className: "workshops-dialog" }}
       >
-        <DialogTitle className="branches-dialog-title">
+        <DialogTitle className="workshops-dialog-title">
           تأكيد الحذف
         </DialogTitle>
 
         <DialogContent>
-          <DialogContentText className="branches-dialog-text">
-            هل أنت متأكد من حذف الفرع{" "}
-            <strong>{deleteDialog.branch?.name}</strong>؟
+          <DialogContentText className="workshops-dialog-text">
+            هل أنت متأكد من حذف الورشة{" "}
+            <strong>{deleteDialog.workshop?.name}</strong>؟
             <br />
             لا يمكن التراجع عن هذا الإجراء.
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions className="branches-dialog-actions">
+        <DialogActions className="workshops-dialog-actions">
           <Button
             onClick={handleCloseDeleteDialog}
             disabled={deleting}
-            className="branches-dialog-cancel"
+            className="workshops-dialog-cancel"
           >
             إلغاء
           </Button>
@@ -541,7 +498,7 @@ export default function BranchesManagement() {
             onClick={handleConfirmDelete}
             disabled={deleting}
             variant="contained"
-            className="branches-dialog-confirm"
+            className="workshops-dialog-confirm"
           >
             {deleting ? (
               <CircularProgress size={18} sx={{ color: "#fff" }} />

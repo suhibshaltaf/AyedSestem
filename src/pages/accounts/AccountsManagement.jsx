@@ -22,6 +22,7 @@ import {
   DialogContentText,
   DialogActions,
   MenuItem,
+  Pagination,
 } from "@mui/material";
 import { toast } from "react-toastify";
 
@@ -33,8 +34,11 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
+import LockResetIcon from "@mui/icons-material/LockReset";
 
 import authService from "../../services/authService.js";
+import { useBranches } from "../../hooks/useBranches.js";
+import { useWorkshops } from "../../hooks/useWorkshops.js";
 import useAuthStore from "../../store/useAuthStore.js";
 import "../../styles/accounts.css";
 
@@ -47,7 +51,21 @@ const emptyForm = {
   fullName: "",
   password: "",
   role: "",
+  branchId: "",
+  workshopId: "",
 };
+
+// ===============================
+// الأدوار
+// ===============================
+const BRANCH_ROLES = ["BranchManager", "BranchAccountant"];
+const WORKSHOP_ROLES = ["OperatorManager"];
+const ADMIN_ROLES = ["SuperAdmin", "Admin"];
+
+// ===============================
+// عدد العناصر في الصفحة
+// ===============================
+const PAGE_SIZE = 10;
 
 export default function AccountsManagement() {
   const currentUser = useAuthStore((state) => state.user);
@@ -57,6 +75,9 @@ export default function AccountsManagement() {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Pagination
+  const [page, setPage] = useState(1);
+
   // Dialog الحذف
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
@@ -64,15 +85,130 @@ export default function AccountsManagement() {
   });
   const [deleting, setDeleting] = useState(false);
 
+  // Dialog تغيير كلمة المرور
+  const [passwordDialog, setPasswordDialog] = useState({
+    open: false,
+    user: null,
+    newPassword: "",
+    confirmPassword: "",
+  });
+  const [passwordErrors, setPasswordErrors] = useState({});
+  const [savingPassword, setSavingPassword] = useState(false);
+
   // Dialog الإضافة/التعديل
   const [formDialog, setFormDialog] = useState({
     open: false,
-    mode: "add", // "add" | "edit"
+    mode: "add",
     user: null,
   });
   const [formData, setFormData] = useState(emptyForm);
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
+
+  // ===============================
+  // جلب الفروع والورش
+  // ===============================
+  const { data: branches = [] } = useBranches();
+  const { data: workshops = [] } = useWorkshops();
+
+  // ===============================
+  // ✅ هل المستخدم الحالي Admin/SuperAdmin؟
+  // ===============================
+  const isCurrentUserAdmin = useMemo(() => {
+    if (!currentUser?.roles) return false;
+    const roleNames = currentUser.roles.map((r) => r.name);
+    return roleNames.some((name) => ADMIN_ROLES.includes(name));
+  }, [currentUser]);
+
+  // ===============================
+  // Helper: عرض اسم الفرع/الورشة
+  // ===============================
+  const getBranchOrWorkshopName = (user) => {
+    if (user?.branchName) {
+      return `فرع ${user.branchName}`;
+    }
+    if (user?.workshopName) {
+      return user.workshopName;
+    }
+    return "—";
+  };
+
+  // ===============================
+  // ✅ Helper: تنسيق التاريخ (UTC → Local)
+  // ===============================
+  const formatDateTime = (value) => {
+    if (!value) return "—";
+    try {
+      let isoValue = String(value);
+
+      if (
+        !isoValue.endsWith("Z") &&
+        !isoValue.match(/[+-]\d{2}:\d{2}$/)
+      ) {
+        isoValue = isoValue + "Z";
+      }
+
+      const d = new Date(isoValue);
+      if (isNaN(d.getTime())) return "—";
+
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, "0");
+      const day = String(d.getDate()).padStart(2, "0");
+
+      let h = d.getHours();
+      const min = String(d.getMinutes()).padStart(2, "0");
+      const period = h >= 12 ? "م" : "ص";
+      h = h % 12 || 12;
+
+      return `${y}/${m}/${day} ${String(h).padStart(2, "0")}:${min} ${period}`;
+    } catch {
+      return "—";
+    }
+  };
+
+  // ===============================
+  // ✅ Helper: حالة الحساب
+  // الأولوية: غير نشط > متصل الآن > نشط
+  // ===============================
+  const getAccountStatus = (user) => {
+    // ✅ 1. غير نشط — أعلى أولوية
+    if (user?.isActive === false) {
+      return { label: "غير نشط", type: "inactive" };
+    }
+
+    // ✅ 2. تحقق من الاتصال الحقيقي (خلال 5 دقائق)
+    const isReallyOnline = () => {
+      if (!user?.lastActivityAt) return false;
+      try {
+        let isoValue = String(user.lastActivityAt);
+        if (
+          !isoValue.endsWith("Z") &&
+          !isoValue.match(/[+-]\d{2}:\d{2}$/)
+        ) {
+          isoValue = isoValue + "Z";
+        }
+        const lastActivity = new Date(isoValue);
+        const now = new Date();
+        const diffMinutes = (now - lastActivity) / 1000 / 60;
+        return diffMinutes < 5;
+      } catch {
+        return false;
+      }
+    };
+
+    if (isReallyOnline()) {
+      return { label: "متصل الآن", type: "online" };
+    }
+
+    // ✅ 3. نشط (افتراضي)
+    return { label: "نشط", type: "active" };
+  };
+
+  // ===============================
+  // هل نحتاج dropdown الفرع/الورشة؟
+  // ===============================
+  const needsBranch = BRANCH_ROLES.includes(formData.role);
+  const needsWorkshop = WORKSHOP_ROLES.includes(formData.role);
 
   // ===============================
   // جلب المستخدمين
@@ -84,6 +220,7 @@ export default function AccountsManagement() {
 
       if (result?.success && Array.isArray(result.data)) {
         setUsers(result.data);
+        setPage(1);
       } else {
         setUsers([]);
         toast.error(result?.message || "تعذر جلب المستخدمين");
@@ -99,12 +236,11 @@ export default function AccountsManagement() {
   };
 
   // ===============================
-  // جلب الصلاحيات المتاحة
+  // جلب الصلاحيات
   // ===============================
   const fetchRoles = async () => {
     try {
       const result = await authService.getAvailableRoles();
-
       if (result?.success && Array.isArray(result.data)) {
         setRoles(result.data);
       } else if (Array.isArray(result)) {
@@ -114,7 +250,6 @@ export default function AccountsManagement() {
       }
     } catch (error) {
       console.error("Fetch Roles Error:", error);
-      // لا نعرض Toast لأنها اختيارية
     }
   };
 
@@ -124,7 +259,7 @@ export default function AccountsManagement() {
   }, []);
 
   // ===============================
-  // فلترة المستخدمين
+  // فلترة
   // ===============================
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return users;
@@ -133,6 +268,8 @@ export default function AccountsManagement() {
       const fullName = (u.fullName || "").toLowerCase();
       const userName = (u.userName || "").toLowerCase();
       const email = (u.email || "").toLowerCase();
+      const branchName = (u.branchName || "").toLowerCase();
+      const workshopName = (u.workshopName || "").toLowerCase();
       const userRoles = (u.roles || [])
         .map((r) => (r.displayName || r.name || "").toLowerCase())
         .join(" ");
@@ -140,10 +277,30 @@ export default function AccountsManagement() {
         fullName.includes(q) ||
         userName.includes(q) ||
         email.includes(q) ||
+        branchName.includes(q) ||
+        workshopName.includes(q) ||
         userRoles.includes(q)
       );
     });
   }, [users, searchQuery]);
+
+  // ===============================
+  // Pagination
+  // ===============================
+  const pageCount = Math.ceil(filteredUsers.length / PAGE_SIZE);
+
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredUsers.slice(start, start + PAGE_SIZE);
+  }, [filteredUsers, page]);
+
+  const startItem =
+    filteredUsers.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const endItem = Math.min(page * PAGE_SIZE, filteredUsers.length);
+
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
 
   // ===============================
   // فتح Dialog الإضافة
@@ -162,15 +319,17 @@ export default function AccountsManagement() {
       userName: user.userName || "",
       email: user.email || "",
       fullName: user.fullName || "",
-      password: "", // لا نعرض كلمة المرور
+      password: "",
       role: user.roles?.[0]?.name || "",
+      branchId: user.branchId || "",
+      workshopId: user.workshopId || "",
     });
     setFormErrors({});
     setFormDialog({ open: true, mode: "edit", user });
   };
 
   // ===============================
-  // إغلاق Dialog النموذج
+  // إغلاق Dialog
   // ===============================
   const handleCloseFormDialog = () => {
     if (!saving) {
@@ -181,24 +340,30 @@ export default function AccountsManagement() {
   };
 
   // ===============================
-  // تحديث حقل في النموذج
+  // تحديث حقل
   // ===============================
   const handleFormChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData((prev) => {
+      const updated = { ...prev, [field]: value };
+      if (field === "role") {
+        if (!BRANCH_ROLES.includes(value)) updated.branchId = "";
+        if (!WORKSHOP_ROLES.includes(value)) updated.workshopId = "";
+      }
+      return updated;
+    });
+
     if (formErrors[field]) {
       setFormErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   // ===============================
-  // التحقق من النموذج
+  // التحقق
   // ===============================
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.userName.trim()) {
-      errors.userName = "اسم المستخدم مطلوب";
-    }
+    if (!formData.userName.trim()) errors.userName = "اسم المستخدم مطلوب";
 
     if (!formData.email.trim()) {
       errors.email = "البريد الإلكتروني مطلوب";
@@ -206,9 +371,7 @@ export default function AccountsManagement() {
       errors.email = "البريد الإلكتروني غير صحيح";
     }
 
-    if (!formData.fullName.trim()) {
-      errors.fullName = "اسم الموظف مطلوب";
-    }
+    if (!formData.fullName.trim()) errors.fullName = "اسم الموظف مطلوب";
 
     if (formDialog.mode === "add") {
       if (!formData.password) {
@@ -218,8 +381,14 @@ export default function AccountsManagement() {
       }
     }
 
-    if (!formData.role) {
-      errors.role = "الصلاحية مطلوبة";
+    if (!formData.role) errors.role = "الصلاحية مطلوبة";
+
+    if (BRANCH_ROLES.includes(formData.role) && !formData.branchId) {
+      errors.branchId = "الفرع مطلوب لهذه الصلاحية";
+    }
+
+    if (WORKSHOP_ROLES.includes(formData.role) && !formData.workshopId) {
+      errors.workshopId = "الورشة مطلوبة لهذه الصلاحية";
     }
 
     setFormErrors(errors);
@@ -227,7 +396,7 @@ export default function AccountsManagement() {
   };
 
   // ===============================
-  // حفظ (إضافة أو تعديل)
+  // حفظ
   // ===============================
   const handleSave = async () => {
     if (!validateForm()) return;
@@ -236,13 +405,18 @@ export default function AccountsManagement() {
       setSaving(true);
 
       if (formDialog.mode === "add") {
-        // إضافة
         const payload = {
           userName: formData.userName.trim(),
           email: formData.email.trim(),
           fullName: formData.fullName.trim(),
           password: formData.password,
           role: formData.role,
+          branchId: BRANCH_ROLES.includes(formData.role)
+            ? Number(formData.branchId)
+            : null,
+          workshopId: WORKSHOP_ROLES.includes(formData.role)
+            ? Number(formData.workshopId)
+            : null,
         };
 
         const result = await authService.createEmployee(payload);
@@ -255,7 +429,6 @@ export default function AccountsManagement() {
           toast.error(result?.message || "فشل إضافة الموظف");
         }
       } else {
-        // تعديل
         const payload = {
           email: formData.email.trim(),
           fullName: formData.fullName.trim(),
@@ -276,16 +449,14 @@ export default function AccountsManagement() {
       }
     } catch (error) {
       console.error("Save User Error:", error);
-      toast.error(
-        error?.response?.data?.message || "حدث خطأ أثناء الحفظ"
-      );
+      toast.error(error?.response?.data?.message || "حدث خطأ أثناء الحفظ");
     } finally {
       setSaving(false);
     }
   };
 
   // ===============================
-  // فتح Dialog الحذف
+  // حذف
   // ===============================
   const handleDeleteClick = (user) => {
     if (user.id === currentUser?.id) {
@@ -295,9 +466,6 @@ export default function AccountsManagement() {
     setDeleteDialog({ open: true, user });
   };
 
-  // ===============================
-  // تأكيد الحذف
-  // ===============================
   const handleConfirmDelete = async () => {
     const user = deleteDialog.user;
     if (!user) return;
@@ -323,12 +491,83 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
-  // إغلاق Dialog الحذف
-  // ===============================
   const handleCloseDeleteDialog = () => {
     if (!deleting) {
       setDeleteDialog({ open: false, user: null });
+    }
+  };
+
+  // ===============================
+  // تغيير كلمة المرور
+  // ===============================
+  const handlePasswordClick = (user) => {
+    setPasswordDialog({
+      open: true,
+      user,
+      newPassword: "",
+      confirmPassword: "",
+    });
+    setPasswordErrors({});
+  };
+
+  const handleClosePasswordDialog = () => {
+    if (!savingPassword) {
+      setPasswordDialog({
+        open: false,
+        user: null,
+        newPassword: "",
+        confirmPassword: "",
+      });
+      setPasswordErrors({});
+    }
+  };
+
+  const handleSavePassword = async () => {
+    const { newPassword, confirmPassword, user } = passwordDialog;
+
+    const errors = {};
+
+    if (!newPassword) {
+      errors.newPassword = "كلمة المرور الجديدة مطلوبة";
+    } else if (newPassword.length < 6) {
+      errors.newPassword = "كلمة المرور يجب أن تكون 6 أحرف على الأقل";
+    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(newPassword)) {
+      errors.newPassword =
+        "كلمة المرور يجب أن تحتوي على حرف كبير وحرف صغير ورقم على الأقل";
+    }
+
+    if (!confirmPassword) {
+      errors.confirmPassword = "تأكيد كلمة المرور مطلوب";
+    } else if (newPassword !== confirmPassword) {
+      errors.confirmPassword = "كلمتا المرور غير متطابقتين";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setPasswordErrors(errors);
+      return;
+    }
+
+    try {
+      setSavingPassword(true);
+
+      const result = await authService.resetUserPassword(user.id, {
+        newPassword: newPassword,
+        confirmNewPassword: confirmPassword,
+      });
+
+      if (result?.success) {
+        toast.success(result?.message || "تم تغيير كلمة المرور بنجاح");
+        handleClosePasswordDialog();
+      } else {
+        toast.error(result?.message || "فشل تغيير كلمة المرور");
+      }
+    } catch (error) {
+      console.error("Change Password Error:", error);
+      toast.error(
+        error?.response?.data?.message || "حدث خطأ أثناء تغيير كلمة المرور"
+      );
+    } finally {
+      setSavingPassword(false);
     }
   };
 
@@ -342,7 +581,9 @@ export default function AccountsManagement() {
 
   const isAdminUser = (user) => {
     const userRoles = user?.roles?.map((r) => r.name) || [];
-    return userRoles.includes("SuperAdmin") || userRoles.includes("Admin");
+    return (
+      userRoles.includes("SuperAdmin") || userRoles.includes("Admin")
+    );
   };
 
   return (
@@ -392,7 +633,7 @@ export default function AccountsManagement() {
             className="accounts-add-btn"
             onClick={handleAddClick}
           >
-            إضافة موظف
+            إضافة مستخدم جديد
           </Button>
         </div>
       </div>
@@ -412,76 +653,135 @@ export default function AccountsManagement() {
             </Typography>
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow className="accounts-table-head-row">
-                  <TableCell className="accounts-th">#</TableCell>
-                  <TableCell className="accounts-th">اسم الموظف</TableCell>
-                  <TableCell className="accounts-th">اسم المستخدم</TableCell>
-                  <TableCell className="accounts-th">البريد الإلكتروني</TableCell>
-                  <TableCell className="accounts-th">الصلاحيات</TableCell>
-                  <TableCell className="accounts-th" align="center">
-                    الإجراءات
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {filteredUsers.map((user, index) => (
-                  <TableRow key={user.id} className="accounts-table-row">
-                    <TableCell className="accounts-td">{index + 1}</TableCell>
-
-                    <TableCell className="accounts-td accounts-td-name">
-                      {user.fullName || "—"}
+          <>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow className="accounts-table-head-row">
+                    <TableCell className="accounts-th">#</TableCell>
+                    <TableCell className="accounts-th">اسم المستخدم</TableCell>
+                    <TableCell className="accounts-th">اسم الموظف</TableCell>
+                    <TableCell className="accounts-th">الصلاحيات</TableCell>
+                    <TableCell className="accounts-th">الفرع / الورشة</TableCell>
+                    <TableCell className="accounts-th">حالة الحساب</TableCell>
+                    <TableCell className="accounts-th">
+                      آخر تسجيل دخول
                     </TableCell>
-
-                    <TableCell className="accounts-td">
-                      {user.userName || "—"}
-                    </TableCell>
-
-                    <TableCell className="accounts-td accounts-td-email">
-                      {user.email || "—"}
-                    </TableCell>
-
-                    <TableCell className="accounts-td">
-                      <Chip
-                        label={getRoleName(user)}
-                        size="small"
-                        className={`accounts-role-chip ${
-                          isAdminUser(user)
-                            ? "accounts-role-chip-admin"
-                            : "accounts-role-chip-user"
-                        }`}
-                      />
-                    </TableCell>
-
-                    <TableCell className="accounts-td" align="center">
-                      <Tooltip title="تعديل">
-                        <IconButton
-                          size="small"
-                          className="accounts-action-btn accounts-edit-btn"
-                          onClick={() => handleEditClick(user)}
-                        >
-                          <EditIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
-
-                      <Tooltip title="حذف">
-                        <IconButton
-                          size="small"
-                          className="accounts-action-btn accounts-delete-btn"
-                          onClick={() => handleDeleteClick(user)}
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+                    <TableCell className="accounts-th" align="center">
+                      الإجراءات
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+
+                <TableBody>
+                  {paginatedUsers.map((user, index) => {
+                    const status = getAccountStatus(user);
+                    return (
+                      <TableRow key={user.id} className="accounts-table-row">
+                        <TableCell className="accounts-td">
+                          {(page - 1) * PAGE_SIZE + index + 1}
+                        </TableCell>
+
+                        <TableCell className="accounts-td accounts-td-username">
+                          {user.userName || "—"}
+                        </TableCell>
+
+                        <TableCell className="accounts-td accounts-td-name">
+                          {user.fullName || "—"}
+                        </TableCell>
+
+                        <TableCell className="accounts-td">
+                          <Chip
+                            label={getRoleName(user)}
+                            size="small"
+                            className={`accounts-role-chip ${
+                              isAdminUser(user)
+                                ? "accounts-role-chip-admin"
+                                : "accounts-role-chip-user"
+                            }`}
+                          />
+                        </TableCell>
+
+                        {/* ✅ الفرع / الورشة */}
+                        <TableCell className="accounts-td accounts-td-branch">
+                          {getBranchOrWorkshopName(user)}
+                        </TableCell>
+
+                        {/* ✅ حالة الحساب */}
+                        <TableCell className="accounts-td">
+                          <Chip
+                            label={status.label}
+                            size="small"
+                            className={`accounts-status-chip accounts-status-chip-${status.type}`}
+                          />
+                        </TableCell>
+
+                        {/* ✅ آخر تسجيل دخول */}
+                        <TableCell className="accounts-td accounts-td-date">
+                          {user.lastLoginAt
+                            ? formatDateTime(user.lastLoginAt)
+                            : "—"}
+                        </TableCell>
+
+                        <TableCell className="accounts-td" align="center">
+                          {/* ✅ زر التعديل */}
+                          <Tooltip title="تعديل">
+                            <IconButton
+                              size="small"
+                              className="accounts-action-btn accounts-edit-btn"
+                              onClick={() => handleEditClick(user)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+
+                          {/* ✅ زر تغيير كلمة المرور — للأدمن والسوبر أدمن فقط */}
+                          {isCurrentUserAdmin && (
+                            <Tooltip title="تغيير كلمة المرور">
+                              <IconButton
+                                size="small"
+                                className="accounts-action-btn accounts-password-btn"
+                                onClick={() => handlePasswordClick(user)}
+                              >
+                                <LockResetIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+
+                          {/* ✅ زر الحذف */}
+                          <Tooltip title="حذف">
+                            <IconButton
+                              size="small"
+                              className="accounts-action-btn accounts-delete-btn"
+                              onClick={() => handleDeleteClick(user)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            {/* Pagination */}
+            <div className="accounts-pagination">
+              <div className="accounts-pagination-info">
+                عرض {startItem} - {endItem} من {filteredUsers.length} مستخدمين
+              </div>
+
+              <Pagination
+                count={pageCount}
+                page={page}
+                onChange={(e, value) => setPage(value)}
+                shape="rounded"
+                className="accounts-pagination-control"
+                dir="ltr"
+              />
+            </div>
+          </>
         )}
       </Paper>
 
@@ -500,7 +800,6 @@ export default function AccountsManagement() {
         </DialogTitle>
 
         <DialogContent className="accounts-form-content">
-          {/* Full Name */}
           <TextField
             fullWidth
             label="اسم الموظف"
@@ -512,7 +811,6 @@ export default function AccountsManagement() {
             className="accounts-form-field"
           />
 
-          {/* UserName */}
           <TextField
             fullWidth
             label="اسم المستخدم"
@@ -525,7 +823,6 @@ export default function AccountsManagement() {
             className="accounts-form-field"
           />
 
-          {/* Email */}
           <TextField
             fullWidth
             label="البريد الإلكتروني"
@@ -538,7 +835,6 @@ export default function AccountsManagement() {
             className="accounts-form-field"
           />
 
-          {/* Password (add only) */}
           {formDialog.mode === "add" && (
             <TextField
               fullWidth
@@ -553,7 +849,6 @@ export default function AccountsManagement() {
             />
           )}
 
-          {/* Role */}
           <TextField
             fullWidth
             select
@@ -572,15 +867,64 @@ export default function AccountsManagement() {
               </MenuItem>
             ) : (
               roles.map((role) => (
-                <MenuItem
-                  key={role.name || role}
-                  value={role.name || role}
-                >
+                <MenuItem key={role.name || role} value={role.name || role}>
                   {role.displayName || role.name || role}
                 </MenuItem>
               ))
             )}
           </TextField>
+
+          {needsBranch && (
+            <TextField
+              fullWidth
+              select
+              label="الفرع"
+              value={formData.branchId}
+              onChange={(e) => handleFormChange("branchId", e.target.value)}
+              error={!!formErrors.branchId}
+              helperText={formErrors.branchId}
+              margin="dense"
+              className="accounts-form-field"
+            >
+              {branches.length === 0 ? (
+                <MenuItem value="" disabled>
+                  لا توجد فروع متاحة
+                </MenuItem>
+              ) : (
+                branches.map((branch) => (
+                  <MenuItem key={branch.id} value={branch.id}>
+                    {branch.name} {branch.code ? `(${branch.code})` : ""}
+                  </MenuItem>
+                ))
+              )}
+            </TextField>
+          )}
+
+          {needsWorkshop && (
+            <TextField
+              fullWidth
+              select
+              label="الورشة"
+              value={formData.workshopId}
+              onChange={(e) => handleFormChange("workshopId", e.target.value)}
+              error={!!formErrors.workshopId}
+              helperText={formErrors.workshopId}
+              margin="dense"
+              className="accounts-form-field"
+            >
+              {workshops.length === 0 ? (
+                <MenuItem value="" disabled>
+                  لا توجد ورش متاحة
+                </MenuItem>
+              ) : (
+                workshops.map((workshop) => (
+                  <MenuItem key={workshop.id} value={workshop.id}>
+                    {workshop.name}
+                  </MenuItem>
+                ))
+              )}
+            </TextField>
+          )}
         </DialogContent>
 
         <DialogActions className="accounts-form-actions">
@@ -611,6 +955,98 @@ export default function AccountsManagement() {
               : formDialog.mode === "add"
               ? "إضافة"
               : "حفظ التعديلات"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* ===============================
+          Dialog تغيير كلمة المرور
+      =============================== */}
+      <Dialog
+        open={passwordDialog.open}
+        onClose={handleClosePasswordDialog}
+        PaperProps={{ className: "accounts-form-dialog" }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle className="accounts-form-title">
+          تغيير كلمة مرور الموظف
+        </DialogTitle>
+
+        <DialogContent className="accounts-form-content">
+          <Typography
+            sx={{
+              fontFamily: "'Cairo', sans-serif",
+              fontSize: "0.88rem",
+              color: "var(--text-secondary)",
+              mb: 2,
+            }}
+          >
+            الموظف: <strong>{passwordDialog.user?.fullName}</strong>
+          </Typography>
+
+          <TextField
+            fullWidth
+            label="كلمة المرور الجديدة"
+            type="password"
+            value={passwordDialog.newPassword}
+            onChange={(e) =>
+              setPasswordDialog((prev) => ({
+                ...prev,
+                newPassword: e.target.value,
+              }))
+            }
+            error={!!passwordErrors.newPassword}
+            helperText={
+              passwordErrors.newPassword ||
+              "يجب أن تحتوي على حرف كبير وحرف صغير ورقم (6+ أحرف)"
+            }
+            margin="dense"
+            className="accounts-form-field"
+          />
+
+          <TextField
+            fullWidth
+            label="تأكيد كلمة المرور"
+            type="password"
+            value={passwordDialog.confirmPassword}
+            onChange={(e) =>
+              setPasswordDialog((prev) => ({
+                ...prev,
+                confirmPassword: e.target.value,
+              }))
+            }
+            error={!!passwordErrors.confirmPassword}
+            helperText={passwordErrors.confirmPassword}
+            margin="dense"
+            className="accounts-form-field"
+          />
+        </DialogContent>
+
+        <DialogActions className="accounts-form-actions">
+          <Button
+            onClick={handleClosePasswordDialog}
+            disabled={savingPassword}
+            className="accounts-form-cancel"
+            startIcon={<CloseIcon />}
+          >
+            إلغاء
+          </Button>
+
+          <Button
+            onClick={handleSavePassword}
+            disabled={savingPassword}
+            variant="contained"
+            className="accounts-form-save"
+            startIcon={
+              savingPassword ? (
+                <CircularProgress size={16} sx={{ color: "#fff" }} />
+              ) : (
+                <LockResetIcon />
+              )
+            }
+          >
+            {savingPassword ? "جاري الحفظ..." : "تغيير كلمة المرور"}
           </Button>
         </DialogActions>
       </Dialog>
