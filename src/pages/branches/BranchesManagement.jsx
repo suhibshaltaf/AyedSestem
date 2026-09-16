@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -26,6 +26,7 @@ import {
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useNavigate } from "react-router-dom";
 
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import SearchIcon from "@mui/icons-material/Search";
@@ -35,6 +36,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 
 import {
   useBranches,
@@ -43,11 +45,9 @@ import {
   useDeleteBranch,
 } from "../../hooks/useBranches.js";
 import branchSchema from "./branchSchema.js";
+import useAuthStore from "../../store/useAuthStore.js";
 import "../../styles/branches.css";
 
-// ===============================
-// القيم الافتراضية
-// ===============================
 const emptyForm = {
   name: "",
   code: "",
@@ -56,7 +56,12 @@ const emptyForm = {
   isActive: true,
 };
 
+const ADMIN_ROLES = ["SuperAdmin", "Admin"];
+
 export default function BranchesManagement() {
+  const navigate = useNavigate();
+  const currentUser = useAuthStore((state) => state.user);
+
   const [searchQuery, setSearchQuery] = useState("");
   const [formDialog, setFormDialog] = useState({
     open: false,
@@ -67,6 +72,29 @@ export default function BranchesManagement() {
     open: false,
     branch: null,
   });
+
+  // ✅ الأدوار
+  const isAdmin = useMemo(() => {
+    if (!currentUser?.roles) return false;
+    const roleNames = currentUser.roles.map((r) => r.name);
+    return roleNames.some((name) => ADMIN_ROLES.includes(name));
+  }, [currentUser]);
+
+  const isBranchUser = useMemo(() => {
+    if (!currentUser?.roles) return false;
+    const roleNames = currentUser.roles.map((r) => r.name);
+    return (
+      roleNames.includes("BranchManager") ||
+      roleNames.includes("BranchAccountant")
+    );
+  }, [currentUser]);
+
+  // ✅ Redirect — BranchUser يذهب مباشرة لصفحة فرعه
+  useEffect(() => {
+    if (isBranchUser && !isAdmin && currentUser?.branchId) {
+      navigate(`/branches/${currentUser.branchId}`, { replace: true });
+    }
+  }, [isBranchUser, isAdmin, currentUser, navigate]);
 
   // React Query
   const { data: branches = [], isLoading, refetch } = useBranches();
@@ -90,9 +118,7 @@ export default function BranchesManagement() {
     defaultValues: emptyForm,
   });
 
-  // ===============================
   // فلترة
-  // ===============================
   const filteredBranches = useMemo(() => {
     if (!searchQuery.trim()) return branches;
     const q = searchQuery.toLowerCase();
@@ -108,17 +134,11 @@ export default function BranchesManagement() {
     });
   }, [branches, searchQuery]);
 
-  // ===============================
-  // فتح Dialog الإضافة
-  // ===============================
   const handleAddClick = () => {
     reset(emptyForm);
     setFormDialog({ open: true, mode: "add", branch: null });
   };
 
-  // ===============================
-  // فتح Dialog التعديل
-  // ===============================
   const handleEditClick = (branch) => {
     reset({
       name: branch.name || "",
@@ -130,9 +150,10 @@ export default function BranchesManagement() {
     setFormDialog({ open: true, mode: "edit", branch });
   };
 
-  // ===============================
-  // إغلاق Dialog
-  // ===============================
+  const handleViewClick = (branch) => {
+    navigate(`/branches/${branch.id}`);
+  };
+
   const handleCloseFormDialog = () => {
     if (!saving) {
       setFormDialog({ open: false, mode: "add", branch: null });
@@ -140,9 +161,6 @@ export default function BranchesManagement() {
     }
   };
 
-  // ===============================
-  // حفظ
-  // ===============================
   const onSubmit = async (data) => {
     const payload = {
       name: data.name.trim(),
@@ -153,23 +171,16 @@ export default function BranchesManagement() {
 
     if (formDialog.mode === "add") {
       const result = await createMutation.mutateAsync(payload);
-      if (result?.success) {
-        handleCloseFormDialog();
-      }
+      if (result?.success) handleCloseFormDialog();
     } else {
       const result = await updateMutation.mutateAsync({
         id: formDialog.branch.id,
         data: { ...payload, isActive: data.isActive },
       });
-      if (result?.success) {
-        handleCloseFormDialog();
-      }
+      if (result?.success) handleCloseFormDialog();
     }
   };
 
-  // ===============================
-  // حذف
-  // ===============================
   const handleDeleteClick = (branch) => {
     setDeleteDialog({ open: true, branch });
   };
@@ -177,18 +188,22 @@ export default function BranchesManagement() {
   const handleConfirmDelete = async () => {
     const branch = deleteDialog.branch;
     if (!branch) return;
-
     const result = await deleteMutation.mutateAsync(branch.id);
-    if (result?.success) {
-      setDeleteDialog({ open: false, branch: null });
-    }
+    if (result?.success) setDeleteDialog({ open: false, branch: null });
   };
 
   const handleCloseDeleteDialog = () => {
-    if (!deleting) {
-      setDeleteDialog({ open: false, branch: null });
-    }
+    if (!deleting) setDeleteDialog({ open: false, branch: null });
   };
+
+  // ✅ إذا BranchUser — لا نعرض الصفحة (Redirect يجري)
+  if (isBranchUser && !isAdmin) {
+    return (
+      <Box className="branches-loading">
+        <CircularProgress sx={{ color: "#b8860b" }} />
+      </Box>
+    );
+  }
 
   return (
     <div className="branches-container">
@@ -305,7 +320,6 @@ export default function BranchesManagement() {
                       {branch.phoneNumber || "—"}
                     </TableCell>
 
-                    {/* ✅ المدير المسؤول */}
                     <TableCell className="branches-td branches-td-manager">
                       {branch.managerName ? (
                         <Chip
@@ -318,7 +332,6 @@ export default function BranchesManagement() {
                       )}
                     </TableCell>
 
-                    {/* ✅ المحاسب المسؤول */}
                     <TableCell className="branches-td branches-td-accountant">
                       {branch.accountantName ? (
                         <Chip
@@ -344,6 +357,16 @@ export default function BranchesManagement() {
                     </TableCell>
 
                     <TableCell className="branches-td" align="center">
+                      <Tooltip title="عرض التفاصيل">
+                        <IconButton
+                          size="small"
+                          className="branches-action-btn branches-view-btn"
+                          onClick={() => handleViewClick(branch)}
+                        >
+                          <VisibilityIcon fontSize="small" />
+                        </IconButton>
+                      </Tooltip>
+
                       <Tooltip title="تعديل">
                         <IconButton
                           size="small"
@@ -372,9 +395,7 @@ export default function BranchesManagement() {
         )}
       </Paper>
 
-      {/* ===============================
-          Dialog الإضافة / التعديل
-      =============================== */}
+      {/* Dialog الإضافة / التعديل */}
       <Dialog
         open={formDialog.open}
         onClose={handleCloseFormDialog}
@@ -388,7 +409,6 @@ export default function BranchesManagement() {
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
           <DialogContent className="branches-form-content">
-            {/* Name */}
             <TextField
               fullWidth
               label="اسم الفرع"
@@ -399,7 +419,6 @@ export default function BranchesManagement() {
               className="branches-form-field"
             />
 
-            {/* Code */}
             <TextField
               fullWidth
               label="كود الفرع"
@@ -417,7 +436,6 @@ export default function BranchesManagement() {
               }}
             />
 
-            {/* Address */}
             <TextField
               fullWidth
               label="العنوان"
@@ -428,7 +446,6 @@ export default function BranchesManagement() {
               className="branches-form-field"
             />
 
-            {/* Phone */}
             <TextField
               fullWidth
               label="رقم الهاتف"
@@ -451,7 +468,6 @@ export default function BranchesManagement() {
               }}
             />
 
-            {/* IsActive (edit only) */}
             {formDialog.mode === "edit" && (
               <Controller
                 name="isActive"
@@ -507,9 +523,7 @@ export default function BranchesManagement() {
         </form>
       </Dialog>
 
-      {/* ===============================
-          Dialog الحذف
-      =============================== */}
+      {/* Dialog الحذف */}
       <Dialog
         open={deleteDialog.open}
         onClose={handleCloseDeleteDialog}

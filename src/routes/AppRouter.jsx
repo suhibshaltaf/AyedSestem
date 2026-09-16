@@ -5,6 +5,7 @@ import Dashboard from "../pages/dashboard/Dashboard.jsx";
 import Profile from "../pages/profile/Profile.jsx";
 import AccountsManagement from "../pages/accounts/AccountsManagement.jsx";
 import BranchesManagement from "../pages/branches/BranchesManagement.jsx";
+import BranchDetails from "../pages/branches/BranchDetails.jsx";
 import WorkshopsManagement from "../pages/workshops/WorkshopsManagement.jsx";
 import ChangePassword from "../pages/profile/ChangePassword.jsx";
 import Unauthorized from "../pages/unauthorized/Unauthorized.jsx";
@@ -36,15 +37,31 @@ export default function AppRouter() {
           <Route path="/profile" element={<Profile />} />
           <Route path="/change-password" element={<ChangePassword />} />
 
-          {/* Admin Only */}
+          {/* ✅ Admin + SuperAdmin فقط */}
           <Route
             element={
               <ProtectedRoute allowedRoles={["SuperAdmin", "Admin"]} />
             }
           >
             <Route path="/accounts" element={<AccountsManagement />} />
-            <Route path="/branches" element={<BranchesManagement />} />
             <Route path="/workshops" element={<WorkshopsManagement />} />
+          </Route>
+
+          {/* ✅ Admin + SuperAdmin + BranchManager + BranchAccountant */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                  "BranchAccountant",
+                ]}
+              />
+            }
+          >
+            <Route path="/branches" element={<BranchesManagement />} />
+            <Route path="/branches/:id" element={<BranchDetails />} />
           </Route>
         </Route>
       </Route>

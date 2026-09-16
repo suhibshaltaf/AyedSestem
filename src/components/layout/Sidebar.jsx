@@ -34,6 +34,9 @@ function SidebarContent({ onClose }) {
 
   const roles = user?.roles?.map((r) => r.name) || [];
 
+  // ✅ هل المستخدم Admin أو SuperAdmin؟
+  const isAdmin = roles.includes("SuperAdmin") || roles.includes("Admin");
+
   const handleLogout = () => {
     logout();
     toast.success("تم تسجيل الخروج بنجاح");
@@ -66,10 +69,11 @@ function SidebarContent({ onClose }) {
       roles: ["SuperAdmin", "Admin"],
     },
     {
-      label: "إدارة الفروع",
+      // ✅ النص يتغير حسب الدور
+      label: isAdmin ? "إدارة الفروع" : "الفرع",
       icon: <StorefrontIcon fontSize="small" />,
       path: "/branches",
-      roles: ["SuperAdmin", "Admin","BranchManager"],
+      roles: ["SuperAdmin", "Admin", "BranchManager"],
     },
     {
       label: "إدارة الورش",
@@ -177,4 +181,4 @@ export default function Sidebar({ mobileOpen, onClose }) {
       </Drawer>
     </>
   );
-}
+} 
