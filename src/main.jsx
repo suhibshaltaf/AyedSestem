@@ -9,6 +9,8 @@ import CssBaseline from "@mui/material/CssBaseline";
 import App from "./App.jsx";
 import { getTheme } from "./theme/theme.js";
 import useThemeStore from "./store/useThemeStore.js";
+import AuthInitializer from "./components/auth/AuthInitializer.jsx";
+import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 
 import "react-toastify/dist/ReactToastify.css";
 import "./styles/global.css";
@@ -24,20 +26,24 @@ function Root() {
   const theme = React.useMemo(() => getTheme(mode), [mode]);
 
   return (
-    <QueryClientProvider client={queryClient}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <BrowserRouter>
-          <App />
-          <ToastContainer
-            position="top-right"
-            autoClose={3000}
-            rtl
-            theme={mode === "dark" ? "dark" : "light"}
-          />
-        </BrowserRouter>
-      </ThemeProvider>
-    </QueryClientProvider>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <BrowserRouter>
+            <AuthInitializer>
+              <App />
+            </AuthInitializer>
+            <ToastContainer
+              position="top-right"
+              autoClose={3000}
+              rtl
+              theme={mode === "dark" ? "dark" : "light"}
+            />
+          </BrowserRouter>
+        </ThemeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }
 

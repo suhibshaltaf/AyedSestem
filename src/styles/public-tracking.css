@@ -1,0 +1,301 @@
+/* ===============================
+   Public Tracking Container
+   =============================== */
+.tracking-container {
+  min-height: 100vh;
+  width: 100%;
+  padding: 40px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--bg-default);
+  direction: rtl;
+}
+
+/* ===============================
+   Header
+   =============================== */
+.tracking-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.tracking-header-icon {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  border: 2px solid var(--gold-primary);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+
+.tracking-title {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 2rem !important;
+  font-weight: 700 !important;
+  color: #1e3a5f !important;
+  margin-bottom: 6px !important;
+}
+
+[data-theme="dark"] .tracking-title {
+  color: #80a9d4 !important;
+}
+
+.tracking-subtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--text-muted) !important;
+}
+
+/* ===============================
+   Form Card
+   =============================== */
+.tracking-form-card {
+  width: 100%;
+  max-width: 700px;
+  border-radius: 16px !important;
+  padding: 24px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-medium) !important;
+  margin-bottom: 24px;
+}
+
+.tracking-field .MuiOutlinedInput-root {
+  border-radius: 10px !important;
+  background-color: var(--bg-paper) !important;
+}
+
+.tracking-field .MuiOutlinedInput-root fieldset {
+  border-color: var(--border-gold-strong) !important;
+}
+
+.tracking-field .MuiOutlinedInput-root:hover fieldset {
+  border-color: var(--gold-soft) !important;
+}
+
+.tracking-field .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: var(--gold-primary) !important;
+}
+
+.tracking-field .MuiInputLabel-root {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+}
+
+.tracking-field .MuiInputLabel-root.Mui-focused {
+  color: var(--gold-primary) !important;
+}
+
+.tracking-field .MuiFormHelperText-root {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+}
+
+.tracking-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+.tracking-search-btn {
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  border-radius: 10px !important;
+  text-transform: none !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  padding: 10px 32px !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
+}
+
+.tracking-search-btn:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+.tracking-search-btn.Mui-disabled {
+  background: linear-gradient(90deg, #d4b98a, #c0a068) !important;
+  color: #fff !important;
+}
+
+.tracking-reset-btn {
+  color: var(--text-secondary) !important;
+  border-color: var(--border-gold-strong) !important;
+  border-radius: 10px !important;
+  text-transform: none !important;
+  font-family: "Cairo", sans-serif !important;
+  padding: 10px 24px !important;
+}
+
+/* ===============================
+   Loading
+   =============================== */
+.tracking-loading {
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+}
+
+/* ===============================
+   Result Card
+   =============================== */
+.tracking-result-card {
+  width: 100%;
+  max-width: 700px;
+  border-radius: 16px !important;
+  padding: 0 !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-medium) !important;
+  overflow: hidden;
+}
+
+.tracking-error {
+  padding: 32px !important;
+  border-color: rgba(211, 47, 47, 0.3) !important;
+}
+
+.tracking-error-text {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.95rem !important;
+  color: #d32f2f !important;
+  text-align: center;
+}
+
+/* Status Highlight */
+.tracking-status-highlight {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 20px;
+}
+
+.tracking-ready {
+  background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
+  color: #fff;
+}
+
+.tracking-not-ready {
+  background: linear-gradient(135deg, #b8860b 0%, #d4af6a 100%);
+  color: #fff;
+}
+
+.tracking-status-text {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.2rem !important;
+  font-weight: 700 !important;
+  color: #fff !important;
+}
+
+/* Details */
+.tracking-details {
+  padding: 8px 24px 24px;
+}
+
+.tracking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 8px;
+  gap: 16px;
+}
+
+.tracking-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-secondary);
+}
+
+.tracking-label span {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.88rem;
+}
+
+.tracking-label svg {
+  color: var(--gold-primary);
+}
+
+.tracking-value {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: #2b6cb0 !important;
+  text-align: right;
+  flex: 1;
+}
+
+[data-theme="dark"] .tracking-value {
+  color: #80a9d4 !important;
+}
+
+.tracking-value-mono {
+  font-family: "Courier New", monospace !important;
+  font-size: 0.95rem !important;
+  letter-spacing: 1px;
+}
+
+.tracking-value-date {
+  font-size: 0.9rem !important;
+}
+
+.tracking-status-chip {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  background-color: rgba(184, 134, 11, 0.15) !important;
+  color: #b8860b !important;
+}
+
+.tracking-divider {
+  border-color: var(--border-gold) !important;
+  opacity: 0.6;
+}
+
+/* ===============================
+   Responsive
+   =============================== */
+@media (max-width: 600px) {
+  .tracking-container {
+    padding: 24px 12px;
+  }
+
+  .tracking-title {
+    font-size: 1.5rem !important;
+  }
+
+  .tracking-form-card {
+    padding: 16px !important;
+  }
+
+  .tracking-form-actions {
+    flex-direction: column;
+  }
+
+  .tracking-form-actions > * {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .tracking-row {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+    gap: 4px;
+  }
+
+  .tracking-value {
+    width: 100%;
+    text-align: right;
+  }
+
+  .tracking-label {
+    align-self: flex-start;
+  }
+}

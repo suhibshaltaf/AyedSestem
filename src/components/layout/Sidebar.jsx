@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import {
   Box,
   List,
@@ -7,6 +8,7 @@ import {
   Typography,
   Divider,
   Drawer,
+  Tooltip,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
@@ -17,13 +19,87 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import BuildIcon from "@mui/icons-material/Build";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SettingsIcon from "@mui/icons-material/Settings";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
+import GroupIcon from "@mui/icons-material/Group";
+import ConstructionIcon from "@mui/icons-material/Construction";
 
 import useAuthStore from "../../store/useAuthStore.js";
 import companyLogo from "../../assets/Logo.svg";
 import "../../styles/sidebar.css";
 
 const SIDEBAR_WIDTH = 240;
+
+// ✅ العناصر الجاهزة
+const READY_ITEMS = [
+  {
+    label: "الصفحة الرئيسية",
+    icon: <HomeIcon fontSize="small" />,
+    path: "/dashboard",
+  },
+  {
+    label: "حسابي",
+    icon: <PersonIcon fontSize="small" />,
+    path: "/profile",
+  },
+  {
+    label: "إدارة الحسابات",
+    icon: <ManageAccountsIcon fontSize="small" />,
+    path: "/accounts",
+    roles: ["SuperAdmin", "Admin"],
+  },
+  {
+    label: "إدارة الفروع",
+    icon: <StorefrontIcon fontSize="small" />,
+    path: "/branches",
+    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
+  },
+  {
+    label: "إدارة الورش",
+    icon: <BuildIcon fontSize="small" />,
+    path: "/workshops",
+    roles: ["SuperAdmin", "Admin"],
+  },
+  {
+    label: "كشف التصاليح",
+    icon: <ReceiptLongIcon fontSize="small" />,
+    path: "/repairs/list",
+    roles: [
+      "SuperAdmin",
+      "Admin",
+      "BranchManager",
+      "BranchAccountant",
+      "OperatorManager",
+    ],
+  },
+  {
+    label: "الاستلام والتسليم",
+    icon: <SwapHorizIcon fontSize="small" />,
+    path: "/repairs/pickup-delivery",
+    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
+  },
+  {
+    label: "ملخص المندوبين",
+    icon: <GroupIcon fontSize="small" />,
+    path: "/repairs/representatives-summary",
+    roles: ["SuperAdmin", "Admin"],
+  },
+  {
+    label: "لوحة المندوب",
+    icon: <LocalShippingIcon fontSize="small" />,
+    path: "/repairs/representative",
+    roles: ["Representative"],
+  },
+];
+
+// ⏸️ قيد التطوير
+const DISABLED_ITEMS = [
+  {
+    label: "الضبط",
+    icon: <SettingsIcon fontSize="small" />,
+  },
+];
 
 function SidebarContent({ onClose }) {
   const navigate = useNavigate();
@@ -32,68 +108,33 @@ function SidebarContent({ onClose }) {
   const user = useAuthStore((state) => state.user);
   const logout = useAuthStore((state) => state.logout);
 
-  const roles = user?.roles?.map((r) => r.name) || [];
-
-  // ✅ هل المستخدم Admin أو SuperAdmin؟
-  const isAdmin = roles.includes("SuperAdmin") || roles.includes("Admin");
-
-  const handleLogout = () => {
-    logout();
-    toast.success("تم تسجيل الخروج بنجاح");
-    navigate("/login", { replace: true });
-  };
+  const roles = useMemo(
+    () => user?.roles?.map((r) => r.name) || [],
+    [user]
+  );
 
   const handleNavigate = (path) => {
     navigate(path);
     if (onClose) onClose();
   };
 
+  const handleDisabledClick = () => {
+    toast.info("سوف يتم تجهيز هذا القسم في الـ API قريباً", {
+      position: "top-center",
+      autoClose: 3000,
+    });
+  };
+
   const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(path + "/");
 
-  const menuItems = [
-    {
-      label: "الصفحة الرئيسية",
-      icon: <HomeIcon fontSize="small" />,
-      path: "/dashboard",
-    },
-    {
-      label: "حسابي",
-      icon: <PersonIcon fontSize="small" />,
-      path: "/profile",
-    },
-    {
-      label: "إدارة الحسابات",
-      icon: <ManageAccountsIcon fontSize="small" />,
-      path: "/accounts",
-      roles: ["SuperAdmin", "Admin"],
-    },
-    {
-      // ✅ النص يتغير حسب الدور
-      label: isAdmin ? "إدارة الفروع" : "الفرع",
-      icon: <StorefrontIcon fontSize="small" />,
-      path: "/branches",
-      roles: ["SuperAdmin", "Admin", "BranchManager"],
-    },
-    {
-      label: "إدارة الورش",
-      icon: <BuildIcon fontSize="small" />,
-      path: "/workshops",
-      roles: ["SuperAdmin", "Admin"],
-    },
-    {
-      label: "كشف التصاليح",
-      icon: <ReceiptLongIcon fontSize="small" />,
-      path: "/repairs/list",
-    },
-    {
-      label: "الضبط",
-      icon: <SettingsIcon fontSize="small" />,
-      path: "/settings",
-    },
-  ];
+  const visibleReadyItems = READY_ITEMS.filter((item) => {
+    if (!item.roles || item.roles.length === 0) return true;
+    if (roles.length === 0) return false;
+    return item.roles.some((r) => roles.includes(r));
+  });
 
-  const visibleItems = menuItems.filter((item) => {
+  const visibleDisabledItems = DISABLED_ITEMS.filter((item) => {
     if (!item.roles || item.roles.length === 0) return true;
     if (roles.length === 0) return false;
     return item.roles.some((r) => roles.includes(r));
@@ -108,13 +149,11 @@ function SidebarContent({ onClose }) {
           className="sidebar-logo"
         />
 
-        <Typography className="sidebar-title">
-          مجموعة عايد دعنا
-        </Typography>
+        <Typography className="sidebar-title">مجموعة عايد دعنا</Typography>
       </div>
 
       <List className="sidebar-list">
-        {visibleItems.map((item) => {
+        {visibleReadyItems.map((item) => {
           const active = isActive(item.path);
           return (
             <ListItemButton
@@ -143,7 +182,46 @@ function SidebarContent({ onClose }) {
         })}
       </List>
 
-      <Divider className="sidebar-divider" />
+      {visibleDisabledItems.length > 0 && (
+        <>
+          <Divider className="sidebar-divider" />
+
+          <Typography className="sidebar-section-title">
+            <ConstructionIcon sx={{ fontSize: 14, ml: 0.5 }} />
+            قيد التطوير
+          </Typography>
+
+          <List className="sidebar-list">
+            {visibleDisabledItems.map((item) => (
+              <Tooltip
+                key={item.label}
+                title="سوف يتم تجهيزه في الـ API قريباً"
+                placement="left"
+                arrow
+              >
+                <span>
+                  <ListItemButton
+                    disabled
+                    onClick={handleDisabledClick}
+                    className="sidebar-item sidebar-item-disabled"
+                  >
+                    <ListItemIcon className="sidebar-icon sidebar-icon-disabled">
+                      {item.icon}
+                    </ListItemIcon>
+                    <ListItemText
+                      primary={item.label}
+                      primaryTypographyProps={{
+                        fontSize: "0.85rem",
+                        fontWeight: 500,
+                      }}
+                    />
+                  </ListItemButton>
+                </span>
+              </Tooltip>
+            ))}
+          </List>
+        </>
+      )}
     </div>
   );
 }
@@ -181,4 +259,4 @@ export default function Sidebar({ mobileOpen, onClose }) {
       </Drawer>
     </>
   );
-} 
+}

@@ -1,6 +1,7 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 
 import Login from "../pages/login/Login.jsx";
+import HomePage from "../pages/home/HomePage.jsx";
 import Dashboard from "../pages/dashboard/Dashboard.jsx";
 import Profile from "../pages/profile/Profile.jsx";
 import AccountsManagement from "../pages/accounts/AccountsManagement.jsx";
@@ -9,6 +10,14 @@ import BranchDetails from "../pages/branches/BranchDetails.jsx";
 import WorkshopsManagement from "../pages/workshops/WorkshopsManagement.jsx";
 import ChangePassword from "../pages/profile/ChangePassword.jsx";
 import Unauthorized from "../pages/unauthorized/Unauthorized.jsx";
+
+// Repairs
+import RepairOrdersList from "../pages/repairs/RepairOrdersList.jsx";
+import CreateRepairOrder from "../pages/repairs/CreateRepairOrder.jsx";
+import RepairOrderDetails from "../pages/repairs/RepairOrderDetails.jsx";
+import RepresentativeDashboard from "../pages/repairs/RepresentativeDashboard.jsx";
+import PickupDelivery from "../pages/repairs/PickupDelivery.jsx";
+import RepresentativesSummary from "../pages/repairs/RepresentativesSummary.jsx";
 
 import ProtectedRoute from "../components/auth/ProtectedRoute.jsx";
 import MainLayout from "../components/layout/MainLayout.jsx";
@@ -20,7 +29,10 @@ export default function AppRouter() {
 
   return (
     <Routes>
-      {/* Public Routes */}
+      {/* Public */}
+      <Route path="/" element={<HomePage />} />
+      <Route path="/home" element={<HomePage />} />
+
       <Route
         path="/login"
         element={
@@ -30,14 +42,14 @@ export default function AppRouter() {
 
       <Route path="/unauthorized" element={<Unauthorized />} />
 
-      {/* Protected Routes */}
+      {/* Protected */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/change-password" element={<ChangePassword />} />
 
-          {/* ✅ Admin + SuperAdmin فقط */}
+          {/* Admin Only */}
           <Route
             element={
               <ProtectedRoute allowedRoles={["SuperAdmin", "Admin"]} />
@@ -45,9 +57,13 @@ export default function AppRouter() {
           >
             <Route path="/accounts" element={<AccountsManagement />} />
             <Route path="/workshops" element={<WorkshopsManagement />} />
+            <Route
+              path="/repairs/representatives-summary"
+              element={<RepresentativesSummary />}
+            />
           </Route>
 
-          {/* ✅ Admin + SuperAdmin + BranchManager + BranchAccountant */}
+          {/* Branch roles */}
           <Route
             element={
               <ProtectedRoute
@@ -62,25 +78,46 @@ export default function AppRouter() {
           >
             <Route path="/branches" element={<BranchesManagement />} />
             <Route path="/branches/:id" element={<BranchDetails />} />
+            <Route path="/repairs/create" element={<CreateRepairOrder />} />
+            <Route
+              path="/repairs/pickup-delivery"
+              element={<PickupDelivery />}
+            />
+          </Route>
+
+          {/* All authenticated */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                  "BranchAccountant",
+                  "OperatorManager",
+                  "Representative",
+                ]}
+              />
+            }
+          >
+            <Route path="/repairs/list" element={<RepairOrdersList />} />
+            <Route path="/repairs/:id" element={<RepairOrderDetails />} />
+          </Route>
+
+          {/* Representative Only */}
+          <Route
+            element={<ProtectedRoute allowedRoles={["Representative"]} />}
+          >
+            <Route
+              path="/repairs/representative"
+              element={<RepresentativeDashboard />}
+            />
           </Route>
         </Route>
       </Route>
 
-      {/* Default */}
-      <Route
-        path="/"
-        element={
-          <Navigate to={token ? "/dashboard" : "/login"} replace />
-        }
-      />
-
       {/* Catch All */}
-      <Route
-        path="*"
-        element={
-          <Navigate to={token ? "/dashboard" : "/login"} replace />
-        }
-      />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 }
