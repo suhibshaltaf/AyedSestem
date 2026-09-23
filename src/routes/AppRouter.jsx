@@ -10,6 +10,9 @@ import BranchDetails from "../pages/branches/BranchDetails.jsx";
 import WorkshopsManagement from "../pages/workshops/WorkshopsManagement.jsx";
 import ChangePassword from "../pages/profile/ChangePassword.jsx";
 import Unauthorized from "../pages/unauthorized/Unauthorized.jsx";
+import PublicTracking from "../pages/repairs/PublicTracking.jsx";
+import OrganizationSettings from "../pages/settings/OrganizationSettings.jsx";
+import ScanRepair from "../pages/repairs/ScanRepair.jsx";
 
 // Repairs
 import RepairOrdersList from "../pages/repairs/RepairOrdersList.jsx";
@@ -32,6 +35,7 @@ export default function AppRouter() {
       {/* Public */}
       <Route path="/" element={<HomePage />} />
       <Route path="/home" element={<HomePage />} />
+      <Route path="/track" element={<PublicTracking />} />
 
       <Route
         path="/login"
@@ -48,6 +52,7 @@ export default function AppRouter() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/profile" element={<Profile />} />
           <Route path="/change-password" element={<ChangePassword />} />
+          <Route path="/settings" element={<OrganizationSettings />} />
 
           {/* Admin Only */}
           <Route
@@ -57,6 +62,8 @@ export default function AppRouter() {
           >
             <Route path="/accounts" element={<AccountsManagement />} />
             <Route path="/workshops" element={<WorkshopsManagement />} />
+            <Route path="/branches" element={<BranchesManagement />} />
+            <Route path="/branches/:id" element={<BranchDetails />} />
             <Route
               path="/repairs/representatives-summary"
               element={<RepresentativesSummary />}
@@ -76,13 +83,14 @@ export default function AppRouter() {
               />
             }
           >
-            <Route path="/branches" element={<BranchesManagement />} />
-            <Route path="/branches/:id" element={<BranchDetails />} />
-            <Route path="/repairs/create" element={<CreateRepairOrder />} />
             <Route
               path="/repairs/pickup-delivery"
               element={<PickupDelivery />}
             />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={["BranchManager", "BranchAccountant"]} />}>
+            <Route path="/repairs/create" element={<CreateRepairOrder />} />
           </Route>
 
           {/* All authenticated */}
@@ -94,13 +102,15 @@ export default function AppRouter() {
                   "Admin",
                   "BranchManager",
                   "BranchAccountant",
-                  "OperatorManager",
-                  "Representative",
                 ]}
               />
             }
           >
             <Route path="/repairs/list" element={<RepairOrdersList />} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={["SuperAdmin", "Admin", "BranchManager", "BranchAccountant", "OperatorManager"]} />}>
+            <Route path="/repairs/scan" element={<ScanRepair />} />
             <Route path="/repairs/:id" element={<RepairOrderDetails />} />
           </Route>
 

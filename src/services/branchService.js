@@ -8,6 +8,11 @@ const getAllBranches = async () => {
   return response.data;
 };
 
+const getBranchLookup = async () => {
+  const response = await authAxiosInstance.get("/Branches/lookup");
+  return response.data;
+};
+
 // ===============================
 // GET: فرع بواسطة ID
 // ===============================
@@ -44,6 +49,7 @@ const deleteBranch = async (id) => {
 
 const branchService = {
   getAllBranches,
+  getBranchLookup,
   getBranchById,
   createBranch,
   updateBranch,

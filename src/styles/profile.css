@@ -47,13 +47,13 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.9rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   line-height: 1.3 !important;
   margin-bottom: 4px !important;
 }
 
 [data-theme="dark"] .profile-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .profile-title-decor {
@@ -139,7 +139,7 @@
 }
 
 [data-theme="dark"] .profile-value {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .profile-value-id {

@@ -34,12 +34,12 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   margin-bottom: 4px !important;
 }
 
 [data-theme="dark"] .workshops-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .workshops-subtitle {
@@ -224,7 +224,7 @@
 }
 
 .workshops-edit-btn {
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 .workshops-edit-btn:hover {
@@ -232,7 +232,7 @@
 }
 
 [data-theme="dark"] .workshops-edit-btn {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .workshops-delete-btn {

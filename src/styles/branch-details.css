@@ -41,13 +41,13 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   margin-bottom: 4px !important;
   text-align: center;
 }
 
 [data-theme="dark"] .branch-details-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branch-details-title-decor {
@@ -201,7 +201,7 @@
 }
 
 [data-theme="dark"] .branch-details-value {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branch-details-value-mono {
@@ -274,11 +274,11 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.3rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 [data-theme="dark"] .branch-employees-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branch-employees-paper {
@@ -377,7 +377,7 @@
 }
 
 .branch-employees-edit-btn {
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 .branch-employees-edit-btn:hover {
@@ -385,7 +385,7 @@
 }
 
 [data-theme="dark"] .branch-employees-edit-btn {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branch-employees-delete-btn {

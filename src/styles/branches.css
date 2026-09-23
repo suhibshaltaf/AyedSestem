@@ -34,12 +34,12 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   margin-bottom: 4px !important;
 }
 
 [data-theme="dark"] .branches-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branches-subtitle {
@@ -191,13 +191,13 @@
   font-weight: 700 !important;
   letter-spacing: 1px !important;
   background-color: rgba(30, 58, 95, 0.1) !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   border-radius: 6px !important;
 }
 
 [data-theme="dark"] .branches-code-chip {
   background-color: rgba(128, 169, 212, 0.15) !important;
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branches-status-chip {
@@ -239,7 +239,7 @@
 }
 
 .branches-edit-btn {
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 .branches-edit-btn:hover {
@@ -247,7 +247,7 @@
 }
 
 [data-theme="dark"] .branches-edit-btn {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .branches-delete-btn {

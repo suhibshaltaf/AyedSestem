@@ -63,6 +63,22 @@ const getRepairOrderByBarcode = async (barcode) => {
   return response.data;
 };
 
+const getBarcodeImage = async (barcode) => {
+  const response = await authAxiosInstance.get(
+    `/RepairOrders/barcode/${encodeURIComponent(barcode)}/image`,
+    { responseType: "blob" }
+  );
+  return response.data;
+};
+
+const getQrImage = async (barcode) => {
+  const response = await authAxiosInstance.get(
+    `/RepairOrders/barcode/${encodeURIComponent(barcode)}/qr`,
+    { responseType: "blob" }
+  );
+  return response.data;
+};
+
 // ===============================
 // 5. ADD REPAIR MOVEMENT
 // POST /api/RepairOrders/movement
@@ -127,6 +143,8 @@ const repairOrderService = {
   getRepairOrders,
   getRepairOrderById,
   getRepairOrderByBarcode,
+  getBarcodeImage,
+  getQrImage,
   addRepairMovement,
   getRepresentativeDashboard,
   getRepresentativeOrders,

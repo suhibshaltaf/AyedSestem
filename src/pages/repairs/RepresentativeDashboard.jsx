@@ -1,180 +1,210 @@
-import { useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Typography,
   Paper,
-  CircularProgress,
-  Grid,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Chip,
-  Divider,
+  CircularProgress,
+  TextField,
+  InputAdornment,
+  IconButton,
+  Tooltip,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
-import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import GroupIcon from "@mui/icons-material/Group";
+import SearchIcon from "@mui/icons-material/Search";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import StorefrontIcon from "@mui/icons-material/Storefront";
 import BuildIcon from "@mui/icons-material/Build";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
 
-import {
-  useRepresentativeDashboard,
-  useRepresentativeOrders,
-} from "../../hooks/useRepresentative.js";
-import {
-  getStatusName,
-  getStatusColor,
-} from "../../utils/repairConstants.js";
+import { useRepresentativesSummary } from "../../hooks/useRepairOrders.js";
 import "../../styles/repairs.css";
 
-export default function RepresentativeDashboard() {
-  const navigate = useNavigate();
+export default function RepresentativesSummary() {
+  const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: dashboard, isLoading: loadingDashboard } =
-    useRepresentativeDashboard();
-  const { data: orders = [], isLoading: loadingOrders } =
-    useRepresentativeOrders();
+  const { data: representatives = [], isLoading, refetch } =
+    useRepresentativesSummary();
 
-  // إحصائيات
-  const stats = useMemo(() => {
-    return {
-      total: dashboard?.totalOrders || orders.length || 0,
-      withRepresentative:
-        dashboard?.withRepresentative ||
-        orders.filter((o) => o.status === 2 || o.status === 6).length,
-      atWorkshop:
-        dashboard?.atWorkshop ||
-        orders.filter((o) => o.status === 3 || o.status === 4).length,
-      ready:
-        dashboard?.readyForPickup ||
-        orders.filter((o) => o.status === 5).length,
-    };
-  }, [dashboard, orders]);
+  // فلترة
+  const filteredRepresentatives = useMemo(() => {
+    if (!searchQuery.trim()) return representatives;
+    const q = searchQuery.toLowerCase();
+    return representatives.filter((r) => {
+      return (
+        (r.representativeName || "").toLowerCase().includes(q) ||
+        (r.branchName || "").toLowerCase().includes(q)
+      );
+    });
+  }, [representatives, searchQuery]);
 
-  if (loadingDashboard || loadingOrders) {
-    return (
-      <Box className="repairs-details-loading">
-        <CircularProgress sx={{ color: "#b8860b" }} />
-      </Box>
-    );
-  }
-
-  const cards = [
-    {
-      label: "إجمالي التصاليح",
-      value: stats.total,
-      icon: <ReceiptLongIcon sx={{ fontSize: 28 }} />,
-      color: "gold",
-    },
-    {
-      label: "مع المندوب",
-      value: stats.withRepresentative,
-      icon: <LocalShippingIcon sx={{ fontSize: 28 }} />,
-      color: "blue",
-    },
-    {
-      label: "في الورشة",
-      value: stats.atWorkshop,
-      icon: <BuildIcon sx={{ fontSize: 28 }} />,
-      color: "orange",
-    },
-    {
-      label: "جاهزة للاستلام",
-      value: stats.ready,
-      icon: <CheckCircleIcon sx={{ fontSize: 28 }} />,
-      color: "green",
-    },
-  ];
+  const totalPieces = useMemo(
+    () => representatives.reduce((sum, r) => sum + (r.totalPieces || 0), 0),
+    [representatives]
+  );
 
   return (
     <div className="repairs-list-container">
       {/* Header */}
       <div className="repairs-list-header">
         <div className="repairs-list-header-icon">
-          <LocalShippingIcon sx={{ fontSize: 34 }} />
+          <GroupIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="repairs-list-title">لوحة المندوب</Typography>
+        <Typography className="repairs-list-title">ملخص المندوبين</Typography>
 
         <Typography className="repairs-list-subtitle">
-          ملخص التصاليح الخاصة بك
+          عرض القطع الموجودة بحوزة كل مندوب
         </Typography>
       </div>
 
       {/* Stats */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
-        {cards.map((card) => (
-          <Grid item xs={6} sm={3} key={card.label}>
-            <Paper
-              elevation={0}
-              className={`repairs-stat-card repairs-stat-${card.color}`}
-            >
-              <div className="repairs-stat-icon">{card.icon}</div>
-              <Typography className="repairs-stat-value">
-                {card.value}
-              </Typography>
-              <Typography className="repairs-stat-label">
-                {card.label}
-              </Typography>
-            </Paper>
-          </Grid>
-        ))}
-      </Grid>
-
-      {/* Orders */}
-      <Paper elevation={0} className="repairs-table-paper">
-        <div className="repairs-section-header">
-          <Typography className="repairs-section-header-title">
-            التصاليح الحالية
+      <div className="repairs-summary-stats">
+        <Paper elevation={0} className="repairs-summary-stat">
+          <Typography className="repairs-summary-stat-value">
+            {representatives.length}
           </Typography>
-        </div>
+          <Typography className="repairs-summary-stat-label">
+            عدد المندوبين
+          </Typography>
+        </Paper>
 
-        <Divider />
+        <Paper elevation={0} className="repairs-summary-stat">
+          <Typography className="repairs-summary-stat-value">
+            {totalPieces}
+          </Typography>
+          <Typography className="repairs-summary-stat-label">
+            إجمالي القطع
+          </Typography>
+        </Paper>
+      </div>
 
-        {orders.length === 0 ? (
+      {/* Toolbar */}
+      <div className="repairs-toolbar-simple">
+        <TextField
+          placeholder="بحث باسم المندوب أو الفرع..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          size="small"
+          className="repairs-search"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+
+        <Tooltip title="تحديث">
+          <IconButton
+            onClick={() => refetch()}
+            className="repairs-refresh-btn"
+          >
+            <RefreshIcon />
+          </IconButton>
+        </Tooltip>
+      </div>
+
+      {/* Table */}
+      <Paper elevation={0} className="repairs-table-paper">
+        {isLoading ? (
+          <Box className="repairs-loading">
+            <CircularProgress sx={{ color: "#b8860b" }} />
+          </Box>
+        ) : filteredRepresentatives.length === 0 ? (
           <Box className="repairs-empty">
-            <Typography>لا توجد تصاليح حالياً</Typography>
+            <Typography>
+              {searchQuery
+                ? "لا توجد نتائج مطابقة للبحث"
+                : "لا يوجد مندوبون لعرضهم"}
+            </Typography>
           </Box>
         ) : (
-          <div className="repairs-orders-list">
-            {orders.map((order) => (
-              <div key={order.id} className="repairs-order-item">
-                <div className="repairs-order-item-info">
-                  <Chip
-                    label={order.barcode || "—"}
-                    size="small"
-                    className="repairs-barcode-chip"
-                  />
+          <TableContainer>
+            <Table>
+              <TableHead>
+                <TableRow className="repairs-table-head-row">
+                  <TableCell className="repairs-th">#</TableCell>
+                  <TableCell className="repairs-th">اسم المندوب</TableCell>
+                  <TableCell className="repairs-th">الفرع</TableCell>
+                  <TableCell className="repairs-th" align="center">
+                    <InventoryIcon
+                      sx={{ fontSize: 18, verticalAlign: "middle", ml: 0.5 }}
+                    />
+                    الإجمالي
+                  </TableCell>
+                  <TableCell className="repairs-th" align="center">
+                    <StorefrontIcon
+                      sx={{ fontSize: 18, verticalAlign: "middle", ml: 0.5 }}
+                    />
+                    من الفرع
+                  </TableCell>
+                  <TableCell className="repairs-th" align="center">
+                    <BuildIcon
+                      sx={{ fontSize: 18, verticalAlign: "middle", ml: 0.5 }}
+                    />
+                    من الورشة
+                  </TableCell>
+                </TableRow>
+              </TableHead>
 
-                  <Typography className="repairs-order-item-name">
-                    {order.customerName || "—"}
-                  </Typography>
+              <TableBody>
+                {filteredRepresentatives.map((rep, index) => (
+                  <TableRow key={rep.userId} className="repairs-table-row">
+                    <TableCell className="repairs-td">
+                      {index + 1}
+                    </TableCell>
 
-                  <Typography className="repairs-order-item-desc">
-                    {order.description || "—"}
-                  </Typography>
+                    <TableCell className="repairs-td repairs-td-name">
+                      {rep.representativeName || "—"}
+                    </TableCell>
 
-                  <Chip
-                    label={getStatusName(order.status)}
-                    size="small"
-                    className={`repairs-status-chip repairs-status-${getStatusColor(
-                      order.status
-                    )}`}
-                  />
-                </div>
+                    <TableCell className="repairs-td">
+                      {rep.branchName || "—"}
+                    </TableCell>
 
-                <Tooltip title="عرض التفاصيل">
-                  <IconButton
-                    onClick={() => navigate(`/repairs/${order.id}`)}
-                    className="repairs-view-btn"
-                  >
-                    <VisibilityIcon />
-                  </IconButton>
-                </Tooltip>
-              </div>
-            ))}
-          </div>
+                    <TableCell className="repairs-td" align="center">
+                      <Chip
+                        label={rep.totalPieces || 0}
+                        size="small"
+                        className={`repairs-summary-count-chip ${
+                          rep.totalPieces > 0
+                            ? "repairs-summary-count-chip-active"
+                            : "repairs-summary-count-chip-empty"
+                        }`}
+                      />
+                    </TableCell>
+
+                    <TableCell className="repairs-td" align="center">
+                      <Chip
+                        label={rep.fromBranch || 0}
+                        size="small"
+                        className="repairs-summary-branch-chip"
+                      />
+                    </TableCell>
+
+                    <TableCell className="repairs-td" align="center">
+                      <Chip
+                        label={rep.fromWorkshop || 0}
+                        size="small"
+                        className="repairs-summary-workshop-chip"
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
         )}
       </Paper>
     </div>

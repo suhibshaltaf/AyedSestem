@@ -88,54 +88,51 @@ export const getStatusColor = (status) =>
 // ===============================
 // الحصول على الحركات المتاحة حسب الحالة والدور
 // ===============================
-export const getAvailableMovements = (status, userRoles = []) => {
+export const getAvailableMovements = (status, userRoles = [], movements = []) => {
   const available = [];
+  const last = [...movements].sort((a, b) =>
+    new Date(b.createdAt) - new Date(a.createdAt) || b.id - a.id
+  )[0]?.movementType;
 
-  switch (status) {
+  switch (Number(status)) {
     case 1: // جديدة
       if (
-        userRoles.includes("BranchManager") ||
-        userRoles.includes("BranchAccountant")
+        (userRoles.includes("BranchManager") ||
+        userRoles.includes("BranchAccountant")) && !last
       ) {
         available.push(1); // DeliveredToRepresentative
       }
       break;
 
-    case 2: // مع المندوب
-      if (userRoles.includes("Representative")) {
-        available.push(3); // DeliveredToWorkshop
-      }
-      break;
-
     case 3: // في المشغل
       if (userRoles.includes("OperatorManager")) {
-        available.push(4); // ReceivedByWorkshop
+        if (last === 3) available.push(4); // استلام المشغل
+        if (last === 4) available.push(5); // بدء التصليح
       }
       break;
 
     case 4: // قيد التصليح
       if (userRoles.includes("OperatorManager")) {
-        available.push(5); // StartedRepair (اختياري)
-        available.push(6); // RepairCompleted
+        if (last === 5) available.push(6); // انتهاء التصليح
       }
       break;
 
     case 5: // تم التصليح
       if (userRoles.includes("OperatorManager")) {
-        available.push(7); // DeliveredToRepresentativeFromWorkshop
+        if (last === 6) available.push(7); // التسليم للمندوب
       }
       break;
 
     case 6: // مع المندوب بعد التصليح
-      if (userRoles.includes("Representative")) {
-        available.push(9); // DeliveredToBranch
+      if ((userRoles.includes("BranchManager") || userRoles.includes("BranchAccountant")) && last === 9) {
+        available.push(10); // استلام الفرع من المندوب
       }
       break;
 
     case 7: // جاهزة للاستلام
       if (
-        userRoles.includes("BranchManager") ||
-        userRoles.includes("BranchAccountant")
+        (userRoles.includes("BranchManager") ||
+        userRoles.includes("BranchAccountant")) && last === 10
       ) {
         available.push(11); // DeliveredToCustomer
       }

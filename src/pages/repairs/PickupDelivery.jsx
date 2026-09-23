@@ -39,7 +39,7 @@ const PAGE_SIZE = 10;
 
 // ✅ الحالات
 const DELIVER_TO_REP_STATUSES = [1]; // جديدة → تسليم للمندوب
-const RECEIVE_FROM_REP_STATUSES = [5, 6, 7]; // تم التصليح → استلام من المندوب
+const RECEIVE_FROM_REP_STATUSES = [6]; // القطعة عائدة من المشغل مع المندوب
 
 export default function PickupDelivery() {
   const navigate = useNavigate();

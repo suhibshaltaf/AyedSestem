@@ -49,7 +49,7 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   margin-bottom: 4px !important;
   text-align: center;
 }
@@ -57,7 +57,7 @@
 [data-theme="dark"] .repairs-list-title,
 [data-theme="dark"] .repairs-create-title,
 [data-theme="dark"] .repairs-details-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .repairs-list-subtitle,
@@ -233,13 +233,13 @@
   font-weight: 700 !important;
   letter-spacing: 0.5px;
   background-color: rgba(30, 58, 95, 0.1) !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   border-radius: 6px !important;
 }
 
 [data-theme="dark"] .repairs-barcode-chip {
   background-color: rgba(128, 169, 212, 0.15) !important;
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 /* Status Chips */
@@ -302,7 +302,7 @@
 }
 
 .repairs-view-btn {
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 .repairs-view-btn:hover {
@@ -310,7 +310,7 @@
 }
 
 [data-theme="dark"] .repairs-view-btn {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .repairs-print-btn {
@@ -551,7 +551,7 @@
 }
 
 [data-theme="dark"] .repairs-details-value {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .repairs-details-value-ltr {

@@ -23,6 +23,8 @@
     const useAuthStore = create((set, get) => ({
       token: getStoredToken(),
       user: getStoredUser(),
+      initialized: false,
+      setInitialized: (initialized) => set({ initialized }),
 
       // ===============================
       // Set Token

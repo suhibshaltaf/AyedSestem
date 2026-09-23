@@ -8,6 +8,7 @@ import branchService from "../services/branchService.js";
 // ===============================
 export const branchKeys = {
   all: ["branches"],
+  lookup: ["branches", "lookup"],
   detail: (id) => ["branches", id],
 };
 
@@ -112,3 +113,10 @@ export const useDeleteBranch = () => {
     },
   });
 };
+
+export const useBranchLookup = () => useQuery({
+  queryKey: branchKeys.lookup,
+  queryFn: branchService.getBranchLookup,
+  select: (result) => Array.isArray(result?.data) ? result.data : [],
+  staleTime: 1000 * 60 * 5,
+});

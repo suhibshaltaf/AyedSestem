@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -15,6 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -38,6 +39,8 @@ import {
 } from "../../hooks/useRepairOrders.js";
 import { useWorkshops } from "../../hooks/useWorkshops.js";
 import useAuthStore from "../../store/useAuthStore.js";
+import repairOrderService from "../../services/repairOrderService.js";
+import organizationService from "../../services/organizationService.js";
 import {
   getStatusName,
   getStatusColor,
@@ -58,6 +61,35 @@ export default function RepairOrderDetails() {
 
   // جلب التصليحة
   const { data: order, isLoading, refetch } = useRepairOrderById(id);
+  const { data: organization } = useQuery({ queryKey: ["organization-settings"], queryFn: organizationService.getSettings });
+  const showBarcode = organization?.showBarcode !== false;
+  const showQr = organization?.showQrCode !== false;
+  const [images, setImages] = useState({ barcode: null, qr: null });
+
+  useEffect(() => {
+    if (!order?.barcode) return undefined;
+    let active = true;
+    const urls = [];
+    const load = async () => {
+      const [barcodeResult, qrResult] = await Promise.allSettled([
+        showBarcode ? repairOrderService.getBarcodeImage(order.barcode) : Promise.resolve(null),
+        showQr ? repairOrderService.getQrImage(order.barcode) : Promise.resolve(null),
+      ]);
+      if (!active) return;
+      const barcode = barcodeResult.status === "fulfilled" && barcodeResult.value
+        ? URL.createObjectURL(barcodeResult.value) : null;
+      const qr = qrResult.status === "fulfilled" && qrResult.value
+        ? URL.createObjectURL(qrResult.value) : null;
+      if (barcode) urls.push(barcode);
+      if (qr) urls.push(qr);
+      setImages({ barcode, qr });
+    };
+    load();
+    return () => {
+      active = false;
+      urls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [order?.barcode, showBarcode, showQr]);
 
   // إضافة حركة
   const addMovementMutation = useAddRepairMovement();
@@ -76,7 +108,7 @@ export default function RepairOrderDetails() {
   // الحركات المتاحة
   const availableMovements = useMemo(() => {
     if (!order) return [];
-    return getAvailableMovements(order.status, roles);
+    return getAvailableMovements(order.status, roles, order.movements);
   }, [order, roles]);
 
   // حساب تواريخ الحركات
@@ -120,17 +152,18 @@ export default function RepairOrderDetails() {
       notes: movementDialog.notes || "",
     };
 
-    const result = await addMovementMutation.mutateAsync(payload);
-
-    if (result?.success) {
-      handleCloseMovement();
-      refetch();
-    }
+    try {
+      const result = await addMovementMutation.mutateAsync(payload);
+      if (result?.data || result?.success) {
+        setMovementDialog({ open: false, movementType: null, notes: "" });
+        refetch();
+      }
+    } catch { /* The mutation displays the server error. */ }
   };
 
   // ✅ طباعة الباركود — عند الضغط على الزر فقط
   const handlePrintBarcode = () => {
-    if (!order?.barcodeImage) {
+    if (!images.barcode) {
       return;
     }
 
@@ -141,12 +174,13 @@ export default function RepairOrderDetails() {
       return;
     }
 
+    const printableBarcode = order.barcode.replace(/[^A-Za-z0-9_-]/g, "");
     printWindow.document.write(`
       <!DOCTYPE html>
       <html dir="rtl">
         <head>
           <meta charset="UTF-8" />
-          <title>طباعة الباركود - ${order.barcode}</title>
+          <title>طباعة الباركود - ${printableBarcode}</title>
           <style>
             * { box-sizing: border-box; }
             body {
@@ -158,7 +192,7 @@ export default function RepairOrderDetails() {
             }
             h1 {
               font-size: 1.2rem;
-              color: #1e3a5f;
+              color: #8b6914;
               margin-bottom: 10px;
             }
             .barcode-img {
@@ -195,11 +229,11 @@ export default function RepairOrderDetails() {
         <body>
           <h1>مجموعة عايد دعنا</h1>
           <div class="label">تصليحة رقم</div>
-          <div class="barcode-text">${order.barcode}</div>
-          <img class="barcode-img" src="${order.barcodeImage}" alt="Barcode" />
+          <div class="barcode-text">${printableBarcode}</div>
+          <img class="barcode-img" src="${images.barcode}" alt="Barcode" />
           ${
-            order.qrCodeImage
-              ? `<img class="qr-img" src="${order.qrCodeImage}" alt="QR Code" />`
+            images.qr
+              ? `<img class="qr-img" src="${images.qr}" alt="QR Code" />`
               : ""
           }
           <script>
@@ -354,7 +388,7 @@ export default function RepairOrderDetails() {
           العودة
         </Button>
 
-        {order.barcodeImage && (
+        {images.barcode && (
           <Button
             variant="contained"
             startIcon={<PrintIcon />}
@@ -367,7 +401,7 @@ export default function RepairOrderDetails() {
       </div>
 
       {/* Barcode Display */}
-      {order.barcodeImage && (
+      {(images.barcode || images.qr) && (
         <Paper elevation={0} className="repairs-details-card">
           <Typography className="repairs-details-movements-history-title">
             الباركود و QR Code
@@ -376,18 +410,18 @@ export default function RepairOrderDetails() {
           <Divider className="repairs-details-divider" />
 
           <div className="repairs-barcode-display">
-            <img
-              src={order.barcodeImage}
+            {images.barcode && <img
+              src={images.barcode}
               alt={`Barcode ${order.barcode}`}
               className="repairs-barcode-image"
-            />
+            />}
             <Typography className="repairs-barcode-text">
               {order.barcode}
             </Typography>
 
-            {order.qrCodeImage && (
+            {images.qr && (
               <img
-                src={order.qrCodeImage}
+                src={images.qr}
                 alt="QR Code"
                 className="repairs-qrcode-image"
               />

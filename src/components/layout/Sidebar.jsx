@@ -19,11 +19,11 @@ import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import BuildIcon from "@mui/icons-material/Build";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import GroupIcon from "@mui/icons-material/Group";
-import ConstructionIcon from "@mui/icons-material/Construction";
 
 import useAuthStore from "../../store/useAuthStore.js";
 import companyLogo from "../../assets/Logo.svg";
@@ -53,7 +53,7 @@ const READY_ITEMS = [
     label: "إدارة الفروع",
     icon: <StorefrontIcon fontSize="small" />,
     path: "/branches",
-    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
+    roles: ["SuperAdmin", "Admin"],
   },
   {
     label: "إدارة الورش",
@@ -70,7 +70,6 @@ const READY_ITEMS = [
       "Admin",
       "BranchManager",
       "BranchAccountant",
-      "OperatorManager",
     ],
   },
   {
@@ -91,15 +90,20 @@ const READY_ITEMS = [
     path: "/repairs/representative",
     roles: ["Representative"],
   },
-];
-
-// ⏸️ قيد التطوير
-const DISABLED_ITEMS = [
+  {
+    label: "مسح الباركود",
+    icon: <QrCodeScannerIcon fontSize="small" />,
+    path: "/repairs/scan",
+    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant", "OperatorManager"],
+  },
   {
     label: "الضبط",
     icon: <SettingsIcon fontSize="small" />,
+    path: "/settings",
   },
 ];
+
+const DISABLED_ITEMS = [];
 
 function SidebarContent({ onClose }) {
   const navigate = useNavigate();
@@ -187,7 +191,6 @@ function SidebarContent({ onClose }) {
           <Divider className="sidebar-divider" />
 
           <Typography className="sidebar-section-title">
-            <ConstructionIcon sx={{ fontSize: 14, ml: 0.5 }} />
             قيد التطوير
           </Typography>
 

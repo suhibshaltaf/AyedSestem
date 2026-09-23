@@ -34,12 +34,12 @@
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
   margin-bottom: 4px !important;
 }
 
 [data-theme="dark"] .accounts-title {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .accounts-subtitle {
@@ -204,11 +204,11 @@
 
 .accounts-role-chip-user {
   background-color: rgba(30, 58, 95, 0.1) !important;
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 [data-theme="dark"] .accounts-role-chip-user {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
   background-color: rgba(128, 169, 212, 0.15) !important;
 }
 
@@ -269,7 +269,7 @@
 }
 
 .accounts-edit-btn {
-  color: #1e3a5f !important;
+  color: #8b6914 !important;
 }
 
 .accounts-edit-btn:hover {
@@ -277,7 +277,7 @@
 }
 
 [data-theme="dark"] .accounts-edit-btn {
-  color: #80a9d4 !important;
+  color: #e6c878 !important;
 }
 
 .accounts-password-btn {

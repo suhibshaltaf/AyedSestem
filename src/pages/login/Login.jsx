@@ -358,7 +358,7 @@ export default function Login() {
           <Typography
             sx={{
               fontWeight: 700,
-              color: darkMode ? "#80a9d4" : "#1e3a5f",
+              color: darkMode ? "#e6c878" : "#8b6914",
               mb: 0.5,
               fontSize: "1.25rem",
               fontFamily: "'Cairo', sans-serif",

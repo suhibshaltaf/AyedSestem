@@ -106,7 +106,7 @@ export default function Header({ onMenuClick }) {
           </Box>
 
           <Typography className="header-username">
-            {user?.fullName || "ضياء"}
+            {user?.fullName || user?.userName || "المستخدم"}
           </Typography>
 
           <KeyboardArrowDownIcon

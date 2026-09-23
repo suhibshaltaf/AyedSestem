@@ -59,5 +59,6 @@ export default function AuthInitializer({
     setInitialized,
   ]);
 
-  return children;
+  const initialized = useAuthStore((state) => state.initialized);
+  return initialized ? children : null;
 }

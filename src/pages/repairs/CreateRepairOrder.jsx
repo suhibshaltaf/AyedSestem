@@ -29,7 +29,7 @@ import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 import repairOrderSchema from "./repairOrderSchema.js";
 import { useCreateRepairOrder } from "../../hooks/useRepairOrders.js";
-import { useBranches } from "../../hooks/useBranches.js";
+import { useBranchLookup } from "../../hooks/useBranches.js";
 import { useBranchEmployees } from "../../hooks/useBranchEmployees.js";
 import useAuthStore from "../../store/useAuthStore.js";
 import "../../styles/repairs.css";
@@ -61,13 +61,12 @@ export default function CreateRepairOrder() {
 
   const userBranchId = currentUser?.branchId;
 
-  const { data: branches = [] } = useBranches();
+  const { data: branches = [] } = useBranchLookup();
 
   const availableBranches = useMemo(() => {
     const activeBranches = branches.filter((b) => b.isActive !== false);
-    if (isAdmin) return activeBranches;
-    return activeBranches.filter((b) => b.id === userBranchId);
-  }, [branches, isAdmin, userBranchId]);
+    return activeBranches;
+  }, [branches]);
 
   const createMutation = useCreateRepairOrder();
   const saving = createMutation.isPending;
