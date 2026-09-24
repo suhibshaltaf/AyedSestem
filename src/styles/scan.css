@@ -1,0 +1,148 @@
+/* ===============================
+   Scan Repair Page
+   =============================== */
+.scan-repair-page {
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 16px 8px 40px;
+}
+
+.scan-repair-card {
+  border-radius: 18px !important;
+  padding: 32px 24px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.scan-repair-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 28px;
+  color: var(--gold-primary);
+}
+
+.scan-repair-title {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.9rem !important;
+  font-weight: 700 !important;
+  color: #8b6914 !important;
+  margin-top: 6px !important;
+  text-align: center;
+}
+
+[data-theme="dark"] .scan-repair-title {
+  color: #e6c878 !important;
+}
+
+.scan-repair-subtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  text-align: center;
+  line-height: 1.7;
+}
+
+.scan-repair-camera-btn {
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  border-radius: 12px !important;
+  padding: 14px 20px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  text-transform: none !important;
+  box-shadow: 0 4px 14px rgba(184, 134, 11, 0.25) !important;
+}
+
+.scan-repair-camera-btn:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+.scan-repair-divider {
+  position: relative;
+  text-align: center;
+  margin: 22px 0;
+}
+
+.scan-repair-divider::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--border-gold);
+}
+
+.scan-repair-divider span {
+  position: relative;
+  display: inline-block;
+  padding: 0 14px;
+  background: var(--bg-paper);
+  font-family: "Cairo", sans-serif;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+}
+
+.scan-repair-input .MuiOutlinedInput-root {
+  border-radius: 12px !important;
+  background-color: var(--bg-paper) !important;
+}
+
+.scan-repair-input .MuiOutlinedInput-root fieldset {
+  border-color: var(--border-gold-strong) !important;
+}
+
+.scan-repair-input .MuiOutlinedInput-root.Mui-focused fieldset {
+  border-color: var(--gold-primary) !important;
+}
+
+.scan-repair-input .MuiInputLabel-root {
+  font-family: "Cairo", sans-serif !important;
+}
+
+.scan-repair-submit-btn {
+  border-radius: 12px !important;
+  padding: 12px 20px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  text-transform: none !important;
+  border-color: var(--border-gold-strong) !important;
+  color: var(--gold-primary) !important;
+}
+
+.scan-repair-submit-btn:hover {
+  border-color: var(--gold-primary) !important;
+  background-color: rgba(184, 134, 11, 0.06) !important;
+}
+
+.scan-repair-alert {
+  margin-top: 18px !important;
+  border-radius: 12px !important;
+  font-family: "Cairo", sans-serif !important;
+}
+
+/* ===============================
+   Responsive
+   =============================== */
+@media (max-width: 700px) {
+  .scan-repair-page {
+    padding: 12px 4px 32px;
+  }
+
+  .scan-repair-card {
+    padding: 22px 16px !important;
+  }
+
+  .scan-repair-title {
+    font-size: 1.5rem !important;
+  }
+
+  .scan-repair-subtitle {
+    font-size: 0.82rem !important;
+  }
+}   

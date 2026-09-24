@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -13,7 +13,7 @@ import {
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -28,10 +28,15 @@ import BuildIcon from "@mui/icons-material/Build";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 import repairOrderSchema from "./repairOrderSchema.js";
-import { useCreateRepairOrder } from "../../hooks/useRepairOrders.js";
+import {
+  useCreateRepairOrder,
+  useUpdateRepairOrder,
+  useRepairOrderById,
+} from "../../hooks/useRepairOrders.js";
 import { useBranchLookup } from "../../hooks/useBranches.js";
 import { useBranchEmployees } from "../../hooks/useBranchEmployees.js";
 import useAuthStore from "../../store/useAuthStore.js";
+import { canEditRepair } from "../../utils/repairConstants.js";
 import "../../styles/repairs.css";
 
 const emptyForm = {
@@ -51,49 +56,111 @@ const emptyForm = {
 
 export default function CreateRepairOrder() {
   const navigate = useNavigate();
+  const { id: editId } = useParams();
+  const isEditMode = !!editId;
+
   const currentUser = useAuthStore((state) => state.user);
 
-  const isAdmin = useMemo(() => {
-    if (!currentUser?.roles) return false;
-    const roleNames = currentUser.roles.map((r) => r.name);
-    return roleNames.includes("SuperAdmin") || roleNames.includes("Admin");
-  }, [currentUser]);
+  const userRoles = useMemo(
+    () => currentUser?.roles?.map((r) => r.name) || [],
+    [currentUser]
+  );
 
   const userBranchId = currentUser?.branchId;
 
+  /* ==========================================
+   * الفروع
+   * ========================================== */
   const { data: branches = [] } = useBranchLookup();
 
   const availableBranches = useMemo(() => {
-    const activeBranches = branches.filter((b) => b.isActive !== false);
-    return activeBranches;
+    return branches.filter((b) => b.isActive !== false);
   }, [branches]);
 
+  /* ==========================================
+   * الميوتيشن
+   * ========================================== */
   const createMutation = useCreateRepairOrder();
-  const saving = createMutation.isPending;
+  const updateMutation = useUpdateRepairOrder();
 
+  const saving = createMutation.isPending || updateMutation.isPending;
+
+  /* ==========================================
+   * جلب بيانات التصليحة في وضع التعديل
+   * ========================================== */
+  const {
+    data: existingOrder,
+    isLoading: loadingOrder,
+  } = useRepairOrderById(editId, { enabled: isEditMode });
+
+  /* ==========================================
+   * React Hook Form
+   * ========================================== */
   const {
     register,
     handleSubmit,
     formState: { errors },
     control,
     setValue,
+    reset,
   } = useForm({
     resolver: yupResolver(repairOrderSchema),
     defaultValues: emptyForm,
   });
 
-  // موظفو الفرع الحالي (فرع الاستلام)
+  /* ==========================================
+   * التحقق من صلاحية التعديل
+   * ========================================== */
+  useEffect(() => {
+    if (!isEditMode || !existingOrder) return;
+
+    const allowed = canEditRepair(
+      userRoles,
+      existingOrder.status,
+      existingOrder.movements || []
+    );
+
+    if (!allowed) {
+      toast.error(
+        "لا يمكن تعديل التصليح بعد خروج القطعة من الفرع"
+      );
+      navigate(`/repairs/${editId}`, { replace: true });
+    }
+  }, [isEditMode, existingOrder, userRoles, navigate, editId]);
+
+  /* ==========================================
+   * تحميل البيانات في النموذج عند التعديل
+   * ========================================== */
+  useEffect(() => {
+    if (!isEditMode || !existingOrder) return;
+
+    reset({
+      customerName: existingOrder.customerName || "",
+      customerPhone: existingOrder.customerPhone || "",
+      description: existingOrder.description || "",
+      weight: existingOrder.weight ?? "",
+      karat: existingOrder.karat || "",
+      quantity: existingOrder.quantity ?? 1,
+      requiredWork: existingOrder.requiredWork || "",
+      price: existingOrder.price ?? "",
+      notes: existingOrder.notes || "",
+      operatorNotes: existingOrder.operatorNotes || "",
+      deliveryBranchId: existingOrder.deliveryBranchId || "",
+      customerReceiverEmployeeId:
+        existingOrder.customerReceiverEmployeeId || "",
+    });
+  }, [isEditMode, existingOrder, reset]);
+
+  /* ==========================================
+   * موظفو فرع المستخدم الحالي
+   * ========================================== */
   const { data: employees = [] } = useBranchEmployees(userBranchId, {
     enabled: !!userBranchId,
   });
 
-  // إذا المستخدم Branch — الفرع معبأ تلقائياً
-  useEffect(() => {
-    if (!isAdmin && userBranchId) {
-      setValue("deliveryBranchId", userBranchId);
-    }
-  }, [isAdmin, userBranchId, setValue]);
-
+  /* ==========================================
+   * Submit
+   * ========================================== */
   const onSubmit = async (data) => {
     const deliveryBranchId = Number(data.deliveryBranchId);
     const customerReceiverEmployeeId = Number(
@@ -105,10 +172,7 @@ export default function CreateRepairOrder() {
       return;
     }
 
-    if (
-      !customerReceiverEmployeeId ||
-      customerReceiverEmployeeId === 0
-    ) {
+    if (!customerReceiverEmployeeId || customerReceiverEmployeeId === 0) {
       toast.error("الرجاء اختيار الموظف المستلم");
       return;
     }
@@ -124,54 +188,90 @@ export default function CreateRepairOrder() {
       price: data.price ? Number(data.price) : 0,
       notes: String(data.notes || "").trim(),
       operatorNotes: String(data.operatorNotes || "").trim(),
-      deliveryBranchId: deliveryBranchId,
-      customerReceiverEmployeeId: customerReceiverEmployeeId,
+      deliveryBranchId,
+      customerReceiverEmployeeId,
     };
 
     try {
-      const result = await createMutation.mutateAsync(payload);
-
-      // ✅ الـ API يرجّع { message, data }
-      const orderId = result?.data?.id || result?.data?.Id;
-
-      if (orderId) {
-        navigate(`/repairs/${orderId}`);
-      } else if (result?.data) {
-        navigate("/repairs/list");
+      if (isEditMode) {
+        await updateMutation.mutateAsync({ id: editId, payload });
+        navigate(`/repairs/${editId}`);
       } else {
-        toast.error(result?.message || "فشل إنشاء التصليحة");
+        const result = await createMutation.mutateAsync(payload);
+        const orderId = result?.data?.id || result?.data?.Id;
+
+        if (orderId) {
+          navigate(`/repairs/${orderId}`);
+        } else if (result?.data) {
+          navigate("/repairs/list");
+        } else {
+          toast.error(result?.message || "فشل إنشاء التصليحة");
+        }
       }
     } catch (error) {
-      console.error("Create Repair Error:", error);
+      console.error("Repair Order Submit Error:", error);
     }
   };
 
+  /* ==========================================
+   * شاشة التحميل في وضع التعديل
+   * ========================================== */
+  if (isEditMode && loadingOrder) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "#b8860b" }} />
+      </Box>
+    );
+  }
+
   return (
-    <div className="repairs-create-container">
-      {/* Header */}
-      <div className="repairs-create-header">
-        <div className="repairs-create-header-icon">
+    <Box className="repairs-create-container">
+      {/* ==========================================
+          Header
+      ========================================== */}
+      <Box className="repairs-create-header">
+        <Box className="repairs-create-header-icon">
           <ReceiptLongIcon sx={{ fontSize: 34 }} />
-        </div>
+        </Box>
 
         <Typography className="repairs-create-title">
-          تصليحة جديدة
+          {isEditMode ? "تعديل التصليحة" : "تصليحة جديدة"}
         </Typography>
 
         <Typography className="repairs-create-subtitle">
-          إدخال بيانات القطعة والعميل
+          {isEditMode
+            ? "تعديل بيانات القطعة والعميل"
+            : "إدخال بيانات القطعة والعميل"}
         </Typography>
-      </div>
+      </Box>
 
+      {/* ==========================================
+          Form Card
+      ========================================== */}
       <Paper elevation={0} className="repairs-create-card">
-        <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          {/* معلومات العميل */}
+        <Box
+          component="form"
+          onSubmit={handleSubmit(onSubmit)}
+          noValidate
+        >
+          {/* ========================================
+              معلومات العميل
+          ======================================== */}
           <Typography className="repairs-section-title">
             معلومات العميل
           </Typography>
+
           <Divider className="repairs-section-divider" />
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
+            {/* اسم العميل */}
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -185,7 +285,9 @@ export default function CreateRepairOrder() {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PersonIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                        <PersonIcon
+                          sx={{ color: "#c9a44c", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   },
@@ -193,6 +295,7 @@ export default function CreateRepairOrder() {
               />
             </Grid>
 
+            {/* رقم الهاتف */}
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -210,12 +313,17 @@ export default function CreateRepairOrder() {
                 error={!!errors.customerPhone}
                 helperText={errors.customerPhone?.message}
                 className="repairs-form-field"
-                inputProps={{ inputMode: "numeric", maxLength: 15 }}
+                inputProps={{
+                  inputMode: "numeric",
+                  maxLength: 15,
+                }}
                 slotProps={{
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <PhoneIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                        <PhoneIcon
+                          sx={{ color: "#c9a44c", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   },
@@ -224,13 +332,17 @@ export default function CreateRepairOrder() {
             </Grid>
           </Grid>
 
-          {/* معلومات القطعة */}
+          {/* ========================================
+              معلومات القطعة
+          ======================================== */}
           <Typography className="repairs-section-title">
             معلومات القطعة
           </Typography>
+
           <Divider className="repairs-section-divider" />
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
+            {/* وصف القطعة */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -245,6 +357,7 @@ export default function CreateRepairOrder() {
               />
             </Grid>
 
+            {/* الوزن */}
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
@@ -260,7 +373,9 @@ export default function CreateRepairOrder() {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <ScaleIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                        <ScaleIcon
+                          sx={{ color: "#c9a44c", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   },
@@ -268,6 +383,7 @@ export default function CreateRepairOrder() {
               />
             </Grid>
 
+            {/* العيار */}
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
@@ -281,7 +397,9 @@ export default function CreateRepairOrder() {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <DiamondIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                        <DiamondIcon
+                          sx={{ color: "#c9a44c", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   },
@@ -289,6 +407,7 @@ export default function CreateRepairOrder() {
               />
             </Grid>
 
+            {/* العدد */}
             <Grid item xs={12} sm={4}>
               <TextField
                 fullWidth
@@ -304,7 +423,9 @@ export default function CreateRepairOrder() {
                   input: {
                     startAdornment: (
                       <InputAdornment position="start">
-                        <NumbersIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                        <NumbersIcon
+                          sx={{ color: "#c9a44c", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   },
@@ -313,13 +434,17 @@ export default function CreateRepairOrder() {
             </Grid>
           </Grid>
 
-          {/* العمل المطلوب */}
+          {/* ========================================
+              العمل المطلوب
+          ======================================== */}
           <Typography className="repairs-section-title">
             العمل المطلوب
           </Typography>
+
           <Divider className="repairs-section-divider" />
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
+            {/* العمل المطلوب */}
             <Grid item xs={12}>
               <TextField
                 fullWidth
@@ -338,7 +463,9 @@ export default function CreateRepairOrder() {
                         position="start"
                         sx={{ alignSelf: "flex-start", mt: 1.5 }}
                       >
-                        <BuildIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                        <BuildIcon
+                          sx={{ color: "#c9a44c", fontSize: 20 }}
+                        />
                       </InputAdornment>
                     ),
                   },
@@ -346,6 +473,7 @@ export default function CreateRepairOrder() {
               />
             </Grid>
 
+            {/* السعر */}
             <Grid item xs={12} sm={6}>
               <TextField
                 fullWidth
@@ -372,8 +500,13 @@ export default function CreateRepairOrder() {
             </Grid>
           </Grid>
 
-          {/* ملاحظات */}
-          <Typography className="repairs-section-title">ملاحظات</Typography>
+          {/* ========================================
+              ملاحظات
+          ======================================== */}
+          <Typography className="repairs-section-title">
+            ملاحظات
+          </Typography>
+
           <Divider className="repairs-section-divider" />
 
           <Grid container spacing={2} sx={{ mb: 3 }}>
@@ -402,13 +535,17 @@ export default function CreateRepairOrder() {
             </Grid>
           </Grid>
 
-          {/* التسليم */}
+          {/* ========================================
+              الاستلام والتسليم
+          ======================================== */}
           <Typography className="repairs-section-title">
             الاستلام والتسليم
           </Typography>
+
           <Divider className="repairs-section-divider" />
 
           <Grid container spacing={2}>
+            {/* فرع التسليم النهائي للعميل */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="deliveryBranchId"
@@ -418,7 +555,7 @@ export default function CreateRepairOrder() {
                     {...field}
                     fullWidth
                     select
-                    label="فرع التسليم"
+                    label="فرع التسليم للعميل"
                     margin="dense"
                     error={!!errors.deliveryBranchId}
                     helperText={errors.deliveryBranchId?.message}
@@ -440,6 +577,7 @@ export default function CreateRepairOrder() {
               />
             </Grid>
 
+            {/* موظف الفرع الحالي الذي استلم القطعة من العميل */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="customerReceiverEmployeeId"
@@ -452,7 +590,9 @@ export default function CreateRepairOrder() {
                     label="الموظف المستلم من العميل"
                     margin="dense"
                     error={!!errors.customerReceiverEmployeeId}
-                    helperText={errors.customerReceiverEmployeeId?.message}
+                    helperText={
+                      errors.customerReceiverEmployeeId?.message
+                    }
                     className="repairs-form-field"
                   >
                     {!userBranchId ? (
@@ -461,7 +601,7 @@ export default function CreateRepairOrder() {
                       </MenuItem>
                     ) : employees.length === 0 ? (
                       <MenuItem value="" disabled>
-                        لا يوجد موظفون في فرعك
+                        لا يوجد موظفون نشطون في فرعك
                       </MenuItem>
                     ) : (
                       employees.map((emp) => (
@@ -476,11 +616,17 @@ export default function CreateRepairOrder() {
             </Grid>
           </Grid>
 
-          {/* Actions */}
-          <div className="repairs-create-actions">
+          {/* ========================================
+              Actions
+          ======================================== */}
+          <Box className="repairs-create-actions">
             <Button
               variant="outlined"
-              onClick={() => navigate("/repairs/list")}
+              onClick={() =>
+                navigate(
+                  isEditMode ? `/repairs/${editId}` : "/repairs/list"
+                )
+              }
               disabled={saving}
               className="repairs-create-cancel"
               startIcon={<CloseIcon />}
@@ -501,11 +647,15 @@ export default function CreateRepairOrder() {
                 )
               }
             >
-              {saving ? "جاري الحفظ..." : "إنشاء التصليحة"}
+              {saving
+                ? "جاري الحفظ..."
+                : isEditMode
+                ? "حفظ التعديلات"
+                : "إنشاء التصليحة"}
             </Button>
-          </div>
-        </form>
+          </Box>
+        </Box>
       </Paper>
-    </div>
+    </Box>
   );
 }

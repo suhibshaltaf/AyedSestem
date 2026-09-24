@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -81,15 +81,31 @@ export default function BranchDetails() {
     return roleNames.some((name) => ADMIN_ROLES.includes(name));
   }, [currentUser]);
 
-  const canManage = isAdmin || currentUser?.roles?.some(
-    (r) => r.name === "BranchManager"
-  );
+  const canManage = useMemo(() => {
+    if (!currentUser?.roles) return false;
+    const roleNames = currentUser.roles.map((r) => r.name);
+    return (
+      isAdmin ||
+      roleNames.includes("BranchManager") ||
+      roleNames.includes("BranchAccountant")
+    );
+  }, [currentUser, isAdmin]);
 
   // ===============================
   // React Query
   // ===============================
-  const { data: branches = [], isLoading: loadingBranches, refetch: refetchBranches } = useBranches();
-  const { data: employees = [], isLoading: loadingEmployees, refetch: refetchEmployees } = useBranchEmployees(id);
+  const {
+    data: branches = [],
+    isLoading: loadingBranches,
+    refetch: refetchBranches,
+  } = useBranches();
+
+  const {
+    data: employees = [],
+    isLoading: loadingEmployees,
+    refetch: refetchEmployees,
+  } = useBranchEmployees(id);
+
   const createMutation = useCreateBranchEmployee(id);
   const updateMutation = useUpdateBranchEmployee(id);
   const deleteMutation = useDeleteBranchEmployee(id);
@@ -104,7 +120,7 @@ export default function BranchDetails() {
     if (!id) return null;
     const numericId = Number(id);
     if (isNaN(numericId)) return null;
-    return branches.find((b) => b.id === numericId) || null;
+    return branches.find((b) => Number(b.id) === numericId) || null;
   }, [branches, id]);
 
   // ===============================
@@ -113,8 +129,18 @@ export default function BranchDetails() {
   const canView = useMemo(() => {
     if (!branch) return false;
     if (isAdmin) return true;
-    return currentUser?.branchId === branch.id;
+    return Number(currentUser?.branchId) === Number(branch.id);
   }, [branch, isAdmin, currentUser]);
+
+  // ===============================
+  // ✅ حماية إضافية: BranchManager/Accountant لا يفتح إلا فرعه
+  // ===============================
+  useEffect(() => {
+    if (!branch || isAdmin) return;
+    if (!canView) {
+      navigate("/unauthorized", { replace: true });
+    }
+  }, [branch, isAdmin, canView, navigate]);
 
   // ===============================
   // RHF
@@ -213,7 +239,7 @@ export default function BranchDetails() {
             <Button
               variant="contained"
               startIcon={<ArrowBackIcon />}
-              onClick={() => navigate("/branches")}
+              onClick={() => navigate(isAdmin ? "/branches" : "/dashboard")}
               className="branch-details-back-btn"
             >
               العودة
@@ -228,25 +254,7 @@ export default function BranchDetails() {
   // ليس لديه صلاحية
   // ===============================
   if (!canView) {
-    return (
-      <div className="branch-details-container">
-        <Paper elevation={0} className="branch-details-card">
-          <Box className="branch-details-empty">
-            <Typography className="branch-details-empty-text">
-              ليس لديك صلاحية لعرض هذا الفرع
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<ArrowBackIcon />}
-              onClick={() => navigate("/branches")}
-              className="branch-details-back-btn"
-            >
-              العودة
-            </Button>
-          </Box>
-        </Paper>
-      </div>
-    );
+    return null; // الـ useEffect سيتولى التوجيه
   }
 
   // ===============================

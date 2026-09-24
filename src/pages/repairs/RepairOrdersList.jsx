@@ -26,6 +26,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
+import GridOnIcon from "@mui/icons-material/GridOn";
 import { useNavigate } from "react-router-dom";
 
 import { useRepairOrders } from "../../hooks/useRepairOrders.js";
@@ -37,6 +38,7 @@ import {
   canCreateRepair,
   canViewAllBranches,
 } from "../../utils/repairConstants.js";
+import { exportRepairsToExcel } from "../../utils/repairExport.js";
 import "../../styles/repairs.css";
 
 const PAGE_SIZE = 10;
@@ -53,7 +55,6 @@ export default function RepairOrdersList() {
   const isAdmin = canViewAllBranches(roles);
   const canCreate = canCreateRepair(roles);
 
-  // الفلاتر
   const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
@@ -61,10 +62,8 @@ export default function RepairOrdersList() {
   const [statusFilter, setStatusFilter] = useState("");
   const [page, setPage] = useState(1);
 
-  // جلب الفروع
   const { data: branches = [] } = useBranches();
 
-  // جلب التصاليح
   const params = useMemo(() => {
     const p = {};
     if (fromDate) p.fromDate = fromDate;
@@ -76,7 +75,6 @@ export default function RepairOrdersList() {
 
   const { data: orders = [], isLoading, refetch } = useRepairOrders(params);
 
-  // فلترة
   const filteredOrders = useMemo(() => {
     if (!searchQuery.trim()) return orders;
     const q = searchQuery.toLowerCase();
@@ -90,7 +88,6 @@ export default function RepairOrdersList() {
     });
   }, [orders, searchQuery]);
 
-  // Pagination
   const pageCount = Math.ceil(filteredOrders.length / PAGE_SIZE);
   const paginatedOrders = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
@@ -110,17 +107,20 @@ export default function RepairOrdersList() {
     setPage(1);
   };
 
-  // خيارات الحالة
+  const handleExportExcel = () => {
+    exportRepairsToExcel(filteredOrders, "repairs");
+  };
+
+  // ✅ الحالات الجديدة (7 حالات)
   const statusOptions = [
     { value: "", label: "الكل" },
     { value: 1, label: "جديدة" },
     { value: 2, label: "مع المندوب" },
-    { value: 3, label: "في الورشة" },
-    { value: 4, label: "قيد التصليح" },
-    { value: 5, label: "تم التصليح" },
-    { value: 6, label: "مع المندوب بعد التصليح" },
-    { value: 7, label: "جاهزة للاستلام" },
-    { value: 8, label: "تم التسليم للعميل" },
+    { value: 3, label: "في المشغل" },
+    { value: 4, label: "تم التصليح" },
+    { value: 5, label: "مع المندوب بعد التصليح" },
+    { value: 6, label: "جاهزة للاستلام" },
+    { value: 7, label: "تم التسليم للعميل" },
   ];
 
   return (
@@ -141,7 +141,6 @@ export default function RepairOrdersList() {
       {/* Toolbar */}
       <Paper elevation={0} className="repairs-filters-paper">
         <Grid container spacing={2} alignItems="center">
-          {/* Search */}
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
@@ -162,7 +161,6 @@ export default function RepairOrdersList() {
             />
           </Grid>
 
-          {/* From Date */}
           <Grid item xs={6} sm={3} md={2}>
             <TextField
               fullWidth
@@ -176,7 +174,6 @@ export default function RepairOrdersList() {
             />
           </Grid>
 
-          {/* To Date */}
           <Grid item xs={6} sm={3} md={2}>
             <TextField
               fullWidth
@@ -190,7 +187,6 @@ export default function RepairOrdersList() {
             />
           </Grid>
 
-          {/* Branch */}
           {isAdmin && (
             <Grid item xs={6} sm={3} md={2}>
               <TextField
@@ -212,7 +208,6 @@ export default function RepairOrdersList() {
             </Grid>
           )}
 
-          {/* Status */}
           <Grid item xs={6} sm={3} md={2}>
             <TextField
               fullWidth
@@ -231,7 +226,6 @@ export default function RepairOrdersList() {
             </TextField>
           </Grid>
 
-          {/* Actions */}
           <Grid item xs={12} md="auto">
             <div className="repairs-filters-actions">
               <Tooltip title="تحديث">
@@ -250,6 +244,20 @@ export default function RepairOrdersList() {
               >
                 مسح
               </Button>
+
+              <Tooltip title="تصدير Excel">
+                <span>
+                  <Button
+                    variant="outlined"
+                    startIcon={<GridOnIcon />}
+                    onClick={handleExportExcel}
+                    disabled={filteredOrders.length === 0}
+                    className="repairs-export-excel-btn"
+                  >
+                    Excel
+                  </Button>
+                </span>
+              </Tooltip>
 
               {canCreate && (
                 <Button
@@ -332,7 +340,9 @@ export default function RepairOrdersList() {
 
                       <TableCell className="repairs-td">
                         <Chip
-                          label={getStatusName(order.status)}
+                          label={
+                            order.statusName || getStatusName(order.status)
+                          }
                           size="small"
                           className={`repairs-status-chip repairs-status-${getStatusColor(
                             order.status
@@ -342,7 +352,7 @@ export default function RepairOrdersList() {
 
                       <TableCell className="repairs-td">
                         {order.currentLocationName || "—"}
-                        {order.currentHolderName && (
+                        {order.currentResponsibleUserName && (
                           <Typography
                             sx={{
                               fontSize: "0.75rem",
@@ -350,7 +360,7 @@ export default function RepairOrdersList() {
                               mt: 0.5,
                             }}
                           >
-                            {order.currentHolderName}
+                            {order.currentResponsibleUserName}
                           </Typography>
                         )}
                       </TableCell>
@@ -380,7 +390,6 @@ export default function RepairOrdersList() {
               </Table>
             </TableContainer>
 
-            {/* Pagination */}
             <div className="repairs-pagination">
               <div className="repairs-pagination-info">
                 عرض {startItem} - {endItem} من {filteredOrders.length} تصليحة

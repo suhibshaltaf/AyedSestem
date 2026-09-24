@@ -8,11 +8,6 @@ import {
   Button,
   Divider,
   Grid,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
@@ -29,23 +24,23 @@ import BuildIcon from "@mui/icons-material/Build";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import NotesIcon from "@mui/icons-material/Notes";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import PlayArrowIcon from "@mui/icons-material/PlayArrow";
-import CloseIcon from "@mui/icons-material/Close";
 import HistoryIcon from "@mui/icons-material/History";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import {
   useRepairOrderById,
-  useAddRepairMovement,
+  useDeleteRepairOrder,
 } from "../../hooks/useRepairOrders.js";
-import { useWorkshops } from "../../hooks/useWorkshops.js";
 import useAuthStore from "../../store/useAuthStore.js";
 import repairOrderService from "../../services/repairOrderService.js";
 import organizationService from "../../services/organizationService.js";
 import {
   getStatusName,
   getStatusColor,
-  getAvailableMovements,
-  MOVEMENT_TYPES,
+  getStatusLocation,
+  canEditRepair,
+  canDeleteRepair,
 } from "../../utils/repairConstants.js";
 import "../../styles/repairs.css";
 
@@ -59,11 +54,16 @@ export default function RepairOrderDetails() {
     [currentUser]
   );
 
-  // جلب التصليحة
-  const { data: order, isLoading, refetch } = useRepairOrderById(id);
-  const { data: organization } = useQuery({ queryKey: ["organization-settings"], queryFn: organizationService.getSettings });
+  const { data: order, isLoading } = useRepairOrderById(id);
+
+  const { data: organization } = useQuery({
+    queryKey: ["organization-settings"],
+    queryFn: organizationService.getSettings,
+  });
+
   const showBarcode = organization?.showBarcode !== false;
   const showQr = organization?.showQrCode !== false;
+
   const [images, setImages] = useState({ barcode: null, qr: null });
 
   useEffect(() => {
@@ -72,14 +72,22 @@ export default function RepairOrderDetails() {
     const urls = [];
     const load = async () => {
       const [barcodeResult, qrResult] = await Promise.allSettled([
-        showBarcode ? repairOrderService.getBarcodeImage(order.barcode) : Promise.resolve(null),
-        showQr ? repairOrderService.getQrImage(order.barcode) : Promise.resolve(null),
+        showBarcode
+          ? repairOrderService.getBarcodeImage(order.barcode)
+          : Promise.resolve(null),
+        showQr
+          ? repairOrderService.getQrImage(order.barcode)
+          : Promise.resolve(null),
       ]);
       if (!active) return;
-      const barcode = barcodeResult.status === "fulfilled" && barcodeResult.value
-        ? URL.createObjectURL(barcodeResult.value) : null;
-      const qr = qrResult.status === "fulfilled" && qrResult.value
-        ? URL.createObjectURL(qrResult.value) : null;
+      const barcode =
+        barcodeResult.status === "fulfilled" && barcodeResult.value
+          ? URL.createObjectURL(barcodeResult.value)
+          : null;
+      const qr =
+        qrResult.status === "fulfilled" && qrResult.value
+          ? URL.createObjectURL(qrResult.value)
+          : null;
       if (barcode) urls.push(barcode);
       if (qr) urls.push(qr);
       setImages({ barcode, qr });
@@ -91,84 +99,29 @@ export default function RepairOrderDetails() {
     };
   }, [order?.barcode, showBarcode, showQr]);
 
-  // إضافة حركة
-  const addMovementMutation = useAddRepairMovement();
-  const savingMovement = addMovementMutation.isPending;
+  const deleteMutation = useDeleteRepairOrder();
 
-  // الورش
-  const { data: workshops = [] } = useWorkshops();
+  const canEdit = canEditRepair(roles, order?.status, order?.movements || []);
+  const canDelete = canDeleteRepair(
+    roles,
+    order?.status,
+    order?.movements || []
+  );
 
-  // Dialog الحركة
-  const [movementDialog, setMovementDialog] = useState({
-    open: false,
-    movementType: null,
-    notes: "",
-  });
-
-  // الحركات المتاحة
-  const availableMovements = useMemo(() => {
-    if (!order) return [];
-    return getAvailableMovements(order.status, roles, order.movements);
-  }, [order, roles]);
-
-  // حساب تواريخ الحركات
-  const getMovementDate = useMemo(() => {
-    return (movementType) => {
-      if (!order?.movements) return null;
-      const movement = order.movements.find(
-        (m) => m.movementType === movementType
-      );
-      return movement?.createdAt || null;
-    };
-  }, [order]);
-
-  // فتح Dialog الحركة
-  const handleOpenMovement = (movementType) => {
-    setMovementDialog({
-      open: true,
-      movementType,
-      notes: "",
-    });
-  };
-
-  // إغلاق Dialog
-  const handleCloseMovement = () => {
-    if (!savingMovement) {
-      setMovementDialog({
-        open: false,
-        movementType: null,
-        notes: "",
-      });
-    }
-  };
-
-  // حفظ الحركة
-  const handleSaveMovement = async () => {
-    if (!order?.barcode) return;
-
-    const payload = {
-      barcode: order.barcode,
-      movementType: Number(movementDialog.movementType),
-      notes: movementDialog.notes || "",
-    };
-
+  const handleDelete = async () => {
+    if (!window.confirm("هل أنت متأكد من حذف التصليحة؟")) return;
     try {
-      const result = await addMovementMutation.mutateAsync(payload);
-      if (result?.data || result?.success) {
-        setMovementDialog({ open: false, movementType: null, notes: "" });
-        refetch();
-      }
-    } catch { /* The mutation displays the server error. */ }
+      await deleteMutation.mutateAsync(order.id);
+      navigate("/repairs/list");
+    } catch {
+      /* الـ hook يعرض الرسالة */
+    }
   };
 
-  // ✅ طباعة الباركود — عند الضغط على الزر فقط
   const handlePrintBarcode = () => {
-    if (!images.barcode) {
-      return;
-    }
+    if (!images.barcode) return;
 
     const printWindow = window.open("", "_blank", "width=600,height=500");
-
     if (!printWindow) {
       alert("الرجاء السماح بالنوافذ المنبثقة للطباعة");
       return;
@@ -190,40 +143,16 @@ export default function RepairOrderDetails() {
               text-align: center;
               background: #fff;
             }
-            h1 {
-              font-size: 1.2rem;
-              color: #8b6914;
-              margin-bottom: 10px;
-            }
-            .barcode-img {
-              max-width: 100%;
-              height: auto;
-              margin: 20px 0;
-              display: block;
-            }
-            .qr-img {
-              max-width: 180px;
-              height: auto;
-              margin: 10px auto;
-              display: block;
-            }
+            h1 { font-size: 1.2rem; color: #8b6914; margin-bottom: 10px; }
+            .barcode-img { max-width: 100%; height: auto; margin: 20px 0; display: block; }
+            .qr-img { max-width: 180px; height: auto; margin: 10px auto; display: block; }
             .barcode-text {
-              font-size: 1.1rem;
-              font-weight: bold;
-              letter-spacing: 2px;
-              color: #333;
-              margin-top: 10px;
+              font-size: 1.1rem; font-weight: bold; letter-spacing: 2px;
+              color: #333; margin-top: 10px;
               font-family: 'Courier New', monospace;
             }
-            .label {
-              font-size: 0.85rem;
-              color: #666;
-              margin-top: 4px;
-            }
-            @media print {
-              @page { margin: 10mm; }
-              body { padding: 0; }
-            }
+            .label { font-size: 0.85rem; color: #666; margin-top: 4px; }
+            @media print { @page { margin: 10mm; } body { padding: 0; } }
           </style>
         </head>
         <body>
@@ -231,16 +160,10 @@ export default function RepairOrderDetails() {
           <div class="label">تصليحة رقم</div>
           <div class="barcode-text">${printableBarcode}</div>
           <img class="barcode-img" src="${images.barcode}" alt="Barcode" />
-          ${
-            images.qr
-              ? `<img class="qr-img" src="${images.qr}" alt="QR Code" />`
-              : ""
-          }
+          ${images.qr ? `<img class="qr-img" src="${images.qr}" alt="QR Code" />` : ""}
           <script>
             window.onload = function() {
-              setTimeout(function() {
-                window.print();
-              }, 300);
+              setTimeout(function() { window.print(); }, 300);
             };
           </script>
         </body>
@@ -249,7 +172,6 @@ export default function RepairOrderDetails() {
     printWindow.document.close();
   };
 
-  // Loading
   if (isLoading) {
     return (
       <Box className="repairs-details-loading">
@@ -278,7 +200,6 @@ export default function RepairOrderDetails() {
     );
   }
 
-  // بيانات العرض
   const details = [
     { label: "العميل", value: order.customerName || "—", icon: <PersonIcon /> },
     {
@@ -328,33 +249,6 @@ export default function RepairOrderDetails() {
     },
   ];
 
-  // Timeline
-  const timeline = [
-    { type: 1, label: "تم التسليم للمندوب", date: getMovementDate(1) },
-    { type: 2, label: "استلم المندوب من الفرع", date: getMovementDate(2) },
-    { type: 3, label: "تم التسليم للورشة", date: getMovementDate(3) },
-    { type: 4, label: "استلمت الورشة", date: getMovementDate(4) },
-    { type: 5, label: "بدأ التصليح", date: getMovementDate(5) },
-    { type: 6, label: "تم الانتهاء من التصليح", date: getMovementDate(6) },
-    {
-      type: 7,
-      label: "تم التسليم للمندوب من الورشة",
-      date: getMovementDate(7),
-    },
-    {
-      type: 8,
-      label: "استلم المندوب من الورشة",
-      date: getMovementDate(8),
-    },
-    { type: 9, label: "تم التسليم للفرع", date: getMovementDate(9) },
-    {
-      type: 10,
-      label: "استلم الفرع — جاهزة للاستلام",
-      date: getMovementDate(10),
-    },
-    { type: 11, label: "تم التسليم للعميل", date: getMovementDate(11) },
-  ];
-
   return (
     <div className="repairs-details-container">
       {/* Header */}
@@ -388,6 +282,29 @@ export default function RepairOrderDetails() {
           العودة
         </Button>
 
+        {canEdit && (
+          <Button
+            variant="outlined"
+            startIcon={<EditIcon />}
+            onClick={() => navigate(`/repairs/${order.id}/edit`)}
+            className="repairs-details-back-btn-outline"
+          >
+            تعديل
+          </Button>
+        )}
+
+        {canDelete && (
+          <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={handleDelete}
+            disabled={deleteMutation.isPending}
+          >
+            {deleteMutation.isPending ? "جاري الحذف..." : "حذف"}
+          </Button>
+        )}
+
         {images.barcode && (
           <Button
             variant="contained"
@@ -410,11 +327,13 @@ export default function RepairOrderDetails() {
           <Divider className="repairs-details-divider" />
 
           <div className="repairs-barcode-display">
-            {images.barcode && <img
-              src={images.barcode}
-              alt={`Barcode ${order.barcode}`}
-              className="repairs-barcode-image"
-            />}
+            {images.barcode && (
+              <img
+                src={images.barcode}
+                alt={`Barcode ${order.barcode}`}
+                className="repairs-barcode-image"
+              />
+            )}
             <Typography className="repairs-barcode-text">
               {order.barcode}
             </Typography>
@@ -430,43 +349,19 @@ export default function RepairOrderDetails() {
         </Paper>
       )}
 
-      {/* Status + Movements */}
+      {/* Status */}
       <Paper elevation={0} className="repairs-details-card">
         <div className="repairs-details-status-row">
           <Typography className="repairs-details-status-label">
             الحالة الحالية:
           </Typography>
           <Chip
-            label={getStatusName(order.status)}
+            label={order.statusName || getStatusName(order.status)}
             className={`repairs-details-status-chip repairs-status-${getStatusColor(
               order.status
             )}`}
           />
         </div>
-
-        {availableMovements.length > 0 && (
-          <>
-            <Divider className="repairs-details-divider" />
-            <div className="repairs-details-movements-section">
-              <Typography className="repairs-details-movements-title">
-                <PlayArrowIcon sx={{ fontSize: 20 }} /> الإجراءات المتاحة
-              </Typography>
-
-              <div className="repairs-details-movements-buttons">
-                {availableMovements.map((movementType) => (
-                  <Button
-                    key={movementType}
-                    variant="contained"
-                    onClick={() => handleOpenMovement(movementType)}
-                    className="repairs-movement-btn"
-                  >
-                    {MOVEMENT_TYPES[movementType].shortName}
-                  </Button>
-                ))}
-              </div>
-            </div>
-          </>
-        )}
 
         <Divider className="repairs-details-divider" />
 
@@ -498,50 +393,118 @@ export default function RepairOrderDetails() {
         </Grid>
       </Paper>
 
-      {/* Timeline */}
+      {/* Current Responsibility */}
       <Paper elevation={0} className="repairs-details-card">
         <Typography className="repairs-details-movements-history-title">
-          <HistoryIcon sx={{ fontSize: 20 }} /> سجل الحالات والتواريخ
+          المسؤولية الحالية
         </Typography>
 
         <Divider className="repairs-details-divider" />
 
-        <div className="repairs-timeline-table">
-          {timeline.map((item) => {
-            const isDone = !!item.date;
-            return (
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          <Grid item xs={12} sm={6}>
+            <div className="repairs-details-row">
+              <Typography className="repairs-details-value">
+                {order.currentResponsibleUserName || "—"}
+              </Typography>
+              <div className="repairs-details-label">
+                <span className="repairs-details-label-text">
+                  المسؤول الحالي:
+                </span>
+                <span className="repairs-details-label-icon">
+                  <PersonIcon />
+                </span>
+              </div>
+            </div>
+          </Grid>
+
+          <Grid item xs={12} sm={6}>
+            <div className="repairs-details-row">
+              <Typography className="repairs-details-value">
+                {getStatusLocation(order.status)}
+              </Typography>
+              <div className="repairs-details-label">
+                <span className="repairs-details-label-text">
+                  الموقع الحالي:
+                </span>
+                <span className="repairs-details-label-icon">
+                  <StorefrontIcon />
+                </span>
+              </div>
+            </div>
+          </Grid>
+
+          {order.responsibilitySince && (
+            <Grid item xs={12} sm={6}>
+              <div className="repairs-details-row">
+                <Typography className="repairs-details-value">
+                  {new Date(order.responsibilitySince).toLocaleString("ar-JO")}
+                </Typography>
+                <div className="repairs-details-label">
+                  <span className="repairs-details-label-text">
+                    المسؤولية منذ:
+                  </span>
+                </div>
+              </div>
+            </Grid>
+          )}
+
+          {order.isPendingConfirmation && (
+            <Grid item xs={12} sm={6}>
+              <div className="repairs-details-row">
+                <Chip label="بانتظار التأكيد" color="warning" size="small" />
+                <div className="repairs-details-label">
+                  <span className="repairs-details-label-text">الحالة:</span>
+                </div>
+              </div>
+            </Grid>
+          )}
+        </Grid>
+      </Paper>
+
+      {/* Movement History */}
+      <Paper elevation={0} className="repairs-details-card">
+        <Typography className="repairs-details-movements-history-title">
+          <HistoryIcon sx={{ fontSize: 20 }} /> سجل الحركات
+        </Typography>
+
+        <Divider className="repairs-details-divider" />
+
+        {!order.movements || order.movements.length === 0 ? (
+          <Box sx={{ py: 3, textAlign: "center" }}>
+            <Typography color="text.secondary">لا توجد حركات بعد</Typography>
+          </Box>
+        ) : (
+          <div className="repairs-timeline-table">
+            {order.movements.map((movement) => (
               <div
-                key={item.type}
-                className={`repairs-timeline-row ${
-                  isDone ? "repairs-timeline-done" : ""
-                }`}
+                key={movement.id}
+                className="repairs-timeline-row repairs-timeline-done"
+                style={{
+                  flexDirection: "column",
+                  alignItems: "stretch",
+                  gap: 6,
+                }}
               >
-                <div className="repairs-timeline-status">
-                  {isDone ? (
-                    <Chip
-                      label="تم"
-                      size="small"
-                      className="repairs-timeline-chip-done"
-                    />
-                  ) : (
-                    <Chip
-                      label="بالانتظار"
-                      size="small"
-                      className="repairs-timeline-chip-pending"
-                    />
-                  )}
-                </div>
-
-                <div className="repairs-timeline-label">
-                  <Typography className="repairs-timeline-text">
-                    {item.label}
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    gap: 12,
+                    flexWrap: "wrap",
+                  }}
+                >
+                  <Typography
+                    className="repairs-timeline-text"
+                    sx={{ fontWeight: 700 }}
+                  >
+                    {movement.movementName || "—"}
                   </Typography>
-                </div>
 
-                <div className="repairs-timeline-date">
                   <Typography className="repairs-timeline-date-text">
-                    {item.date
-                      ? new Date(item.date).toLocaleString("ar-JO", {
+                    {movement.createdAt
+                      ? new Date(movement.createdAt).toLocaleString("ar-JO", {
                           year: "numeric",
                           month: "2-digit",
                           day: "2-digit",
@@ -551,69 +514,53 @@ export default function RepairOrderDetails() {
                       : "—"}
                   </Typography>
                 </div>
+
+                <Typography
+                  sx={{ fontSize: "0.85rem", color: "text.secondary" }}
+                >
+                  من: <strong>{movement.previousStatusName || "—"}</strong> →
+                  إلى: <strong>{movement.newStatusName || "—"}</strong>
+                </Typography>
+
+                <Typography
+                  sx={{ fontSize: "0.85rem", color: "text.secondary" }}
+                >
+                  نفّذها: <strong>{movement.performedByName || "—"}</strong>
+                  {movement.branchName && (
+                    <>
+                      {" "}
+                      — الفرع: <strong>{movement.branchName}</strong>
+                    </>
+                  )}
+                  {movement.workshopName && (
+                    <>
+                      {" "}
+                      — المشغل: <strong>{movement.workshopName}</strong>
+                    </>
+                  )}
+                </Typography>
+
+                {movement.newResponsibleUserName && (
+                  <Typography
+                    sx={{ fontSize: "0.85rem", color: "text.secondary" }}
+                  >
+                    المسؤول الجديد:{" "}
+                    <strong>{movement.newResponsibleUserName}</strong>
+                  </Typography>
+                )}
+
+                {movement.notes && (
+                  <Typography
+                    sx={{ fontSize: "0.85rem", color: "text.secondary" }}
+                  >
+                    ملاحظات: {movement.notes}
+                  </Typography>
+                )}
               </div>
-            );
-          })}
-        </div>
+            ))}
+          </div>
+        )}
       </Paper>
-
-      {/* Movement Dialog */}
-      <Dialog
-        open={movementDialog.open}
-        onClose={handleCloseMovement}
-        PaperProps={{ className: "repairs-movement-dialog" }}
-        maxWidth="sm"
-        fullWidth
-      >
-        <DialogTitle className="repairs-movement-dialog-title">
-          {MOVEMENT_TYPES[movementDialog.movementType]?.name || "إضافة حركة"}
-        </DialogTitle>
-
-        <DialogContent className="repairs-movement-dialog-content">
-          <TextField
-            fullWidth
-            label="ملاحظات (اختياري)"
-            multiline
-            rows={3}
-            value={movementDialog.notes}
-            onChange={(e) =>
-              setMovementDialog((prev) => ({
-                ...prev,
-                notes: e.target.value,
-              }))
-            }
-            margin="dense"
-            className="repairs-form-field"
-          />
-        </DialogContent>
-
-        <DialogActions className="repairs-movement-dialog-actions">
-          <Button
-            onClick={handleCloseMovement}
-            disabled={savingMovement}
-            className="repairs-movement-dialog-cancel"
-            startIcon={<CloseIcon />}
-          >
-            إلغاء
-          </Button>
-
-          <Button
-            onClick={handleSaveMovement}
-            disabled={savingMovement}
-            variant="contained"
-            className="repairs-movement-dialog-confirm"
-            startIcon={
-              savingMovement ? (
-                <CircularProgress size={16} sx={{ color: "#fff" }} />
-              ) : (
-                <PlayArrowIcon />
-              )
-            }
-          >
-            {savingMovement ? "جاري الحفظ..." : "تنفيذ الحركة"}
-          </Button>
-        </DialogActions>
-      </Dialog>
     </div>
   );
 }

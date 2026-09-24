@@ -66,7 +66,6 @@ export const useCreateRepairOrder = () => {
   return useMutation({
     mutationFn: repairOrderService.createRepairOrder,
     onSuccess: (result) => {
-      // ✅ الـ API يرجّع { message, data } بدون success
       if (result?.data) {
         toast.success(result?.message || "تم إنشاء التصليحة بنجاح");
         queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
@@ -92,22 +91,115 @@ export const useCreateRepairOrder = () => {
 };
 
 // ===============================
-// POST: إضافة حركة
+// PUT: تعديل تصليحة
 // ===============================
-export const useAddRepairMovement = () => {
+export const useUpdateRepairOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: repairOrderService.addRepairMovement,
-    onSuccess: (result) => {
+    mutationFn: ({ id, payload }) =>
+      repairOrderService.updateRepairOrder(id, payload),
+    onSuccess: (result, variables) => {
       if (result?.data || result?.success) {
-        toast.success(result?.message || "تمت إضافة الحركة بنجاح");
+        toast.success(result?.message || "تم تعديل التصليحة بنجاح");
         queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
+        queryClient.invalidateQueries({
+          queryKey: repairOrderKeys.detail(variables.id),
+        });
       }
     },
     onError: (error) => {
       const resData = error?.response?.data;
-      let msg = "حدث خطأ أثناء إضافة الحركة";
+      let msg = "حدث خطأ أثناء تعديل التصليحة";
+
+      if (
+        resData?.errors &&
+        Array.isArray(resData.errors) &&
+        resData.errors.length > 0
+      ) {
+        msg = resData.errors.join(" | ");
+      } else if (resData?.message) {
+        msg = resData.message;
+      }
+
+      toast.error(msg, { autoClose: 8000 });
+    },
+  });
+};
+
+// ===============================
+// DELETE: حذف تصليحة
+// ===============================
+export const useDeleteRepairOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id) => repairOrderService.deleteRepairOrder(id),
+    onSuccess: (result) => {
+      toast.success(result?.message || "تم حذف التصليحة بنجاح");
+      queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
+    },
+    onError: (error) => {
+      const resData = error?.response?.data;
+      let msg = "حدث خطأ أثناء حذف التصليحة";
+
+      if (
+        resData?.errors &&
+        Array.isArray(resData.errors) &&
+        resData.errors.length > 0
+      ) {
+        msg = resData.errors.join(" | ");
+      } else if (resData?.message) {
+        msg = resData.message;
+      }
+
+      toast.error(msg, { autoClose: 8000 });
+    },
+  });
+};
+
+// ===============================
+// POST: مسح الباركود/QR (Backend يقرر الحركة والحالة)
+// ===============================
+export const useScanRepairOrder = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: repairOrderService.scanRepairOrder,
+    onSuccess: (result) => {
+      const data = result?.data;
+
+      if (data) {
+        const prev = data.previousStatusName || "";
+        const next = data.newStatusName || "";
+        const movementName = data.movementName || "";
+
+        const message = movementName
+          ? `تم: ${movementName}` +
+            (prev && next ? `\nمن: ${prev} → إلى: ${next}` : "")
+          : result?.message || "تمت العملية بنجاح";
+
+        toast.success(message, { autoClose: 5000 });
+
+        queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
+        queryClient.invalidateQueries({ queryKey: ["representative"] });
+
+        if (data.repairOrderId) {
+          queryClient.invalidateQueries({
+            queryKey: repairOrderKeys.detail(data.repairOrderId),
+          });
+        }
+
+        if (data.barcode) {
+          queryClient.invalidateQueries({
+            queryKey: repairOrderKeys.byBarcode(data.barcode),
+          });
+        }
+      }
+    },
+    onError: (error) => {
+      const resData = error?.response?.data;
+      let msg = "حدث خطأ أثناء معالجة الباركود";
 
       if (
         resData?.errors &&

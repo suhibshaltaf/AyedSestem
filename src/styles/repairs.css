@@ -167,6 +167,21 @@
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
+.repairs-export-excel-btn {
+  border-color: #2e7d32 !important;
+  color: #2e7d32 !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  height: 40px !important;
+  text-transform: none !important;
+  font-family: "Cairo", sans-serif !important;
+}
+
+.repairs-export-excel-btn:hover {
+  background-color: rgba(46, 125, 50, 0.08) !important;
+  border-color: #1b5e20 !important;
+}
+
 /* ===============================
    Table
    =============================== */
@@ -227,6 +242,12 @@
   text-align: right;
 }
 
+.repairs-td-date {
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  white-space: nowrap;
+}
+
 .repairs-barcode-chip {
   font-family: "Courier New", monospace !important;
   font-size: 0.78rem !important;
@@ -265,11 +286,6 @@
 .repairs-status-at-workshop {
   background-color: rgba(245, 158, 11, 0.15) !important;
   color: #d97706 !important;
-}
-
-.repairs-status-in-repair {
-  background-color: rgba(139, 92, 246, 0.15) !important;
-  color: #7c3aed !important;
 }
 
 .repairs-status-completed {
@@ -351,7 +367,7 @@
 }
 
 /* ===============================
-   Create Form
+   Create / Edit Form
    =============================== */
 .repairs-create-card,
 .repairs-details-card {
@@ -472,40 +488,14 @@
   justify-content: center !important;
 }
 
-.repairs-details-movements-section {
-  padding: 16px 0;
-}
-
-.repairs-details-movements-title {
+.repairs-details-movements-history-title {
   font-family: "Cairo", sans-serif !important;
-  font-size: 0.95rem !important;
+  font-size: 1rem !important;
   font-weight: 700 !important;
   color: var(--gold-primary) !important;
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-bottom: 12px !important;
-}
-
-.repairs-details-movements-buttons {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.repairs-movement-btn {
-  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
-  color: #fff !important;
-  border-radius: 10px !important;
-  text-transform: none !important;
-  font-family: "Cairo", sans-serif !important;
-  font-weight: 700 !important;
-  padding: 8px 18px !important;
-  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
-}
-
-.repairs-movement-btn:hover {
-  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 .repairs-details-row {
@@ -582,55 +572,87 @@
   padding: 8px 20px !important;
 }
 
-/* Movements Timeline */
-.repairs-details-movements-history-title {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 1rem !important;
-  font-weight: 700 !important;
-  color: var(--gold-primary) !important;
-  display: flex;
+/* ===============================
+   Movements Timeline (سجل الحركات الجديد)
+   =============================== */
+.repairs-timeline-table {
+  padding: 8px 0;
+}
+
+.repairs-timeline-row {
+  display: grid;
+  grid-template-columns: 100px 1fr auto;
   align-items: center;
-  gap: 6px;
+  gap: 16px;
+  padding: 14px 12px;
+  border-bottom: 1px dashed var(--border-gold);
+  transition: background-color 0.2s ease;
 }
 
-.repairs-movements-timeline {
-  padding: 12px 0;
+.repairs-timeline-row:last-child {
+  border-bottom: none;
 }
 
-.repairs-movement-item {
+.repairs-timeline-row:hover {
+  background-color: rgba(184, 134, 11, 0.03);
+}
+
+.repairs-timeline-done {
+  background-color: rgba(46, 125, 50, 0.03);
+}
+
+.repairs-timeline-status {
   display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 10px 0;
-  position: relative;
+  justify-content: center;
 }
 
-.repairs-movement-dot {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--gold-primary);
-  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.2);
-  flex-shrink: 0;
-  margin-top: 5px;
+.repairs-timeline-chip-done {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  background-color: rgba(46, 125, 50, 0.15) !important;
+  color: #2e7d32 !important;
+  border-radius: 6px !important;
+  min-width: 60px;
+  justify-content: center !important;
 }
 
-.repairs-movement-content {
-  flex: 1;
+[data-theme="dark"] .repairs-timeline-chip-done {
+  background-color: rgba(102, 187, 106, 0.15) !important;
+  color: #66bb6a !important;
 }
 
-.repairs-movement-name {
+.repairs-timeline-chip-pending {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  background-color: rgba(150, 150, 150, 0.12) !important;
+  color: #888 !important;
+  border-radius: 6px !important;
+  min-width: 60px;
+  justify-content: center !important;
+}
+
+.repairs-timeline-text {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.9rem !important;
   font-weight: 600 !important;
   color: var(--text-primary) !important;
 }
 
-.repairs-movement-notes {
+.repairs-timeline-date-text {
   font-family: "Cairo", sans-serif !important;
-  font-size: 0.8rem !important;
+  font-size: 0.82rem !important;
   color: var(--text-secondary) !important;
-  margin-top: 2px !important;
+  white-space: nowrap;
+}
+
+/* حركات تفصيلية داخل سجل الحركات */
+.repairs-timeline-row.repairs-timeline-done {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 6px;
 }
 
 /* ===============================
@@ -732,53 +754,201 @@
 }
 
 /* ===============================
-   Movement Dialog
+   Date Column
    =============================== */
-.repairs-movement-dialog {
+.repairs-td-date {
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+  white-space: nowrap;
+}
+
+/* ===============================
+   Toolbar Simple
+   =============================== */
+.repairs-toolbar-simple {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.repairs-toolbar-simple .repairs-search {
+  flex: 1;
+  min-width: 220px;
+  max-width: 400px;
+}
+
+/* ===============================
+   Pickup Delivery Tabs
+   =============================== */
+.pickup-delivery-tabs-paper {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+  margin-bottom: 16px;
+  overflow: hidden;
 }
 
-.repairs-movement-dialog-title {
+.pickup-delivery-tabs .MuiTab-root {
   font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+  text-transform: none !important;
+  padding: 14px 20px !important;
+  min-height: 60px !important;
+}
+
+.pickup-delivery-tabs .Mui-selected {
+  color: var(--gold-primary) !important;
+}
+
+.pickup-delivery-tabs .MuiTabs-indicator {
+  background-color: var(--gold-primary) !important;
+  height: 3px !important;
+}
+
+.pickup-delivery-tab-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pickup-delivery-tab-count {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  background-color: rgba(184, 134, 11, 0.15) !important;
+  color: #b8860b !important;
+  border-radius: 10px !important;
+  height: 20px !important;
+  min-width: 24px !important;
+}
+
+.pickup-delivery-tabs .Mui-selected .pickup-delivery-tab-count {
+  background-color: var(--gold-primary) !important;
+  color: #fff !important;
+}
+
+/* ===============================
+   Summary Stats (RepresentativesSummary)
+   =============================== */
+.repairs-summary-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.repairs-summary-stat {
+  border-radius: 14px !important;
+  padding: 20px !important;
+  text-align: center;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.repairs-summary-stat-value {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 2rem !important;
   font-weight: 700 !important;
   color: var(--gold-primary) !important;
-  font-size: 1.1rem !important;
-  border-bottom: 1px solid var(--border-gold) !important;
-  padding-bottom: 12px !important;
 }
 
-.repairs-movement-dialog-content {
-  padding: 16px 24px !important;
-}
-
-.repairs-movement-dialog-actions {
-  padding: 12px 24px 20px !important;
-  gap: 8px;
-  border-top: 1px solid var(--border-gold) !important;
-}
-
-.repairs-movement-dialog-cancel {
+.repairs-summary-stat-label {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.85rem !important;
   color: var(--text-secondary) !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
-  font-family: "Cairo", sans-serif !important;
-  padding: 8px 20px !important;
+  margin-top: 4px !important;
 }
 
-.repairs-movement-dialog-confirm {
-  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
-  color: #fff !important;
-  border-radius: 8px !important;
-  text-transform: none !important;
+.repairs-summary-count-chip {
   font-family: "Cairo", sans-serif !important;
+  font-size: 0.8rem !important;
   font-weight: 700 !important;
-  padding: 8px 20px !important;
-  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
+  border-radius: 6px !important;
+  min-width: 40px !important;
+  justify-content: center !important;
 }
 
-.repairs-movement-dialog-confirm:hover {
-  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+.repairs-summary-count-chip-active {
+  background-color: rgba(184, 134, 11, 0.15) !important;
+  color: #b8860b !important;
+}
+
+.repairs-summary-count-chip-empty {
+  background-color: rgba(150, 150, 150, 0.12) !important;
+  color: #888 !important;
+}
+
+.repairs-summary-branch-chip {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  background-color: rgba(59, 130, 246, 0.15) !important;
+  color: #2563eb !important;
+  min-width: 40px !important;
+  justify-content: center !important;
+}
+
+.repairs-summary-workshop-chip {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.8rem !important;
+  font-weight: 700 !important;
+  border-radius: 6px !important;
+  background-color: rgba(217, 119, 6, 0.15) !important;
+  color: #d97706 !important;
+  min-width: 40px !important;
+  justify-content: center !important;
+}
+
+/* ===============================
+   Barcode Display
+   =============================== */
+.repairs-barcode-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.repairs-barcode-image {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-gold);
+}
+
+.repairs-barcode-text {
+  font-family: "Courier New", monospace !important;
+  font-size: 1.1rem !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  color: var(--text-primary) !important;
+  margin: 8px 0 !important;
+}
+
+.repairs-qrcode-image {
+  max-width: 180px;
+  height: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border-gold);
+  margin-top: 8px;
+}
+
+/* ===============================
+   Home Single Field
+   =============================== */
+.home-form-grid-single {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 /* ===============================
@@ -863,161 +1033,7 @@
     flex-direction: column;
     align-items: stretch;
   }
-}/* ===============================
-   Date Column
-   =============================== */
-.repairs-td-date {
-  font-size: 0.8rem !important;
-  color: var(--text-secondary) !important;
-  white-space: nowrap;
-}
 
-/* ===============================
-   Toolbar Simple
-   =============================== */
-.repairs-toolbar-simple {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 16px;
-  flex-wrap: wrap;
-}
-
-.repairs-toolbar-simple .repairs-search {
-  flex: 1;
-  min-width: 220px;
-  max-width: 400px;
-}
-
-/* ===============================
-   Pickup Delivery Tabs
-   =============================== */
-.pickup-delivery-tabs-paper {
-  border-radius: 14px !important;
-  background-color: var(--bg-paper) !important;
-  border: 1px solid var(--border-gold-strong) !important;
-  box-shadow: var(--shadow-soft) !important;
-  margin-bottom: 16px;
-  overflow: hidden;
-}
-
-.pickup-delivery-tabs .MuiTab-root {
-  font-family: "Cairo", sans-serif !important;
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
-  color: var(--text-secondary) !important;
-  text-transform: none !important;
-  padding: 14px 20px !important;
-  min-height: 60px !important;
-}
-
-.pickup-delivery-tabs .Mui-selected {
-  color: var(--gold-primary) !important;
-}
-
-.pickup-delivery-tabs .MuiTabs-indicator {
-  background-color: var(--gold-primary) !important;
-  height: 3px !important;
-}
-
-.pickup-delivery-tab-label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pickup-delivery-tab-count {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  background-color: rgba(184, 134, 11, 0.15) !important;
-  color: #b8860b !important;
-  border-radius: 10px !important;
-  height: 20px !important;
-  min-width: 24px !important;
-}
-
-.pickup-delivery-tabs .Mui-selected .pickup-delivery-tab-count {
-  background-color: var(--gold-primary) !important;
-  color: #fff !important;
-}
-
-/* ===============================
-   Timeline Table (سجل الحالات)
-   =============================== */
-.repairs-timeline-table {
-  padding: 8px 0;
-}
-
-.repairs-timeline-row {
-  display: grid;
-  grid-template-columns: 100px 1fr auto;
-  align-items: center;
-  gap: 16px;
-  padding: 14px 12px;
-  border-bottom: 1px dashed var(--border-gold);
-  transition: background-color 0.2s ease;
-}
-
-.repairs-timeline-row:last-child {
-  border-bottom: none;
-}
-
-.repairs-timeline-row:hover {
-  background-color: rgba(184, 134, 11, 0.03);
-}
-
-.repairs-timeline-done {
-  background-color: rgba(46, 125, 50, 0.03);
-}
-
-.repairs-timeline-status {
-  display: flex;
-  justify-content: center;
-}
-
-.repairs-timeline-chip-done {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  background-color: rgba(46, 125, 50, 0.15) !important;
-  color: #2e7d32 !important;
-  border-radius: 6px !important;
-  min-width: 60px;
-  justify-content: center !important;
-}
-
-[data-theme="dark"] .repairs-timeline-chip-done {
-  background-color: rgba(102, 187, 106, 0.15) !important;
-  color: #66bb6a !important;
-}
-
-.repairs-timeline-chip-pending {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.72rem !important;
-  font-weight: 700 !important;
-  background-color: rgba(150, 150, 150, 0.12) !important;
-  color: #888 !important;
-  border-radius: 6px !important;
-  min-width: 60px;
-  justify-content: center !important;
-}
-
-.repairs-timeline-text {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.9rem !important;
-  font-weight: 600 !important;
-  color: var(--text-primary) !important;
-}
-
-.repairs-timeline-date-text {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.82rem !important;
-  color: var(--text-secondary) !important;
-  white-space: nowrap;
-}
-
-@media (max-width: 700px) {
   .repairs-timeline-row {
     grid-template-columns: 1fr;
     gap: 6px;
@@ -1027,145 +1043,4 @@
   .repairs-timeline-status {
     justify-content: flex-start;
   }
-}
-/* ===============================
-   Summary Stats (RepresentativesSummary)
-   =============================== */
-.repairs-summary-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.repairs-summary-stat {
-  border-radius: 14px !important;
-  padding: 20px !important;
-  text-align: center;
-  background-color: var(--bg-paper) !important;
-  border: 1px solid var(--border-gold-strong) !important;
-  box-shadow: var(--shadow-soft) !important;
-}
-
-.repairs-summary-stat-value {
-  font-family: "Amiri", "Cairo", serif !important;
-  font-size: 2rem !important;
-  font-weight: 700 !important;
-  color: var(--gold-primary) !important;
-}
-
-.repairs-summary-stat-label {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.85rem !important;
-  color: var(--text-secondary) !important;
-  margin-top: 4px !important;
-}
-
-.repairs-summary-count-chip {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  border-radius: 6px !important;
-  min-width: 40px !important;
-  justify-content: center !important;
-}
-
-.repairs-summary-count-chip-active {
-  background-color: rgba(184, 134, 11, 0.15) !important;
-  color: #b8860b !important;
-}
-
-.repairs-summary-count-chip-empty {
-  background-color: rgba(150, 150, 150, 0.12) !important;
-  color: #888 !important;
-}
-
-.repairs-summary-branch-chip {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  border-radius: 6px !important;
-  background-color: rgba(59, 130, 246, 0.15) !important;
-  color: #2563eb !important;
-  min-width: 40px !important;
-  justify-content: center !important;
-}
-
-.repairs-summary-workshop-chip {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  border-radius: 6px !important;
-  background-color: rgba(217, 119, 6, 0.15) !important;
-  color: #d97706 !important;
-  min-width: 40px !important;
-  justify-content: center !important;
-}
-
-/* ===============================
-   Barcode Display
-   =============================== */
-.repairs-barcode-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  padding: 20px;
-}
-
-.repairs-barcode-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  border: 1px solid var(--border-gold);
-}
-
-.repairs-qrcode-image {
-  max-width: 200px;
-  height: auto;
-  border-radius: 8px;
-}
-
-/* ===============================
-   Home Single Field
-   =============================== */
-.home-form-grid-single {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-/* ===============================
-   Barcode Display
-   =============================== */
-.repairs-barcode-display {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-  padding: 20px;
-}
-
-.repairs-barcode-image {
-  max-width: 100%;
-  height: auto;
-  border-radius: 8px;
-  border: 1px solid var(--border-gold);
-}
-
-.repairs-barcode-text {
-  font-family: "Courier New", monospace !important;
-  font-size: 1.1rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 2px !important;
-  color: var(--text-primary) !important;
-  margin: 8px 0 !important;
-}
-
-.repairs-qrcode-image {
-  max-width: 180px;
-  height: auto;
-  border-radius: 8px;
-  border: 1px solid var(--border-gold);
-  margin-top: 8px;
 }

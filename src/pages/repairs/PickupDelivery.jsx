@@ -37,9 +37,11 @@ import "../../styles/repairs.css";
 
 const PAGE_SIZE = 10;
 
-// ✅ الحالات
-const DELIVER_TO_REP_STATUSES = [1]; // جديدة → تسليم للمندوب
-const RECEIVE_FROM_REP_STATUSES = [6]; // القطعة عائدة من المشغل مع المندوب
+// ✅ الحالات الجديدة:
+// تبويب 1: تسليم للمندوب → القطع الجديدة في الفرع (Status = 1)
+// تبويب 2: استلام من المندوب → القطع مع المندوب بعد التصليح (Status = 5)
+const DELIVER_TO_REP_STATUSES = [1];
+const RECEIVE_FROM_REP_STATUSES = [5];
 
 export default function PickupDelivery() {
   const navigate = useNavigate();
@@ -50,7 +52,6 @@ export default function PickupDelivery() {
 
   const { data: orders = [], isLoading, refetch } = useRepairOrders({});
 
-  // تصفية حسب التبويب
   const filteredByTab = useMemo(() => {
     if (tab === 0) {
       return orders.filter((o) => DELIVER_TO_REP_STATUSES.includes(o.status));
@@ -60,7 +61,6 @@ export default function PickupDelivery() {
     );
   }, [orders, tab]);
 
-  // فلترة بالبحث
   const filteredOrders = useMemo(() => {
     if (!searchQuery.trim()) return filteredByTab;
     const q = searchQuery.toLowerCase();
@@ -189,8 +189,8 @@ export default function PickupDelivery() {
           <Box className="repairs-empty">
             <Typography>
               {tab === 0
-                ? "لا توجد تصاليح جاهزة للتسليم"
-                : "لا توجد تصاليح للاستلام"}
+                ? "لا توجد تصاليح جاهزة للتسليم للمندوب"
+                : "لا توجد تصاليح لاستلامها من المندوب"}
             </Typography>
           </Box>
         ) : (
@@ -241,7 +241,9 @@ export default function PickupDelivery() {
 
                       <TableCell className="repairs-td">
                         <Chip
-                          label={getStatusName(order.status)}
+                          label={
+                            order.statusName || getStatusName(order.status)
+                          }
                           size="small"
                           className={`repairs-status-chip repairs-status-${getStatusColor(
                             order.status

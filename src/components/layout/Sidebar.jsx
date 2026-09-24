@@ -91,11 +91,18 @@ const READY_ITEMS = [
     roles: ["Representative"],
   },
   {
-    label: "مسح الباركود",
-    icon: <QrCodeScannerIcon fontSize="small" />,
-    path: "/repairs/scan",
-    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant", "OperatorManager"],
-  },
+  label: "مسح QR",
+  icon: <QrCodeScannerIcon fontSize="small" />,
+  path: "/repairs/scan",
+  roles: [
+    "SuperAdmin",
+    "Admin",
+    "BranchManager",
+    "BranchAccountant",
+    "OperatorManager",
+    "Representative",
+  ],
+},
   {
     label: "الضبط",
     icon: <SettingsIcon fontSize="small" />,
@@ -115,6 +122,14 @@ function SidebarContent({ onClose }) {
   const roles = useMemo(
     () => user?.roles?.map((r) => r.name) || [],
     [user]
+  );
+
+  // ✅ هل المستخدم مدير/محاسب فرع؟
+  const isBranchRole = useMemo(
+    () =>
+      roles.includes("BranchManager") ||
+      roles.includes("BranchAccountant"),
+    [roles]
   );
 
   const handleNavigate = (path) => {
@@ -144,6 +159,8 @@ function SidebarContent({ onClose }) {
     return item.roles.some((r) => roles.includes(r));
   });
 
+  const branchPath = user?.branchId ? `/branches/${user.branchId}` : null;
+
   return (
     <div className="sidebar-content">
       <div className="sidebar-header">
@@ -157,6 +174,31 @@ function SidebarContent({ onClose }) {
       </div>
 
       <List className="sidebar-list">
+        {/* ✅ رابط "فرعي" لمدير/محاسب الفرع */}
+        {isBranchRole && branchPath && (
+          <ListItemButton
+            onClick={() => handleNavigate(branchPath)}
+            className={`sidebar-item ${
+              isActive(branchPath) ? "sidebar-item-active" : ""
+            }`}
+          >
+            <ListItemIcon
+              className={`sidebar-icon ${
+                isActive(branchPath) ? "sidebar-icon-active" : ""
+              }`}
+            >
+              <StorefrontIcon fontSize="small" />
+            </ListItemIcon>
+            <ListItemText
+              primary="فرعي"
+              primaryTypographyProps={{
+                fontSize: "0.85rem",
+                fontWeight: isActive(branchPath) ? 700 : 600,
+              }}
+            />
+          </ListItemButton>
+        )}
+
         {visibleReadyItems.map((item) => {
           const active = isActive(item.path);
           return (

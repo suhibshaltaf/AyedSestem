@@ -63,11 +63,27 @@ export default function AppRouter() {
             <Route path="/accounts" element={<AccountsManagement />} />
             <Route path="/workshops" element={<WorkshopsManagement />} />
             <Route path="/branches" element={<BranchesManagement />} />
-            <Route path="/branches/:id" element={<BranchDetails />} />
             <Route
               path="/repairs/representatives-summary"
               element={<RepresentativesSummary />}
             />
+          </Route>
+
+          {/* تفاصيل الفرع — Admin + Branch roles */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                  "BranchAccountant",
+                ]}
+                checkBranch
+              />
+            }
+          >
+            <Route path="/branches/:id" element={<BranchDetails />} />
           </Route>
 
           {/* Branch roles */}
@@ -89,11 +105,17 @@ export default function AppRouter() {
             />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["BranchManager", "BranchAccountant"]} />}>
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={["BranchManager", "BranchAccountant"]}
+              />
+            }
+          >
             <Route path="/repairs/create" element={<CreateRepairOrder />} />
           </Route>
 
-          {/* All authenticated */}
+          {/* All authenticated (عرض فقط) */}
           <Route
             element={
               <ProtectedRoute
@@ -109,8 +131,38 @@ export default function AppRouter() {
             <Route path="/repairs/list" element={<RepairOrdersList />} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={["SuperAdmin", "Admin", "BranchManager", "BranchAccountant", "OperatorManager"]} />}>
+          {/* ✅ صفحة المسح — متاحة لجميع الأدوار اللي تمسح */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                  "BranchAccountant",
+                  "OperatorManager",
+                  "Representative",
+                ]}
+              />
+            }
+          >
             <Route path="/repairs/scan" element={<ScanRepair />} />
+          </Route>
+
+          {/* تفاصيل تصليحة — ما عدا Representative */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                  "BranchAccountant",
+                  "OperatorManager",
+                ]}
+              />
+            }
+          >
             <Route path="/repairs/:id" element={<RepairOrderDetails />} />
           </Route>
 

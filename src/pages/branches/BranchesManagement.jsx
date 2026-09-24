@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -79,22 +79,6 @@ export default function BranchesManagement() {
     const roleNames = currentUser.roles.map((r) => r.name);
     return roleNames.some((name) => ADMIN_ROLES.includes(name));
   }, [currentUser]);
-
-  const isBranchUser = useMemo(() => {
-    if (!currentUser?.roles) return false;
-    const roleNames = currentUser.roles.map((r) => r.name);
-    return (
-      roleNames.includes("BranchManager") ||
-      roleNames.includes("BranchAccountant")
-    );
-  }, [currentUser]);
-
-  // ✅ Redirect — BranchUser يذهب مباشرة لصفحة فرعه
-  useEffect(() => {
-    if (isBranchUser && !isAdmin && currentUser?.branchId) {
-      navigate(`/branches/${currentUser.branchId}`, { replace: true });
-    }
-  }, [isBranchUser, isAdmin, currentUser, navigate]);
 
   // React Query
   const { data: branches = [], isLoading, refetch } = useBranches();
@@ -195,15 +179,6 @@ export default function BranchesManagement() {
   const handleCloseDeleteDialog = () => {
     if (!deleting) setDeleteDialog({ open: false, branch: null });
   };
-
-  // ✅ إذا BranchUser — لا نعرض الصفحة (Redirect يجري)
-  if (isBranchUser && !isAdmin) {
-    return (
-      <Box className="branches-loading">
-        <CircularProgress sx={{ color: "#b8860b" }} />
-      </Box>
-    );
-  }
 
   return (
     <div className="branches-container">

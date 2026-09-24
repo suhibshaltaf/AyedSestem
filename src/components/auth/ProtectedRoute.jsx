@@ -1,10 +1,14 @@
-import { Navigate, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { Navigate, Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
 import useAuthStore from "../../store/useAuthStore.js";
 
-export default function ProtectedRoute({ allowedRoles = [] }) {
+export default function ProtectedRoute({
+  allowedRoles = [],
+  checkBranch = false,
+}) {
   const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
 
   const token = useAuthStore((state) => state.token);
   const user = useAuthStore((state) => state.user);
@@ -23,7 +27,6 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
       const storeToken = useAuthStore.getState().token;
 
       if (!hasToken && storeToken) {
-        // تم حذف التوكن من localStorage
         logout();
         navigate("/login", { replace: true });
       }
@@ -40,10 +43,11 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
-  // 2) التحقق من الصلاحيات (إن وُجدت)
+  const roles = user?.roles?.map((r) => r.name) || [];
+  const userRole = user?.role || user?.Role || "";
+
+  // 2) التحقق من الصلاحيات العامة (إن وُجدت)
   if (allowedRoles.length > 0) {
-    const userRole = user?.role || user?.Role || "";
-    const roles = user?.roles?.map((r) => r.name) || [];
     const hasAccess =
       allowedRoles.includes(userRole) ||
       allowedRoles.some((r) => roles.includes(r));
@@ -53,6 +57,18 @@ export default function ProtectedRoute({ allowedRoles = [] }) {
     }
   }
 
-  // 3) مسموح
+  // 3) ✅ التحقق من صلاحية الفرع (لمدير/محاسب الفرع)
+  if (checkBranch && id) {
+    const isAdmin = roles.some((r) => ["SuperAdmin", "Admin"].includes(r));
+
+    if (!isAdmin) {
+      const userBranchId = user?.branchId;
+      if (Number(userBranchId) !== Number(id)) {
+        return <Navigate to="/unauthorized" replace />;
+      }
+    }
+  }
+
+  // 4) مسموح
   return <Outlet />;
 }
