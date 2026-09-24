@@ -70,13 +70,17 @@ const PAGE_SIZE = 10;
 export default function AccountsManagement() {
   const currentUser = useAuthStore((state) => state.user);
 
+  // State
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pagination
+  // Pagination (server-side)
   const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [pageSize] = useState(PAGE_SIZE);
 
   // Dialog الحذف
   const [deleteDialog, setDeleteDialog] = useState({
@@ -105,24 +109,18 @@ export default function AccountsManagement() {
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // ===============================
   // جلب الفروع والورش
-  // ===============================
   const { data: branches = [] } = useBranches();
   const { data: workshops = [] } = useWorkshops();
 
-  // ===============================
-  // ✅ هل المستخدم الحالي Admin/SuperAdmin؟
-  // ===============================
+  // هل المستخدم الحالي Admin/SuperAdmin؟
   const isCurrentUserAdmin = useMemo(() => {
     if (!currentUser?.roles) return false;
     const roleNames = currentUser.roles.map((r) => r.name);
     return roleNames.some((name) => ADMIN_ROLES.includes(name));
   }, [currentUser]);
 
-  // ===============================
   // Helper: عرض اسم الفرع/الورشة
-  // ===============================
   const getBranchOrWorkshopName = (user) => {
     if (user?.branchName) {
       return `فرع ${user.branchName}`;
@@ -133,18 +131,13 @@ export default function AccountsManagement() {
     return "—";
   };
 
-  // ===============================
-  // ✅ Helper: تنسيق التاريخ (UTC → Local)
-  // ===============================
+  // Helper: تنسيق التاريخ (UTC → Local)
   const formatDateTime = (value) => {
     if (!value) return "—";
     try {
       let isoValue = String(value);
 
-      if (
-        !isoValue.endsWith("Z") &&
-        !isoValue.match(/[+-]\d{2}:\d{2}$/)
-      ) {
+      if (!isoValue.endsWith("Z") && !isoValue.match(/[+-]\d{2}:\d{2}$/)) {
         isoValue = isoValue + "Z";
       }
 
@@ -166,25 +159,17 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
-  // ✅ Helper: حالة الحساب
-  // الأولوية: غير نشط > متصل الآن > نشط
-  // ===============================
+  // Helper: حالة الحساب
   const getAccountStatus = (user) => {
-    // ✅ 1. غير نشط — أعلى أولوية
     if (user?.isActive === false) {
       return { label: "غير نشط", type: "inactive" };
     }
 
-    // ✅ 2. تحقق من الاتصال الحقيقي (خلال 5 دقائق)
     const isReallyOnline = () => {
       if (!user?.lastActivityAt) return false;
       try {
         let isoValue = String(user.lastActivityAt);
-        if (
-          !isoValue.endsWith("Z") &&
-          !isoValue.match(/[+-]\d{2}:\d{2}$/)
-        ) {
+        if (!isoValue.endsWith("Z") && !isoValue.match(/[+-]\d{2}:\d{2}$/)) {
           isoValue = isoValue + "Z";
         }
         const lastActivity = new Date(isoValue);
@@ -200,33 +185,62 @@ export default function AccountsManagement() {
       return { label: "متصل الآن", type: "online" };
     }
 
-    // ✅ 3. نشط (افتراضي)
     return { label: "نشط", type: "active" };
   };
 
-  // ===============================
   // هل نحتاج dropdown الفرع/الورشة؟
-  // ===============================
   const needsBranch = BRANCH_ROLES.includes(formData.role);
   const needsWorkshop = WORKSHOP_ROLES.includes(formData.role);
 
   // ===============================
-  // جلب المستخدمين
+  // ✅ جلب المستخدمين (server-side pagination)
   // ===============================
-  const fetchUsers = async () => {
+  const fetchUsers = async (targetPage = 1) => {
     try {
       setLoading(true);
-      const result = await authService.getUsers();
 
-      if (result?.success && Array.isArray(result.data)) {
-        setUsers(result.data);
-        setPage(1);
-      } else {
-        setUsers([]);
-        toast.error(result?.message || "تعذر جلب المستخدمين");
+      const result = await authService.getUsers({
+        pageNumber: targetPage,
+        pageSize: pageSize,
+      });
+
+      // ✅ دعم شكلين للـ response:
+      // 1) { success, data: { items, totalCount, totalPages } }
+      // 2) { success, data: [...], totalCount, totalPages }
+
+      const payload = result?.data;
+      let items = [];
+      let count = 0;
+      let pages = 1;
+
+      if (Array.isArray(payload)) {
+        // شكل 2
+        items = payload;
+        count = Number(result?.totalCount) || payload.length;
+        pages = Number(result?.totalPages) || 1;
+      } else if (payload && Array.isArray(payload.items)) {
+        // شكل 1
+        items = payload.items;
+        count = Number(payload.totalCount) || 0;
+        pages = Number(payload.totalPages) || 1;
+      } else if (Array.isArray(result)) {
+        items = result;
+        count = result.length;
+        pages = 1;
+      }
+
+      setUsers(items);
+      setTotalCount(count);
+      setTotalPages(pages);
+
+      if (items.length === 0 && count === 0) {
+        // لا شيء — طبيعي
       }
     } catch (error) {
       console.error("Fetch Users Error:", error);
+      setUsers([]);
+      setTotalCount(0);
+      setTotalPages(1);
       toast.error(
         error?.response?.data?.message || "حدث خطأ أثناء جلب المستخدمين"
       );
@@ -235,9 +249,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
   // جلب الصلاحيات
-  // ===============================
   const fetchRoles = async () => {
     try {
       const result = await authService.getAvailableRoles();
@@ -253,14 +265,19 @@ export default function AccountsManagement() {
     }
   };
 
+  // ✅ عند تغيير الصفحة → نداء API جديد
   useEffect(() => {
-    fetchUsers();
+    fetchUsers(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
+
+  // تحميل أولي
+  useEffect(() => {
     fetchRoles();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ===============================
-  // فلترة
-  // ===============================
+  // ✅ فلترة client-side (على الصفحة الحالية)
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return users;
     const q = searchQuery.toLowerCase();
@@ -284,36 +301,18 @@ export default function AccountsManagement() {
     });
   }, [users, searchQuery]);
 
-  // ===============================
-  // Pagination
-  // ===============================
-  const pageCount = Math.ceil(filteredUsers.length / PAGE_SIZE);
+  // Pagination display
+  const startItem = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
+  const endItem = Math.min(page * pageSize, totalCount);
 
-  const paginatedUsers = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredUsers.slice(start, start + PAGE_SIZE);
-  }, [filteredUsers, page]);
-
-  const startItem =
-    filteredUsers.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const endItem = Math.min(page * PAGE_SIZE, filteredUsers.length);
-
-  useEffect(() => {
-    setPage(1);
-  }, [searchQuery]);
-
-  // ===============================
   // فتح Dialog الإضافة
-  // ===============================
   const handleAddClick = () => {
     setFormData(emptyForm);
     setFormErrors({});
     setFormDialog({ open: true, mode: "add", user: null });
   };
 
-  // ===============================
   // فتح Dialog التعديل
-  // ===============================
   const handleEditClick = (user) => {
     setFormData({
       userName: user.userName || "",
@@ -328,9 +327,7 @@ export default function AccountsManagement() {
     setFormDialog({ open: true, mode: "edit", user });
   };
 
-  // ===============================
   // إغلاق Dialog
-  // ===============================
   const handleCloseFormDialog = () => {
     if (!saving) {
       setFormDialog({ open: false, mode: "add", user: null });
@@ -339,9 +336,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
   // تحديث حقل
-  // ===============================
   const handleFormChange = (field, value) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
@@ -357,9 +352,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
   // التحقق
-  // ===============================
   const validateForm = () => {
     const errors = {};
 
@@ -395,9 +388,7 @@ export default function AccountsManagement() {
     return Object.keys(errors).length === 0;
   };
 
-  // ===============================
   // حفظ
-  // ===============================
   const handleSave = async () => {
     if (!validateForm()) return;
 
@@ -424,7 +415,8 @@ export default function AccountsManagement() {
         if (result?.success) {
           toast.success(result?.message || "تم إضافة الموظف بنجاح");
           handleCloseFormDialog();
-          fetchUsers();
+          setPage(1);
+          fetchUsers(1);
         } else {
           toast.error(result?.message || "فشل إضافة الموظف");
         }
@@ -442,7 +434,7 @@ export default function AccountsManagement() {
         if (result?.success) {
           toast.success(result?.message || "تم تعديل الموظف بنجاح");
           handleCloseFormDialog();
-          fetchUsers();
+          fetchUsers(page);
         } else {
           toast.error(result?.message || "فشل تعديل الموظف");
         }
@@ -455,9 +447,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
   // حذف
-  // ===============================
   const handleDeleteClick = (user) => {
     if (user.id === currentUser?.id) {
       toast.warning("لا يمكنك حذف حسابك الحالي");
@@ -476,7 +466,12 @@ export default function AccountsManagement() {
 
       if (result?.success) {
         toast.success(result?.message || "تم حذف المستخدم بنجاح");
-        setUsers((prev) => prev.filter((u) => u.id !== user.id));
+
+        // إذا كانت الصفحة الحالية فيها عنصر واحد فقط، ارجع للصفحة السابقة
+        const newPage = users.length === 1 && page > 1 ? page - 1 : page;
+        setPage(newPage);
+        fetchUsers(newPage);
+
         setDeleteDialog({ open: false, user: null });
       } else {
         toast.error(result?.message || "فشل حذف المستخدم");
@@ -497,9 +492,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
   // تغيير كلمة المرور
-  // ===============================
   const handlePasswordClick = (user) => {
     setPasswordDialog({
       open: true,
@@ -571,9 +564,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // ===============================
   // مساعدات
-  // ===============================
   const getRoleName = (user) => {
     if (!user?.roles || user.roles.length === 0) return "—";
     return user.roles[0]?.displayName || user.roles[0]?.name || "—";
@@ -581,11 +572,12 @@ export default function AccountsManagement() {
 
   const isAdminUser = (user) => {
     const userRoles = user?.roles?.map((r) => r.name) || [];
-    return (
-      userRoles.includes("SuperAdmin") || userRoles.includes("Admin")
-    );
+    return userRoles.includes("SuperAdmin") || userRoles.includes("Admin");
   };
 
+  // ===============================
+  // Render
+  // ===============================
   return (
     <div className="accounts-container">
       {/* Header */}
@@ -622,7 +614,10 @@ export default function AccountsManagement() {
 
         <div className="accounts-actions">
           <Tooltip title="تحديث">
-            <IconButton onClick={fetchUsers} className="accounts-refresh-btn">
+            <IconButton
+              onClick={() => fetchUsers(page)}
+              className="accounts-refresh-btn"
+            >
               <RefreshIcon />
             </IconButton>
           </Tooltip>
@@ -674,12 +669,12 @@ export default function AccountsManagement() {
                 </TableHead>
 
                 <TableBody>
-                  {paginatedUsers.map((user, index) => {
+                  {filteredUsers.map((user, index) => {
                     const status = getAccountStatus(user);
                     return (
                       <TableRow key={user.id} className="accounts-table-row">
                         <TableCell className="accounts-td">
-                          {(page - 1) * PAGE_SIZE + index + 1}
+                          {(page - 1) * pageSize + index + 1}
                         </TableCell>
 
                         <TableCell className="accounts-td accounts-td-username">
@@ -702,12 +697,10 @@ export default function AccountsManagement() {
                           />
                         </TableCell>
 
-                        {/* ✅ الفرع / الورشة */}
                         <TableCell className="accounts-td accounts-td-branch">
                           {getBranchOrWorkshopName(user)}
                         </TableCell>
 
-                        {/* ✅ حالة الحساب */}
                         <TableCell className="accounts-td">
                           <Chip
                             label={status.label}
@@ -716,7 +709,6 @@ export default function AccountsManagement() {
                           />
                         </TableCell>
 
-                        {/* ✅ آخر تسجيل دخول */}
                         <TableCell className="accounts-td accounts-td-date">
                           {user.lastLoginAt
                             ? formatDateTime(user.lastLoginAt)
@@ -724,7 +716,6 @@ export default function AccountsManagement() {
                         </TableCell>
 
                         <TableCell className="accounts-td" align="center">
-                          {/* ✅ زر التعديل */}
                           <Tooltip title="تعديل">
                             <IconButton
                               size="small"
@@ -735,7 +726,6 @@ export default function AccountsManagement() {
                             </IconButton>
                           </Tooltip>
 
-                          {/* ✅ زر تغيير كلمة المرور — للأدمن والسوبر أدمن فقط */}
                           {isCurrentUserAdmin && (
                             <Tooltip title="تغيير كلمة المرور">
                               <IconButton
@@ -748,7 +738,6 @@ export default function AccountsManagement() {
                             </Tooltip>
                           )}
 
-                          {/* ✅ زر الحذف */}
                           <Tooltip title="حذف">
                             <IconButton
                               size="small"
@@ -767,27 +756,27 @@ export default function AccountsManagement() {
             </TableContainer>
 
             {/* Pagination */}
-            <div className="accounts-pagination">
-              <div className="accounts-pagination-info">
-                عرض {startItem} - {endItem} من {filteredUsers.length} مستخدمين
-              </div>
+            {!searchQuery && totalPages > 1 && (
+              <div className="accounts-pagination">
+                <div className="accounts-pagination-info">
+                  عرض {startItem} - {endItem} من {totalCount} مستخدمين
+                </div>
 
-              <Pagination
-                count={pageCount}
-                page={page}
-                onChange={(e, value) => setPage(value)}
-                shape="rounded"
-                className="accounts-pagination-control"
-                dir="ltr"
-              />
-            </div>
+                <Pagination
+                  count={totalPages}
+                  page={page}
+                  onChange={(e, value) => setPage(value)}
+                  shape="rounded"
+                  className="accounts-pagination-control"
+                  dir="ltr"
+                />
+              </div>
+            )}
           </>
         )}
       </Paper>
 
-      {/* ===============================
-          Dialog الإضافة / التعديل
-      =============================== */}
+      {/* Dialog الإضافة / التعديل */}
       <Dialog
         open={formDialog.open}
         onClose={handleCloseFormDialog}
@@ -796,7 +785,9 @@ export default function AccountsManagement() {
         fullWidth
       >
         <DialogTitle className="accounts-form-title">
-          {formDialog.mode === "add" ? "إضافة موظف جديد" : "تعديل بيانات الموظف"}
+          {formDialog.mode === "add"
+            ? "إضافة موظف جديد"
+            : "تعديل بيانات الموظف"}
         </DialogTitle>
 
         <DialogContent className="accounts-form-content">
@@ -959,9 +950,7 @@ export default function AccountsManagement() {
         </DialogActions>
       </Dialog>
 
-      {/* ===============================
-          Dialog تغيير كلمة المرور
-      =============================== */}
+      {/* Dialog تغيير كلمة المرور */}
       <Dialog
         open={passwordDialog.open}
         onClose={handleClosePasswordDialog}
@@ -1051,17 +1040,13 @@ export default function AccountsManagement() {
         </DialogActions>
       </Dialog>
 
-      {/* ===============================
-          Dialog الحذف
-      =============================== */}
+      {/* Dialog الحذف */}
       <Dialog
         open={deleteDialog.open}
         onClose={handleCloseDeleteDialog}
         PaperProps={{ className: "accounts-dialog" }}
       >
-        <DialogTitle className="accounts-dialog-title">
-          تأكيد الحذف
-        </DialogTitle>
+        <DialogTitle className="accounts-dialog-title">تأكيد الحذف</DialogTitle>
 
         <DialogContent>
           <DialogContentText className="accounts-dialog-text">

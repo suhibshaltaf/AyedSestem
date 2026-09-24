@@ -9,14 +9,17 @@ function App() {
       <AppRouter />
 
       <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        newestOnTop
-        closeOnClick
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        rtl
+        position="top-center"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={true}
+        closeOnClick={true}
+        rtl={true}
+        pauseOnFocusLoss={false}
+        draggable={true}
+        pauseOnHover={true}
+        limit={2}
+        theme="colored"
       />
     </>
   );

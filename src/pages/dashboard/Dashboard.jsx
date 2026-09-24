@@ -33,19 +33,51 @@ export default function Dashboard() {
     roles.includes("BranchAccountant");
   const isRepresentative = roles.includes("Representative");
   const isOperator = roles.includes("OperatorManager");
-  const { data: orders = [] } = useRepairOrders({}, {
-    enabled: isAdmin || isBranchUser,
-  });
-  const todayKey = new Date().toLocaleDateString("en-CA");
-  const todayOrders = orders.filter((order) =>
-    order.createdAt && new Date(order.createdAt).toLocaleDateString("en-CA") === todayKey
+
+  const { data: orders = [] } = useRepairOrders(
+    {},
+    {
+      enabled: isAdmin || isBranchUser,
+    }
   );
-  const completed = (list) => list.filter((order) => Number(order.status) >= 5).length;
+
+  const todayKey = new Date().toLocaleDateString("en-CA");
+  const todayOrders = orders.filter(
+    (order) =>
+      order.createdAt &&
+      new Date(order.createdAt).toLocaleDateString("en-CA") === todayKey
+  );
+
+  const completed = (list) =>
+    list.filter((order) => Number(order.status) >= 5).length;
+
   const metrics = [
     { title: "تصاليح اليوم", value: todayOrders.length },
-    { title: "إنجاز اليوم", value: `${todayOrders.length ? Math.round(completed(todayOrders) / todayOrders.length * 100) : 0}%`, progress: todayOrders.length ? completed(todayOrders) / todayOrders.length * 100 : 0 },
+    {
+      title: "إنجاز اليوم",
+      value: `${
+        todayOrders.length
+          ? Math.round(
+              (completed(todayOrders) / todayOrders.length) * 100
+            )
+          : 0
+      }%`,
+      progress: todayOrders.length
+        ? (completed(todayOrders) / todayOrders.length) * 100
+        : 0,
+    },
     { title: "مجموع التصاليح", value: orders.length },
-    { title: "الإنجاز الكلي", value: `${orders.length ? Math.round(completed(orders) / orders.length * 100) : 0}%`, progress: orders.length ? completed(orders) / orders.length * 100 : 0 },
+    {
+      title: "الإنجاز الكلي",
+      value: `${
+        orders.length
+          ? Math.round((completed(orders) / orders.length) * 100)
+          : 0
+      }%`,
+      progress: orders.length
+        ? (completed(orders) / orders.length) * 100
+        : 0,
+    },
   ];
 
   const allCards = [
@@ -77,7 +109,8 @@ export default function Dashboard() {
       title: "مسح الباركود",
       icon: <QrCodeScannerIcon sx={{ fontSize: 30 }} />,
       path: "/repairs/scan",
-      show: isAdmin || isBranchUser || isOperator,
+      show:
+        isAdmin || isBranchUser || isOperator || isRepresentative,
     },
     {
       title: "تصليحة جديدة",
@@ -102,6 +135,12 @@ export default function Dashboard() {
       icon: <LocalShippingIcon sx={{ fontSize: 30 }} />,
       path: "/repairs/representative",
       show: isRepresentative,
+    },
+    {
+      title: "لوحة المشغّل",
+      icon: <BuildIcon sx={{ fontSize: 30 }} />,
+      path: "/repairs/operator",
+      show: isOperator || isAdmin,
     },
     {
       title: "حسابي",
@@ -135,20 +174,65 @@ export default function Dashboard() {
         </Typography>
       </div>
 
-      {(isAdmin || isBranchUser) && <Grid container spacing={2} sx={{ mb: 4 }}>
-        {metrics.map((metric) => <Grid item xs={6} md={3} key={metric.title}>
-          <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, borderRadius: 3, minHeight: 132,
-            border: "1px solid var(--border-gold-strong)", backgroundColor: "var(--bg-paper)" }}>
-            <Typography color="text.secondary" sx={{ fontSize: { xs: ".75rem", sm: ".9rem" } }}>{metric.title}</Typography>
-            <Typography variant="h4" sx={{ fontWeight: 800, color: "var(--gold-primary)", my: 1 }}>{metric.value}</Typography>
-            {metric.progress !== undefined && <Box sx={{ height: 7, bgcolor: "var(--border-gold-strong)", borderRadius: 2, overflow: "hidden" }}>
-              <Box sx={{ width: `${metric.progress}%`, height: "100%", bgcolor: "var(--gold-primary)" }} />
-            </Box>}
-          </Paper>
-        </Grid>)}
-      </Grid>}
+      {(isAdmin || isBranchUser) && (
+        <Grid container spacing={2} sx={{ mb: 4 }}>
+          {metrics.map((metric) => (
+            <Grid item xs={6} md={3} key={metric.title}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: { xs: 2, md: 2.5 },
+                  borderRadius: 3,
+                  minHeight: 132,
+                  border: "1px solid var(--border-gold-strong)",
+                  backgroundColor: "var(--bg-paper)",
+                }}
+              >
+                <Typography
+                  color="text.secondary"
+                  sx={{ fontSize: { xs: ".75rem", sm: ".9rem" } }}
+                >
+                  {metric.title}
+                </Typography>
+                <Typography
+                  variant="h4"
+                  sx={{
+                    fontWeight: 800,
+                    color: "var(--gold-primary)",
+                    my: 1,
+                  }}
+                >
+                  {metric.value}
+                </Typography>
+                {metric.progress !== undefined && (
+                  <Box
+                    sx={{
+                      height: 7,
+                      bgcolor: "var(--border-gold-strong)",
+                      borderRadius: 2,
+                      overflow: "hidden",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: `${metric.progress}%`,
+                        height: "100%",
+                        bgcolor: "var(--gold-primary)",
+                      }}
+                    />
+                  </Box>
+                )}
+              </Paper>
+            </Grid>
+          ))}
+        </Grid>
+      )}
 
-      <Grid container spacing={{ xs: 2, sm: 3 }} className="dashboard-grid">
+      <Grid
+        container
+        spacing={{ xs: 2, sm: 3 }}
+        className="dashboard-grid"
+      >
         {cards.map((card) => (
           <Grid item xs={12} sm={6} md={4} key={card.title}>
             <Paper

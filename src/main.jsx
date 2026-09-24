@@ -2,7 +2,6 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ToastContainer } from "react-toastify";
 import { ThemeProvider } from "@mui/material/styles";
 import CssBaseline from "@mui/material/CssBaseline";
 
@@ -12,7 +11,6 @@ import useThemeStore from "./store/useThemeStore.js";
 import AuthInitializer from "./components/auth/AuthInitializer.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
 
-import "react-toastify/dist/ReactToastify.css";
 import "./styles/global.css";
 
 const queryClient = new QueryClient({
@@ -34,12 +32,6 @@ function Root() {
             <AuthInitializer>
               <App />
             </AuthInitializer>
-            <ToastContainer
-              position="top-right"
-              autoClose={3000}
-              rtl
-              theme={mode === "dark" ? "dark" : "light"}
-            />
           </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>

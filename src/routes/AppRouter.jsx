@@ -19,6 +19,7 @@ import RepairOrdersList from "../pages/repairs/RepairOrdersList.jsx";
 import CreateRepairOrder from "../pages/repairs/CreateRepairOrder.jsx";
 import RepairOrderDetails from "../pages/repairs/RepairOrderDetails.jsx";
 import RepresentativeDashboard from "../pages/repairs/RepresentativeDashboard.jsx";
+import OperatorDashboard from "../pages/repairs/OperatorDashboard.jsx";
 import PickupDelivery from "../pages/repairs/PickupDelivery.jsx";
 import RepresentativesSummary from "../pages/repairs/RepresentativesSummary.jsx";
 
@@ -39,9 +40,7 @@ export default function AppRouter() {
 
       <Route
         path="/login"
-        element={
-          token ? <Navigate to="/dashboard" replace /> : <Login />
-        }
+        element={token ? <Navigate to="/dashboard" replace /> : <Login />}
       />
 
       <Route path="/unauthorized" element={<Unauthorized />} />
@@ -56,9 +55,7 @@ export default function AppRouter() {
 
           {/* Admin Only */}
           <Route
-            element={
-              <ProtectedRoute allowedRoles={["SuperAdmin", "Admin"]} />
-            }
+            element={<ProtectedRoute allowedRoles={["SuperAdmin", "Admin"]} />}
           >
             <Route path="/accounts" element={<AccountsManagement />} />
             <Route path="/workshops" element={<WorkshopsManagement />} />
@@ -147,6 +144,24 @@ export default function AppRouter() {
             }
           >
             <Route path="/repairs/scan" element={<ScanRepair />} />
+          </Route>
+
+          {/* ✅ لوحة المشغّل */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "OperatorManager",
+                ]}
+              />
+            }
+          >
+            <Route
+              path="/repairs/operator"
+              element={<OperatorDashboard />}
+            />
           </Route>
 
           {/* تفاصيل تصليحة — ما عدا Representative */}

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -17,15 +17,18 @@ import CloseIcon from "@mui/icons-material/Close";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import { Html5Qrcode } from "html5-qrcode";
 
-const READER_ID = "qr-scanner-reader";
-
 export default function QrScannerDialog({ open, onClose, onScan }) {
   const theme = useTheme();
   const fullScreen = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // ✅ ID فريد لكل نسخة من الـ Dialog
+  const reactId = useId();
+  const readerId = `qr-scanner-reader-${reactId.replace(/:/g, "")}`;
+
   const [error, setError] = useState("");
   const [starting, setStarting] = useState(false);
   const [ready, setReady] = useState(false);
+
   const scannerRef = useRef(null);
   const hasScannedRef = useRef(false);
 
@@ -40,60 +43,96 @@ export default function QrScannerDialog({ open, onClose, onScan }) {
     setReady(false);
     hasScannedRef.current = false;
 
-    const scanner = new Html5Qrcode(READER_ID, { verbose: false });
-    scannerRef.current = scanner;
-
     let cancelled = false;
+    let scanner = null;
+    let startTimer = null;
 
-    scanner
-      .start(
-        { facingMode: "environment" },
-        {
-          fps: 10,
-          qrbox: { width: 250, height: 250 },
-          aspectRatio: 1.0,
-        },
-        (decodedText) => {
-          if (cancelled || hasScannedRef.current) return;
-          hasScannedRef.current = true;
+    // ✅ نأخّر التشغيل حتى يترندر الـ <div> في الـ DOM
+    startTimer = setTimeout(() => {
+      if (cancelled) return;
 
-          // نوقف الكاميرا ثم نرجع النتيجة
-          scanner
-            .stop()
-            .catch(() => {})
-            .finally(() => {
-              if (typeof onScan === "function") {
-                onScan(decodedText);
-              }
-            });
-        },
-        () => {
-          // أخطاء القراءة الفردية — نتجاهلها
-        }
-      )
-      .then(() => {
-        if (cancelled) return;
+      const el = document.getElementById(readerId);
+      if (!el) {
+        // ✅ إعادة المحاولة مرة ثانية بعد 150ms
+        startTimer = setTimeout(() => {
+          if (cancelled) return;
+          const el2 = document.getElementById(readerId);
+          if (!el2) {
+            setStarting(false);
+            setError("تعذر تهيئة الكاميرا. الرجاء إعادة المحاولة.");
+            return;
+          }
+          startScanner(el2);
+        }, 150);
+        return;
+      }
+
+      startScanner(el);
+    }, 50);
+
+    const startScanner = (el) => {
+      try {
+        scanner = new Html5Qrcode(el.id, { verbose: false });
+        scannerRef.current = scanner;
+      } catch (e) {
         setStarting(false);
-        setReady(true);
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        setStarting(false);
-        setReady(false);
-        const msg = String(err?.message || err || "");
-        if (msg.toLowerCase().includes("permission")) {
-          setError("تم رفض إذن الكاميرا. الرجاء السماح بالوصول للكاميرا.");
-        } else if (msg.toLowerCase().includes("notfound")) {
-          setError("لم يتم العثور على كاميرا على هذا الجهاز.");
-        } else {
-          setError("تعذر تشغيل الكاميرا. تأكد من صلاحيات المتصفح.");
-        }
-      });
+        setError("تعذر تهيئة الكاميرا.");
+        return;
+      }
+
+      scanner
+        .start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 },
+            aspectRatio: 1.0,
+          },
+          (decodedText) => {
+            if (cancelled || hasScannedRef.current) return;
+            hasScannedRef.current = true;
+
+            scanner
+              .stop()
+              .catch(() => {})
+              .finally(() => {
+                if (typeof onScan === "function") {
+                  onScan(decodedText);
+                }
+              });
+          },
+          () => {
+            // أخطاء القراءة الفردية — نتجاهلها
+          }
+        )
+        .then(() => {
+          if (cancelled) return;
+          setStarting(false);
+          setReady(true);
+        })
+        .catch((err) => {
+          if (cancelled) return;
+          setStarting(false);
+          setReady(false);
+
+          const msg = String(err?.message || err || "");
+          if (msg.toLowerCase().includes("permission")) {
+            setError("تم رفض إذن الكاميرا. الرجاء السماح بالوصول للكاميرا.");
+          } else if (msg.toLowerCase().includes("notfound")) {
+            setError("لم يتم العثور على كاميرا على هذا الجهاز.");
+          } else {
+            setError("تعذر تشغيل الكاميرا. تأكد من صلاحيات المتصفح.");
+          }
+        });
+    };
 
     return () => {
       cancelled = true;
+      if (startTimer) clearTimeout(startTimer);
+
       const s = scannerRef.current;
       scannerRef.current = null;
+
       if (s) {
         try {
           s.stop()
@@ -110,7 +149,7 @@ export default function QrScannerDialog({ open, onClose, onScan }) {
         }
       }
     };
-  }, [open, onScan]);
+  }, [open, onScan, readerId]);
 
   return (
     <Dialog
@@ -142,7 +181,10 @@ export default function QrScannerDialog({ open, onClose, onScan }) {
 
       <DialogContent dividers sx={{ p: 2 }}>
         {error && (
-          <Alert severity="error" sx={{ mb: 2, fontFamily: "'Cairo', sans-serif" }}>
+          <Alert
+            severity="error"
+            sx={{ mb: 2, fontFamily: "'Cairo', sans-serif" }}
+          >
             {error}
           </Alert>
         )}
@@ -161,7 +203,7 @@ export default function QrScannerDialog({ open, onClose, onScan }) {
           }}
         >
           <div
-            id={READER_ID}
+            id={readerId}
             style={{ width: "100%", height: "100%" }}
           />
 

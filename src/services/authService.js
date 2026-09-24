@@ -38,11 +38,19 @@ const getAvailableRoles = async () => {
 // ===============================
 // جميع المستخدمين
 // ===============================
-const getUsers = async () => {
-  const response = await authAxiosInstance.get("/Account/users");
+const getUsers = async ({
+  pageNumber = 1,
+  pageSize = 20,
+} = {}) => {
+  const response = await authAxiosInstance.get("/Account/users", {
+    params: {
+      pageNumber,
+      pageSize,
+    },
+  });
+
   return response.data;
 };
-
 // ===============================
 // مستخدم بواسطة ID
 // ===============================

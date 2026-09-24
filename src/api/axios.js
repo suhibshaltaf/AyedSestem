@@ -1,12 +1,13 @@
 import axios from "axios";
-import useAuthStore from "../store/useAuthStore.js";
 
 const authAxiosInstance = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   headers: { "Content-Type": "application/json" },
 });
 
+// ===============================
 // Request Interceptor
+// ===============================
 authAxiosInstance.interceptors.request.use(
   (config) => {
     // ✅ قراءة مباشرة من localStorage (أحدث قيمة)
@@ -21,7 +22,9 @@ authAxiosInstance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
+// ===============================
 // Response Interceptor
+// ===============================
 authAxiosInstance.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -31,7 +34,17 @@ authAxiosInstance.interceptors.response.use(
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 
-      useAuthStore.getState().logout();
+      // ✅ dynamic import لتجنب circular dependency
+      try {
+        const { default: useAuthStore } = await import(
+          "../store/useAuthStore.js"
+        );
+        useAuthStore.getState().logout();
+      } catch {
+        // fallback: امسح الـ localStorage مباشرة
+        localStorage.removeItem("AccessToken");
+        localStorage.removeItem("UserData");
+      }
 
       if (window.location.pathname !== "/login") {
         window.location.href = "/login";

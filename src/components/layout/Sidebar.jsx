@@ -91,18 +91,24 @@ const READY_ITEMS = [
     roles: ["Representative"],
   },
   {
-  label: "مسح QR",
-  icon: <QrCodeScannerIcon fontSize="small" />,
-  path: "/repairs/scan",
-  roles: [
-    "SuperAdmin",
-    "Admin",
-    "BranchManager",
-    "BranchAccountant",
-    "OperatorManager",
-    "Representative",
-  ],
-},
+    label: "لوحة المشغّل",
+    icon: <BuildIcon fontSize="small" />,
+    path: "/repairs/operator",
+    roles: ["SuperAdmin", "Admin", "OperatorManager"],
+  },
+  {
+    label: "مسح QR",
+    icon: <QrCodeScannerIcon fontSize="small" />,
+    path: "/repairs/scan",
+    roles: [
+      "SuperAdmin",
+      "Admin",
+      "BranchManager",
+      "BranchAccountant",
+      "OperatorManager",
+      "Representative",
+    ],
+  },
   {
     label: "الضبط",
     icon: <SettingsIcon fontSize="small" />,
@@ -117,14 +123,12 @@ function SidebarContent({ onClose }) {
   const location = useLocation();
 
   const user = useAuthStore((state) => state.user);
-  const logout = useAuthStore((state) => state.logout);
 
   const roles = useMemo(
     () => user?.roles?.map((r) => r.name) || [],
     [user]
   );
 
-  // ✅ هل المستخدم مدير/محاسب فرع؟
   const isBranchRole = useMemo(
     () =>
       roles.includes("BranchManager") ||

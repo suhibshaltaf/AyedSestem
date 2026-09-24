@@ -233,3 +233,54 @@ export const useRepresentativesSummary = (options = {}) => {
     staleTime: 1000 * 60 * 2,
   });
 };
+export const useOperatorDashboard = (options = {}) => {
+  return useQuery({
+    queryKey: ["operator", "dashboard"],
+    queryFn: async () => {
+      const result = await repairOrderService.getRepairOrders({});
+      const orders = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result)
+        ? result
+        : [];
+
+      const atWorkshop = orders.filter((o) => Number(o.status) === 3);
+      const completed = orders.filter((o) => Number(o.status) === 4);
+      const leftWorkshop = orders.filter((o) =>
+        [5, 6, 7].includes(Number(o.status))
+      );
+
+      return {
+        totalReceived:
+          atWorkshop.length + completed.length + leftWorkshop.length,
+        currentlyAtWorkshop: atWorkshop.length,
+        currentlyCompleted: completed.length,
+        leftWorkshop: leftWorkshop.length,
+      };
+    },
+    enabled: options.enabled !== false,
+    staleTime: 1000 * 60,
+  });
+};
+
+// ===============================
+// ✅ Operator Orders (القطع الحالية في المشغل)
+// ===============================
+export const useOperatorOrders = (options = {}) => {
+  return useQuery({
+    queryKey: ["operator", "orders"],
+    queryFn: async () => {
+      const result = await repairOrderService.getRepairOrders({});
+      const orders = Array.isArray(result?.data)
+        ? result.data
+        : Array.isArray(result)
+        ? result
+        : [];
+
+      // القطع الحالية في المشغل: AtWorkshop (3) + RepairCompleted (4)
+      return orders.filter((o) => [3, 4].includes(Number(o.status)));
+    },
+    enabled: options.enabled !== false,
+    staleTime: 1000 * 60,
+  });
+};
