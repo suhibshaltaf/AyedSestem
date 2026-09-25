@@ -84,12 +84,12 @@ const READY_ITEMS = [
     path: "/repairs/representatives-summary",
     roles: ["SuperAdmin", "Admin"],
   },
-  {
+  /*{
     label: "لوحة المندوب",
     icon: <LocalShippingIcon fontSize="small" />,
     path: "/repairs/representative",
     roles: ["SuperAdmin", "Admin","Representative"],
-  },
+  },*/
   {
     label: "لوحة المشغّل",
     icon: <BuildIcon fontSize="small" />,
