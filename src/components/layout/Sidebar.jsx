@@ -22,7 +22,6 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SettingsIcon from "@mui/icons-material/Settings";
-import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import GroupIcon from "@mui/icons-material/Group";
 
 import useAuthStore from "../../store/useAuthStore.js";
@@ -71,12 +70,6 @@ const READY_ITEMS = [
       "BranchManager",
       "BranchAccountant",
     ],
-  },
-  {
-    label: "الاستلام والتسليم",
-    icon: <SwapHorizIcon fontSize="small" />,
-    path: "/repairs/pickup-delivery",
-    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
   },
   {
     label: "ملخص المندوبين",
