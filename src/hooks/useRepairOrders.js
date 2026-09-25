@@ -1,4 +1,9 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  useQuery,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
+
 import { toast } from "react-toastify";
 
 import repairOrderService from "../services/repairOrderService.js";
@@ -8,26 +13,65 @@ import repairOrderService from "../services/repairOrderService.js";
 // ===============================
 export const repairOrderKeys = {
   all: ["repair-orders"],
-  list: (params) => ["repair-orders", "list", params],
-  detail: (id) => ["repair-orders", "detail", id],
-  byBarcode: (barcode) => ["repair-orders", "barcode", barcode],
-  representativesSummary: ["repair-orders", "representatives-summary"],
+
+  list: (params) => [
+    "repair-orders",
+    "list",
+    params,
+  ],
+
+  detail: (id) => [
+    "repair-orders",
+    "detail",
+    id,
+  ],
+
+  byBarcode: (barcode) => [
+    "repair-orders",
+    "barcode",
+    barcode,
+  ],
+
+  representativesSummary: [
+    "repair-orders",
+    "representatives-summary",
+  ],
 };
 
 // ===============================
 // GET: قائمة التصاليح
 // ===============================
-export const useRepairOrders = (params = {}, options = {}) => {
+export const useRepairOrders = (
+  params = {},
+  options = {}
+) => {
   return useQuery({
     queryKey: repairOrderKeys.list(params),
-    queryFn: () => repairOrderService.getRepairOrders(params),
+
+    queryFn: () =>
+      repairOrderService.getRepairOrders(params),
+
     enabled: options.enabled !== false,
+
     select: (result) => {
-      if (result?.success && Array.isArray(result.data)) return result.data;
-      if (Array.isArray(result)) return result;
-      if (Array.isArray(result?.data)) return result.data;
+      if (
+        result?.success &&
+        Array.isArray(result.data)
+      ) {
+        return result.data;
+      }
+
+      if (Array.isArray(result)) {
+        return result;
+      }
+
+      if (Array.isArray(result?.data)) {
+        return result.data;
+      }
+
       return [];
     },
+
     staleTime: 1000 * 60 * 2,
   });
 };
@@ -35,24 +79,48 @@ export const useRepairOrders = (params = {}, options = {}) => {
 // ===============================
 // GET: تفاصيل تصليحة
 // ===============================
-export const useRepairOrderById = (id, options = {}) => {
+export const useRepairOrderById = (
+  id,
+  options = {}
+) => {
   return useQuery({
     queryKey: repairOrderKeys.detail(id),
-    queryFn: () => repairOrderService.getRepairOrderById(id),
-    enabled: !!id && options.enabled !== false,
-    select: (result) => result?.data || null,
+
+    queryFn: () =>
+      repairOrderService.getRepairOrderById(id),
+
+    enabled:
+      !!id &&
+      options.enabled !== false,
+
+    select: (result) =>
+      result?.data || null,
   });
 };
 
 // ===============================
 // GET: بواسطة Barcode
 // ===============================
-export const useRepairOrderByBarcode = (barcode, options = {}) => {
+export const useRepairOrderByBarcode = (
+  barcode,
+  options = {}
+) => {
   return useQuery({
-    queryKey: repairOrderKeys.byBarcode(barcode),
-    queryFn: () => repairOrderService.getRepairOrderByBarcode(barcode),
-    enabled: !!barcode && options.enabled !== false,
-    select: (result) => result?.data || null,
+    queryKey:
+      repairOrderKeys.byBarcode(barcode),
+
+    queryFn: () =>
+      repairOrderService.getRepairOrderByBarcode(
+        barcode
+      ),
+
+    enabled:
+      !!barcode &&
+      options.enabled !== false,
+
+    select: (result) =>
+      result?.data || null,
+
     retry: false,
   });
 };
@@ -61,19 +129,38 @@ export const useRepairOrderByBarcode = (barcode, options = {}) => {
 // POST: إنشاء تصليحة
 // ===============================
 export const useCreateRepairOrder = () => {
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   return useMutation({
-    mutationFn: repairOrderService.createRepairOrder,
+    mutationFn:
+      repairOrderService.createRepairOrder,
+
     onSuccess: (result) => {
       if (result?.data) {
-        toast.success(result?.message || "تم إنشاء التصليحة بنجاح");
-        queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
+        toast.success(
+          result?.message ||
+            "تم إنشاء التصليحة بنجاح"
+        );
+
+        queryClient.invalidateQueries({
+          queryKey:
+            repairOrderKeys.all,
+        });
+
+        queryClient.invalidateQueries({
+          queryKey:
+            repairOrderKeys.representativesSummary,
+        });
       }
     },
+
     onError: (error) => {
-      const resData = error?.response?.data;
-      let msg = "حدث خطأ أثناء إنشاء التصليحة";
+      const resData =
+        error?.response?.data;
+
+      let msg =
+        "حدث خطأ أثناء إنشاء التصليحة";
 
       if (
         resData?.errors &&
@@ -85,7 +172,9 @@ export const useCreateRepairOrder = () => {
         msg = resData.message;
       }
 
-      toast.error(msg, { autoClose: 8000 });
+      toast.error(msg, {
+        autoClose: 8000,
+      });
     },
   });
 };
@@ -94,23 +183,54 @@ export const useCreateRepairOrder = () => {
 // PUT: تعديل تصليحة
 // ===============================
 export const useUpdateRepairOrder = () => {
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, payload }) =>
-      repairOrderService.updateRepairOrder(id, payload),
-    onSuccess: (result, variables) => {
-      if (result?.data || result?.success) {
-        toast.success(result?.message || "تم تعديل التصليحة بنجاح");
-        queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
+      repairOrderService.updateRepairOrder(
+        id,
+        payload
+      ),
+
+    onSuccess: (
+      result,
+      variables
+    ) => {
+      if (
+        result?.data ||
+        result?.success
+      ) {
+        toast.success(
+          result?.message ||
+            "تم تعديل التصليحة بنجاح"
+        );
+
         queryClient.invalidateQueries({
-          queryKey: repairOrderKeys.detail(variables.id),
+          queryKey:
+            repairOrderKeys.all,
+        });
+
+        queryClient.invalidateQueries({
+          queryKey:
+            repairOrderKeys.detail(
+              variables.id
+            ),
+        });
+
+        queryClient.invalidateQueries({
+          queryKey:
+            repairOrderKeys.representativesSummary,
         });
       }
     },
+
     onError: (error) => {
-      const resData = error?.response?.data;
-      let msg = "حدث خطأ أثناء تعديل التصليحة";
+      const resData =
+        error?.response?.data;
+
+      let msg =
+        "حدث خطأ أثناء تعديل التصليحة";
 
       if (
         resData?.errors &&
@@ -122,7 +242,9 @@ export const useUpdateRepairOrder = () => {
         msg = resData.message;
       }
 
-      toast.error(msg, { autoClose: 8000 });
+      toast.error(msg, {
+        autoClose: 8000,
+      });
     },
   });
 };
@@ -131,17 +253,38 @@ export const useUpdateRepairOrder = () => {
 // DELETE: حذف تصليحة
 // ===============================
 export const useDeleteRepairOrder = () => {
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   return useMutation({
-    mutationFn: (id) => repairOrderService.deleteRepairOrder(id),
+    mutationFn: (id) =>
+      repairOrderService.deleteRepairOrder(
+        id
+      ),
+
     onSuccess: (result) => {
-      toast.success(result?.message || "تم حذف التصليحة بنجاح");
-      queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
+      toast.success(
+        result?.message ||
+          "تم حذف التصليحة بنجاح"
+      );
+
+      queryClient.invalidateQueries({
+        queryKey:
+          repairOrderKeys.all,
+      });
+
+      queryClient.invalidateQueries({
+        queryKey:
+          repairOrderKeys.representativesSummary,
+      });
     },
+
     onError: (error) => {
-      const resData = error?.response?.data;
-      let msg = "حدث خطأ أثناء حذف التصليحة";
+      const resData =
+        error?.response?.data;
+
+      let msg =
+        "حدث خطأ أثناء حذف التصليحة";
 
       if (
         resData?.errors &&
@@ -153,53 +296,105 @@ export const useDeleteRepairOrder = () => {
         msg = resData.message;
       }
 
-      toast.error(msg, { autoClose: 8000 });
+      toast.error(msg, {
+        autoClose: 8000,
+      });
     },
   });
 };
 
 // ===============================
-// POST: مسح الباركود/QR (Backend يقرر الحركة والحالة)
+// POST: مسح الباركود / QR
+// Backend يقرر الحركة والحالة
 // ===============================
 export const useScanRepairOrder = () => {
-  const queryClient = useQueryClient();
+  const queryClient =
+    useQueryClient();
 
   return useMutation({
-    mutationFn: repairOrderService.scanRepairOrder,
+    mutationFn:
+      repairOrderService.scanRepairOrder,
+
     onSuccess: (result) => {
       const data = result?.data;
 
       if (data) {
-        const prev = data.previousStatusName || "";
-        const next = data.newStatusName || "";
-        const movementName = data.movementName || "";
+        const prev =
+          data.previousStatusName || "";
+
+        const next =
+          data.newStatusName || "";
+
+        const movementName =
+          data.movementName || "";
 
         const message = movementName
           ? `تم: ${movementName}` +
-            (prev && next ? `\nمن: ${prev} → إلى: ${next}` : "")
-          : result?.message || "تمت العملية بنجاح";
+            (prev && next
+              ? `\nمن: ${prev} → إلى: ${next}`
+              : "")
+          : result?.message ||
+            "تمت العملية بنجاح";
 
-        toast.success(message, { autoClose: 5000 });
+        toast.success(message, {
+          autoClose: 5000,
+        });
 
-        queryClient.invalidateQueries({ queryKey: repairOrderKeys.all });
-        queryClient.invalidateQueries({ queryKey: ["representative"] });
+        // ===============================
+        // تحديث قائمة التصاليح
+        // ===============================
+        queryClient.invalidateQueries({
+          queryKey:
+            repairOrderKeys.all,
+        });
 
+        // ===============================
+        // تحديث Dashboard المندوب
+        // ===============================
+        queryClient.invalidateQueries({
+          queryKey: ["representative"],
+        });
+
+        // ===============================
+        // تحديث ملخص المندوبين
+        // ===============================
+        queryClient.invalidateQueries({
+          queryKey:
+            repairOrderKeys.representativesSummary,
+        });
+
+        // ===============================
+        // تحديث تفاصيل التصليحة
+        // ===============================
         if (data.repairOrderId) {
           queryClient.invalidateQueries({
-            queryKey: repairOrderKeys.detail(data.repairOrderId),
+            queryKey:
+              repairOrderKeys.detail(
+                data.repairOrderId
+              ),
           });
         }
 
+        // ===============================
+        // تحديث التصليحة بواسطة Barcode
+        // ===============================
         if (data.barcode) {
           queryClient.invalidateQueries({
-            queryKey: repairOrderKeys.byBarcode(data.barcode),
+            queryKey:
+              repairOrderKeys.byBarcode(
+                data.barcode
+              ),
           });
         }
       }
     },
+
     onError: (error) => {
-      const resData = error?.response?.data;
-      let msg = "حدث خطأ أثناء معالجة الباركود";
+      const resData =
+        error?.response?.data;
+
+      let msg =
+        "حدث خطأ أثناء معالجة الباركود";
 
       if (
         resData?.errors &&
@@ -211,7 +406,9 @@ export const useScanRepairOrder = () => {
         msg = resData.message;
       }
 
-      toast.error(msg, { autoClose: 8000 });
+      toast.error(msg, {
+        autoClose: 8000,
+      });
     },
   });
 };
@@ -219,68 +416,152 @@ export const useScanRepairOrder = () => {
 // ===============================
 // GET: ملخص المندوبين (Admin)
 // ===============================
-export const useRepresentativesSummary = (options = {}) => {
+export const useRepresentativesSummary = (
+  options = {}
+) => {
   return useQuery({
-    queryKey: repairOrderKeys.representativesSummary,
-    queryFn: repairOrderService.getRepresentativesSummary,
-    enabled: options.enabled !== false,
+    queryKey:
+      repairOrderKeys.representativesSummary,
+
+    queryFn:
+      repairOrderService.getRepresentativesSummary,
+
+    enabled:
+      options.enabled !== false,
+
     select: (result) => {
-      if (result?.success && Array.isArray(result.data)) return result.data;
-      if (Array.isArray(result)) return result;
-      if (Array.isArray(result?.data)) return result.data;
+      // Backend يرجع:
+      // {
+      //   message: "...",
+      //   data: [...]
+      // }
+
+      if (
+        Array.isArray(result?.data)
+      ) {
+        return result.data;
+      }
+
+      if (Array.isArray(result)) {
+        return result;
+      }
+
       return [];
     },
+
     staleTime: 1000 * 60 * 2,
   });
 };
-export const useOperatorDashboard = (options = {}) => {
+
+// ===============================
+// GET: Dashboard المشغل
+// ===============================
+export const useOperatorDashboard = (
+  options = {}
+) => {
   return useQuery({
-    queryKey: ["operator", "dashboard"],
+    queryKey: [
+      "operator",
+      "dashboard",
+    ],
+
     queryFn: async () => {
-      const result = await repairOrderService.getRepairOrders({});
-      const orders = Array.isArray(result?.data)
+      const result =
+        await repairOrderService.getRepairOrders(
+          {}
+        );
+
+      const orders = Array.isArray(
+        result?.data
+      )
         ? result.data
         : Array.isArray(result)
         ? result
         : [];
 
-      const atWorkshop = orders.filter((o) => Number(o.status) === 3);
-      const completed = orders.filter((o) => Number(o.status) === 4);
-      const leftWorkshop = orders.filter((o) =>
-        [5, 6, 7].includes(Number(o.status))
-      );
+      const atWorkshop =
+        orders.filter(
+          (o) =>
+            Number(o.status) === 3
+        );
+
+      const completed =
+        orders.filter(
+          (o) =>
+            Number(o.status) === 4
+        );
+
+      const leftWorkshop =
+        orders.filter((o) =>
+          [5, 6, 7].includes(
+            Number(o.status)
+          )
+        );
 
       return {
         totalReceived:
-          atWorkshop.length + completed.length + leftWorkshop.length,
-        currentlyAtWorkshop: atWorkshop.length,
-        currentlyCompleted: completed.length,
-        leftWorkshop: leftWorkshop.length,
+          atWorkshop.length +
+          completed.length +
+          leftWorkshop.length,
+
+        currentlyAtWorkshop:
+          atWorkshop.length,
+
+        currentlyCompleted:
+          completed.length,
+
+        leftWorkshop:
+          leftWorkshop.length,
       };
     },
-    enabled: options.enabled !== false,
+
+    enabled:
+      options.enabled !== false,
+
     staleTime: 1000 * 60,
   });
 };
 
 // ===============================
-// ✅ Operator Orders (القطع الحالية في المشغل)
+// GET: Operator Orders
+// القطع الحالية في المشغل
 // ===============================
-export const useOperatorOrders = (options = {}) => {
+export const useOperatorOrders = (
+  options = {}
+) => {
   return useQuery({
-    queryKey: ["operator", "orders"],
+    queryKey: [
+      "operator",
+      "orders",
+    ],
+
     queryFn: async () => {
-      const result = await repairOrderService.getRepairOrders({});
-      const orders = Array.isArray(result?.data)
+      const result =
+        await repairOrderService.getRepairOrders(
+          {}
+        );
+
+      const orders = Array.isArray(
+        result?.data
+      )
         ? result.data
         : Array.isArray(result)
         ? result
         : [];
 
-      // القطع الحالية في المشغل: AtWorkshop (3) + RepairCompleted (4)
-      return orders.filter((o) => [3, 4].includes(Number(o.status)));
+      // القطع الحالية في المشغل:
+      // AtWorkshop (3)
+      // RepairCompleted (4)
+      return orders.filter((o) =>
+        [3, 4].includes(
+          Number(o.status)
+        )
+      );
     },
-    enabled: options.enabled !== false,
+
+    enabled:
+      options.enabled !== false,
+
     staleTime: 1000 * 60,
   });
 };

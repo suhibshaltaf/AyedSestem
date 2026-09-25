@@ -30,63 +30,97 @@ import "../../styles/repairs.css";
 export default function RepresentativesSummary() {
   const [searchQuery, setSearchQuery] = useState("");
 
-  const { data: representatives = [], isLoading, refetch } =
-    useRepresentativesSummary();
+  const {
+    data: representatives = [],
+    isLoading,
+    refetch,
+  } = useRepresentativesSummary();
 
-  // فلترة
+  // ===============================
+  // فلترة المندوبين
+  // ===============================
   const filteredRepresentatives = useMemo(() => {
-    if (!searchQuery.trim()) return representatives;
-    const q = searchQuery.toLowerCase();
+    if (!searchQuery.trim()) {
+      return representatives;
+    }
+
+    const q = searchQuery.toLowerCase().trim();
+
     return representatives.filter((r) => {
       return (
-        (r.representativeName || "").toLowerCase().includes(q) ||
-        (r.branchName || "").toLowerCase().includes(q)
+        (r.representativeName || "")
+          .toLowerCase()
+          .includes(q) ||
+        (r.branchName || "")
+          .toLowerCase()
+          .includes(q)
       );
     });
   }, [representatives, searchQuery]);
 
-  const totalPieces = useMemo(
-    () => representatives.reduce((sum, r) => sum + (r.totalPieces || 0), 0),
-    [representatives]
-  );
+  // ===============================
+  // إجمالي القطع الموجودة مع جميع المندوبين
+  // ===============================
+  const totalPieces = useMemo(() => {
+    return representatives.reduce(
+      (sum, r) => sum + Number(r.totalPieces || 0),
+      0
+    );
+  }, [representatives]);
 
   return (
     <div className="repairs-list-container">
-      {/* Header */}
+      {/* ===============================
+          Header
+      =============================== */}
       <div className="repairs-list-header">
         <div className="repairs-list-header-icon">
           <GroupIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="repairs-list-title">ملخص المندوبين</Typography>
+        <Typography className="repairs-list-title">
+          ملخص المندوبين
+        </Typography>
 
         <Typography className="repairs-list-subtitle">
           عرض القطع الموجودة بحوزة كل مندوب
         </Typography>
       </div>
 
-      {/* Stats */}
+      {/* ===============================
+          Stats
+      =============================== */}
       <div className="repairs-summary-stats">
-        <Paper elevation={0} className="repairs-summary-stat">
+        <Paper
+          elevation={0}
+          className="repairs-summary-stat"
+        >
           <Typography className="repairs-summary-stat-value">
             {representatives.length}
           </Typography>
+
           <Typography className="repairs-summary-stat-label">
             عدد المندوبين
           </Typography>
         </Paper>
 
-        <Paper elevation={0} className="repairs-summary-stat">
+        <Paper
+          elevation={0}
+          className="repairs-summary-stat"
+        >
           <Typography className="repairs-summary-stat-value">
             {totalPieces}
           </Typography>
+
           <Typography className="repairs-summary-stat-label">
             إجمالي القطع
           </Typography>
         </Paper>
       </div>
 
-      {/* Toolbar */}
+      {/* ===============================
+          Toolbar
+      =============================== */}
       <div className="repairs-toolbar-simple">
         <TextField
           placeholder="بحث باسم المندوب أو الفرع..."
@@ -98,7 +132,12 @@ export default function RepresentativesSummary() {
             input: {
               startAdornment: (
                 <InputAdornment position="start">
-                  <SearchIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                  <SearchIcon
+                    sx={{
+                      color: "#c9a44c",
+                      fontSize: 20,
+                    }}
+                  />
                 </InputAdornment>
               ),
             },
@@ -115,11 +154,20 @@ export default function RepresentativesSummary() {
         </Tooltip>
       </div>
 
-      {/* Table */}
-      <Paper elevation={0} className="repairs-table-paper">
+      {/* ===============================
+          Table
+      =============================== */}
+      <Paper
+        elevation={0}
+        className="repairs-table-paper"
+      >
         {isLoading ? (
           <Box className="repairs-loading">
-            <CircularProgress sx={{ color: "#b8860b" }} />
+            <CircularProgress
+              sx={{
+                color: "#b8860b",
+              }}
+            />
           </Box>
         ) : filteredRepresentatives.length === 0 ? (
           <Box className="repairs-empty">
@@ -134,74 +182,146 @@ export default function RepresentativesSummary() {
             <Table>
               <TableHead>
                 <TableRow className="repairs-table-head-row">
-                  <TableCell className="repairs-th">#</TableCell>
-                  <TableCell className="repairs-th">اسم المندوب</TableCell>
-                  <TableCell className="repairs-th">الفرع</TableCell>
-                  <TableCell className="repairs-th" align="center">
+                  <TableCell className="repairs-th">
+                    #
+                  </TableCell>
+
+                  <TableCell className="repairs-th">
+                    اسم المندوب
+                  </TableCell>
+
+                  <TableCell className="repairs-th">
+                    الفرع
+                  </TableCell>
+
+                  <TableCell
+                    className="repairs-th"
+                    align="center"
+                  >
                     <InventoryIcon
-                      sx={{ fontSize: 18, verticalAlign: "middle", ml: 0.5 }}
+                      sx={{
+                        fontSize: 18,
+                        verticalAlign: "middle",
+                        ml: 0.5,
+                      }}
                     />
+
                     الإجمالي
                   </TableCell>
-                  <TableCell className="repairs-th" align="center">
+
+                  <TableCell
+                    className="repairs-th"
+                    align="center"
+                  >
                     <StorefrontIcon
-                      sx={{ fontSize: 18, verticalAlign: "middle", ml: 0.5 }}
+                      sx={{
+                        fontSize: 18,
+                        verticalAlign: "middle",
+                        ml: 0.5,
+                      }}
                     />
+
                     من الفرع
                   </TableCell>
-                  <TableCell className="repairs-th" align="center">
+
+                  <TableCell
+                    className="repairs-th"
+                    align="center"
+                  >
                     <BuildIcon
-                      sx={{ fontSize: 18, verticalAlign: "middle", ml: 0.5 }}
+                      sx={{
+                        fontSize: 18,
+                        verticalAlign: "middle",
+                        ml: 0.5,
+                      }}
                     />
+
                     من الورشة
                   </TableCell>
                 </TableRow>
               </TableHead>
 
               <TableBody>
-                {filteredRepresentatives.map((rep, index) => (
-                  <TableRow key={rep.userId} className="repairs-table-row">
-                    <TableCell className="repairs-td">
-                      {index + 1}
-                    </TableCell>
+                {filteredRepresentatives.map(
+                  (rep, index) => {
+                    const total = Number(
+                      rep.totalPieces || 0
+                    );
 
-                    <TableCell className="repairs-td repairs-td-name">
-                      {rep.representativeName || "—"}
-                    </TableCell>
+                    const fromBranch = Number(
+                      rep.fromBranch || 0
+                    );
 
-                    <TableCell className="repairs-td">
-                      {rep.branchName || "—"}
-                    </TableCell>
+                    const fromWorkshop = Number(
+                      rep.fromWorkshop || 0
+                    );
 
-                    <TableCell className="repairs-td" align="center">
-                      <Chip
-                        label={rep.totalPieces || 0}
-                        size="small"
-                        className={`repairs-summary-count-chip ${
-                          rep.totalPieces > 0
-                            ? "repairs-summary-count-chip-active"
-                            : "repairs-summary-count-chip-empty"
-                        }`}
-                      />
-                    </TableCell>
+                    return (
+                      <TableRow
+                        key={rep.userId}
+                        className="repairs-table-row"
+                      >
+                        {/* # */}
+                        <TableCell className="repairs-td">
+                          {index + 1}
+                        </TableCell>
 
-                    <TableCell className="repairs-td" align="center">
-                      <Chip
-                        label={rep.fromBranch || 0}
-                        size="small"
-                        className="repairs-summary-branch-chip"
-                      />
-                    </TableCell>
+                        {/* اسم المندوب */}
+                        <TableCell
+                          className="repairs-td repairs-td-name"
+                        >
+                          {rep.representativeName ||
+                            "—"}
+                        </TableCell>
 
-                    <TableCell className="repairs-td" align="center">
-                      <Chip
-                        label={rep.fromWorkshop || 0}
-                        size="small"
-                        className="repairs-summary-workshop-chip"
-                      />
-                    </TableCell>
-                  </TableRow>
-                ))}
+                        {/* الفرع */}
+                        <TableCell className="repairs-td">
+                          {rep.branchName || "—"}
+                        </TableCell>
+
+                        {/* الإجمالي */}
+                        <TableCell
+                          className="repairs-td"
+                          align="center"
+                        >
+                          <Chip
+                            label={total}
+                            size="small"
+                            className={`repairs-summary-count-chip ${
+                              total > 0
+                                ? "repairs-summary-count-chip-active"
+                                : "repairs-summary-count-chip-empty"
+                            }`}
+                          />
+                        </TableCell>
+
+                        {/* من الفرع */}
+                        <TableCell
+                          className="repairs-td"
+                          align="center"
+                        >
+                          <Chip
+                            label={fromBranch}
+                            size="small"
+                            className="repairs-summary-branch-chip"
+                          />
+                        </TableCell>
+
+                        {/* من الورشة */}
+                        <TableCell
+                          className="repairs-td"
+                          align="center"
+                        >
+                          <Chip
+                            label={fromWorkshop}
+                            size="small"
+                            className="repairs-summary-workshop-chip"
+                          />
+                        </TableCell>
+                      </TableRow>
+                    );
+                  }
+                )}
               </TableBody>
             </Table>
           </TableContainer>
