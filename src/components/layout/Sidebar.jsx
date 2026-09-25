@@ -22,6 +22,7 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SettingsIcon from "@mui/icons-material/Settings";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import GroupIcon from "@mui/icons-material/Group";
 
 import useAuthStore from "../../store/useAuthStore.js";
@@ -72,17 +73,18 @@ const READY_ITEMS = [
     ],
   },
   {
-    label: "ملخص المندوبين",
-    icon: <GroupIcon fontSize="small" />,
-    path: "/repairs/representatives-summary",
-    roles: ["SuperAdmin", "Admin"],
+    label: "الاستلام والتسليم",
+    icon: <SwapHorizIcon fontSize="small" />,
+    path: "/repairs/pickup-delivery",
+    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
   },
+ /*
   {
     label: "لوحة المندوب",
     icon: <LocalShippingIcon fontSize="small" />,
     path: "/repairs/representative",
     roles: ["Representative"],
-  },
+  },*/
   {
     label: "لوحة المشغّل",
     icon: <BuildIcon fontSize="small" />,
