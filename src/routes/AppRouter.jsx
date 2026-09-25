@@ -33,40 +33,107 @@ export default function AppRouter() {
 
   return (
     <Routes>
-      {/* Public */}
+      {/* ===============================
+          Public
+      =============================== */}
       <Route path="/" element={<HomePage />} />
-      <Route path="/home" element={<HomePage />} />
-      <Route path="/track" element={<PublicTracking />} />
+
+      <Route
+        path="/home"
+        element={<HomePage />}
+      />
+
+      <Route
+        path="/track"
+        element={<PublicTracking />}
+      />
 
       <Route
         path="/login"
-        element={token ? <Navigate to="/dashboard" replace /> : <Login />}
+        element={
+          token ? (
+            <Navigate
+              to="/dashboard"
+              replace
+            />
+          ) : (
+            <Login />
+          )
+        }
       />
 
-      <Route path="/unauthorized" element={<Unauthorized />} />
+      <Route
+        path="/unauthorized"
+        element={<Unauthorized />}
+      />
 
-      {/* Protected */}
+      {/* ===============================
+          Protected
+      =============================== */}
       <Route element={<ProtectedRoute />}>
         <Route element={<MainLayout />}>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/change-password" element={<ChangePassword />} />
-          <Route path="/settings" element={<OrganizationSettings />} />
 
-          {/* Admin Only */}
+          {/* ===============================
+              General
+          =============================== */}
           <Route
-            element={<ProtectedRoute allowedRoles={["SuperAdmin", "Admin"]} />}
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="/profile"
+            element={<Profile />}
+          />
+
+          <Route
+            path="/change-password"
+            element={<ChangePassword />}
+          />
+
+          <Route
+            path="/settings"
+            element={<OrganizationSettings />}
+          />
+
+          {/* ===============================
+              Admin Only
+          =============================== */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                ]}
+              />
+            }
           >
-            <Route path="/accounts" element={<AccountsManagement />} />
-            <Route path="/workshops" element={<WorkshopsManagement />} />
-            <Route path="/branches" element={<BranchesManagement />} />
+            <Route
+              path="/accounts"
+              element={<AccountsManagement />}
+            />
+
+            <Route
+              path="/workshops"
+              element={<WorkshopsManagement />}
+            />
+
+            <Route
+              path="/branches"
+              element={<BranchesManagement />}
+            />
+
             <Route
               path="/repairs/representatives-summary"
               element={<RepresentativesSummary />}
             />
           </Route>
 
-          {/* تفاصيل الفرع — Admin + Branch roles */}
+          {/* ===============================
+              تفاصيل الفرع
+              Admin + Branch roles
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -80,10 +147,15 @@ export default function AppRouter() {
               />
             }
           >
-            <Route path="/branches/:id" element={<BranchDetails />} />
+            <Route
+              path="/branches/:id"
+              element={<BranchDetails />}
+            />
           </Route>
 
-          {/* Branch roles */}
+          {/* ===============================
+              Branch roles
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -102,18 +174,30 @@ export default function AppRouter() {
             />
           </Route>
 
-          {/* ✅ إنشاء تصليحة — Branch فقط */}
+          {/* ===============================
+              إنشاء تصليحة
+              Branch فقط
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
-                allowedRoles={["BranchManager", "BranchAccountant"]}
+                allowedRoles={[
+                  "BranchManager",
+                  "BranchAccountant",
+                ]}
               />
             }
           >
-            <Route path="/repairs/create" element={<CreateRepairOrder />} />
+            <Route
+              path="/repairs/create"
+              element={<CreateRepairOrder />}
+            />
           </Route>
 
-          {/* All authenticated (عرض فقط) */}
+          {/* ===============================
+              قائمة التصليحات
+              Admin + Branch roles
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -126,10 +210,16 @@ export default function AppRouter() {
               />
             }
           >
-            <Route path="/repairs/list" element={<RepairOrdersList />} />
+            <Route
+              path="/repairs/list"
+              element={<RepairOrdersList />}
+            />
           </Route>
 
-          {/* ✅ صفحة المسح — متاحة لجميع الأدوار اللي تمسح */}
+          {/* ===============================
+              صفحة المسح
+              جميع الأدوار التي تقوم بالمسح
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -144,10 +234,16 @@ export default function AppRouter() {
               />
             }
           >
-            <Route path="/repairs/scan" element={<ScanRepair />} />
+            <Route
+              path="/repairs/scan"
+              element={<ScanRepair />}
+            />
           </Route>
 
-          {/* ✅ لوحة المشغّل */}
+          {/* ===============================
+              لوحة المشغّل
+              SuperAdmin + Admin + OperatorManager
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -165,7 +261,10 @@ export default function AppRouter() {
             />
           </Route>
 
-          {/* تفاصيل تصليحة — ما عدا Representative */}
+          {/* ===============================
+              تفاصيل التصليحة
+              ما عدا Representative
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -179,10 +278,16 @@ export default function AppRouter() {
               />
             }
           >
-            <Route path="/repairs/:id" element={<RepairOrderDetails />} />
+            <Route
+              path="/repairs/:id"
+              element={<RepairOrderDetails />}
+            />
           </Route>
 
-          {/* ✅ تعديل تصليحة — Branch + OperatorManager */}
+          {/* ===============================
+              تعديل التصليحة
+              Branch + OperatorManager
+          =============================== */}
           <Route
             element={
               <ProtectedRoute
@@ -202,20 +307,42 @@ export default function AppRouter() {
             />
           </Route>
 
-          {/* Representative Only */}
+          {/* ===============================
+              لوحة المندوب
+              Representative + Admin + SuperAdmin
+          =============================== */}
           <Route
-            element={<ProtectedRoute allowedRoles={["Representative"]} />}
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "Representative",
+                ]}
+              />
+            }
           >
             <Route
               path="/repairs/representative"
               element={<RepresentativeDashboard />}
             />
           </Route>
+
         </Route>
       </Route>
 
-      {/* Catch All */}
-      <Route path="*" element={<Navigate to="/" replace />} />
+      {/* ===============================
+          Catch All
+      =============================== */}
+      <Route
+        path="*"
+        element={
+          <Navigate
+            to="/"
+            replace
+          />
+        }
+      />
     </Routes>
   );
 }
