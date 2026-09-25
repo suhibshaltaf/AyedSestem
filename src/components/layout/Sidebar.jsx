@@ -78,12 +78,17 @@ const READY_ITEMS = [
     path: "/repairs/pickup-delivery",
     roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
   },
- 
+  {
+    label: "ملخص المندوبين",
+    icon: <GroupIcon fontSize="small" />,
+    path: "/repairs/representatives-summary",
+    roles: ["SuperAdmin", "Admin"],
+  },
   {
     label: "لوحة المندوب",
     icon: <LocalShippingIcon fontSize="small" />,
     path: "/repairs/representative",
-    roles: ["Representative"],
+    roles: ["SuperAdmin", "Admin","Representative"],
   },
   {
     label: "لوحة المشغّل",
