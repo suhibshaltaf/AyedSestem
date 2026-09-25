@@ -47,17 +47,22 @@ const repairOrderSchema = yup.object({
     .required("العمل المطلوب مطلوب")
     .max(1000, "العمل المطلوب يجب ألا يتجاوز 1000 حرف"),
 
+  // ✅ السعر اختياري — المشغل هو الذي يدخله
   price: yup
     .number()
     .typeError("السعر يجب أن يكون رقماً")
     .min(0, "السعر لا يمكن أن يكون سالباً")
-    .nullable(),
+    .nullable()
+    .transform((value, originalValue) =>
+      originalValue === "" || originalValue === null ? undefined : value
+    ),
 
   notes: yup
     .string()
     .trim()
     .max(1000, "الملاحظات يجب ألا تتجاوز 1000 حرف"),
 
+  // ✅ ملاحظات المشغل اختيارية
   operatorNotes: yup
     .string()
     .trim()

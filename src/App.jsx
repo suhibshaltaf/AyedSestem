@@ -8,18 +8,35 @@ function App() {
     <>
       <AppRouter />
 
+      {/* ✅ حاوية للتوستات العادية (تختفي تلقائياً) */}
       <ToastContainer
         position="top-center"
-        autoClose={4000}
+        autoClose={5000}
         hideProgressBar={false}
-        newestOnTop={true}
+        newestOnTop
+        closeOnClick
+        rtl
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+        limit={5}
+      />
+
+      {/* ✅ حاوية للتوستات المهمة (تبقى حتى يسكّرها المستخدم) */}
+      <ToastContainer
+        containerId="persistent"
+        position="top-center"
+        autoClose={false}
+        hideProgressBar={false}
+        newestOnTop
         closeOnClick={true}
-        rtl={true}
+        rtl
         pauseOnFocusLoss={false}
-        draggable={true}
-        pauseOnHover={true}
-        limit={2}
-        theme="colored"
+        draggable={false}
+        pauseOnHover
+        theme="light"
+        limit={3}
       />
     </>
   );

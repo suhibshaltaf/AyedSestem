@@ -16,6 +16,17 @@ export const REPAIR_STATUSES = {
 };
 
 // ===============================
+// ثوابت الحالات (للاستخدام البرمجي)
+// ===============================
+export const STATUS_NEW = 1;
+export const STATUS_WITH_REP = 2;
+export const STATUS_AT_WORKSHOP = 3;
+export const STATUS_COMPLETED = 4;
+export const STATUS_WITH_REP_AFTER = 5;
+export const STATUS_READY = 6;
+export const STATUS_DELIVERED = 7;
+
+// ===============================
 // أنواع الحركات (6 أنواع)
 // ===============================
 export const MOVEMENT_TYPES = {
@@ -80,15 +91,75 @@ export const canCreateRepair = (userRoles = []) => {
 };
 
 // ===============================
-// هل يمكن تعديل التصليحة؟
-// فقط عندما Status = New ولا توجد حركات
+// ✅ هل يمكن التعديل كـ Branch؟
+// BranchManager / BranchAccountant
+// ===============================
+export const canEditAsBranch = (userRoles = []) => {
+  return (
+    userRoles.includes("BranchManager") ||
+    userRoles.includes("BranchAccountant")
+  );
+};
+
+// ===============================
+// ✅ هل يمكن التعديل كـ Operator؟
+// OperatorManager + Status = AtWorkshop (3)
+// ===============================
+export const canEditAsOperator = (userRoles = [], status) => {
+  const isOperator = userRoles.includes("OperatorManager");
+  const isAtWorkshop = Number(status) === STATUS_AT_WORKSHOP;
+  return isOperator && isAtWorkshop;
+};
+
+// ===============================
+// ✅ قائمة الحقول المسموح بتعديلها حسب الدور والحالة
+// ===============================
+export const getEditableFields = (userRoles = [], status) => {
+  // Branch: بيانات الفرع فقط (بدون price و operatorNotes)
+  if (canEditAsBranch(userRoles)) {
+    return [
+      "customerName",
+      "customerPhone",
+      "description",
+      "weight",
+      "karat",
+      "quantity",
+      "requiredWork",
+      "notes",
+      "deliveryBranchId",
+      "customerReceiverEmployeeId",
+    ];
+  }
+
+  // Operator (AtWorkshop فقط): price و operatorNotes فقط
+  if (canEditAsOperator(userRoles, status)) {
+    return ["price", "operatorNotes"];
+  }
+
+  return [];
+};
+
+// ===============================
+// ✅ هل يمكن تعديل التصليحة؟ (شامل لكل الأدوار)
+// - Branch: فقط عندما Status = New ولا توجد حركات
+// - Operator: فقط عندما Status = AtWorkshop
+// - Representative: لا
 // ===============================
 export const canEditRepair = (userRoles = [], status, movements = []) => {
-  const hasRole =
-    userRoles.includes("BranchManager") ||
-    userRoles.includes("BranchAccountant");
+  // Branch: New + لا حركات
+  if (canEditAsBranch(userRoles)) {
+    return (
+      Number(status) === STATUS_NEW &&
+      (!movements || movements.length === 0)
+    );
+  }
 
-  return hasRole && Number(status) === 1 && (!movements || movements.length === 0);
+  // Operator: AtWorkshop
+  if (canEditAsOperator(userRoles, status)) {
+    return true;
+  }
+
+  return false;
 };
 
 // ===============================
@@ -99,7 +170,11 @@ export const canDeleteRepair = (userRoles = [], status, movements = []) => {
   const hasRole =
     userRoles.includes("SuperAdmin") || userRoles.includes("Admin");
 
-  return hasRole && Number(status) === 1 && (!movements || movements.length === 0);
+  return (
+    hasRole &&
+    Number(status) === STATUS_NEW &&
+    (!movements || movements.length === 0)
+  );
 };
 
 // ===============================

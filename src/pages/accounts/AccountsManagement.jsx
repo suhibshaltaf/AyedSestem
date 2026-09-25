@@ -35,6 +35,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
 import LockResetIcon from "@mui/icons-material/LockReset";
+import ErrorOutlinedIcon from "@mui/icons-material/ErrorOutlined";
 
 import authService from "../../services/authService.js";
 import { useBranches } from "../../hooks/useBranches.js";
@@ -67,19 +68,28 @@ const ADMIN_ROLES = ["SuperAdmin", "Admin"];
 // ===============================
 const PAGE_SIZE = 10;
 
+// ✅ إعدادات موحدة للتوستات المهمة
+const PERSISTENT_TOAST_OPTIONS = {
+  containerId: "persistent",
+  position: "top-center",
+  autoClose: false,
+  closeOnClick: true,
+  closeButton: true,
+  pauseOnHover: true,
+  draggable: false,
+};
+
 export default function AccountsManagement() {
   const currentUser = useAuthStore((state) => state.user);
 
-  // State
-  const [users, setUsers] = useState([]);
+  // ✅ State — كل المستخدمين
+  const [allUsers, setAllUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Pagination (server-side)
+  // ✅ Pagination (client-side)
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const [totalCount, setTotalCount] = useState(0);
   const [pageSize] = useState(PAGE_SIZE);
 
   // Dialog الحذف
@@ -108,6 +118,9 @@ export default function AccountsManagement() {
   const [formData, setFormData] = useState(emptyForm);
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
+
+  // ✅ خطأ الـ Backend (يظهر داخل الـ Dialog)
+  const [backendError, setBackendError] = useState("");
 
   // جلب الفروع والورش
   const { data: branches = [] } = useBranches();
@@ -193,56 +206,35 @@ export default function AccountsManagement() {
   const needsWorkshop = WORKSHOP_ROLES.includes(formData.role);
 
   // ===============================
-  // ✅ جلب المستخدمين (server-side pagination)
+  // ✅ جلب كل المستخدمين مرة وحدة
   // ===============================
-  const fetchUsers = async (targetPage = 1) => {
+  const fetchAllUsers = async () => {
     try {
       setLoading(true);
 
       const result = await authService.getUsers({
-        pageNumber: targetPage,
-        pageSize: pageSize,
+        pageNumber: 1,
+        pageSize: 10000,
       });
-
-      // ✅ دعم شكلين للـ response:
-      // 1) { success, data: { items, totalCount, totalPages } }
-      // 2) { success, data: [...], totalCount, totalPages }
 
       const payload = result?.data;
       let items = [];
-      let count = 0;
-      let pages = 1;
 
       if (Array.isArray(payload)) {
-        // شكل 2
         items = payload;
-        count = Number(result?.totalCount) || payload.length;
-        pages = Number(result?.totalPages) || 1;
       } else if (payload && Array.isArray(payload.items)) {
-        // شكل 1
         items = payload.items;
-        count = Number(payload.totalCount) || 0;
-        pages = Number(payload.totalPages) || 1;
       } else if (Array.isArray(result)) {
         items = result;
-        count = result.length;
-        pages = 1;
       }
 
-      setUsers(items);
-      setTotalCount(count);
-      setTotalPages(pages);
-
-      if (items.length === 0 && count === 0) {
-        // لا شيء — طبيعي
-      }
+      setAllUsers(items);
     } catch (error) {
       console.error("Fetch Users Error:", error);
-      setUsers([]);
-      setTotalCount(0);
-      setTotalPages(1);
+      setAllUsers([]);
       toast.error(
-        error?.response?.data?.message || "حدث خطأ أثناء جلب المستخدمين"
+        error?.response?.data?.message || "حدث خطأ أثناء جلب المستخدمين",
+        PERSISTENT_TOAST_OPTIONS
       );
     } finally {
       setLoading(false);
@@ -265,23 +257,21 @@ export default function AccountsManagement() {
     }
   };
 
-  // ✅ عند تغيير الصفحة → نداء API جديد
-  useEffect(() => {
-    fetchUsers(page);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page]);
-
   // تحميل أولي
   useEffect(() => {
+    fetchAllUsers();
     fetchRoles();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ فلترة client-side (على الصفحة الحالية)
+  // ===============================
+  // ✅ فلترة client-side — على كل المستخدمين
+  // ===============================
   const filteredUsers = useMemo(() => {
-    if (!searchQuery.trim()) return users;
-    const q = searchQuery.toLowerCase();
-    return users.filter((u) => {
+    if (!searchQuery.trim()) return allUsers;
+    const q = searchQuery.toLowerCase().trim();
+
+    return allUsers.filter((u) => {
       const fullName = (u.fullName || "").toLowerCase();
       const userName = (u.userName || "").toLowerCase();
       const email = (u.email || "").toLowerCase();
@@ -290,6 +280,7 @@ export default function AccountsManagement() {
       const userRoles = (u.roles || [])
         .map((r) => (r.displayName || r.name || "").toLowerCase())
         .join(" ");
+
       return (
         fullName.includes(q) ||
         userName.includes(q) ||
@@ -299,16 +290,32 @@ export default function AccountsManagement() {
         userRoles.includes(q)
       );
     });
-  }, [users, searchQuery]);
+  }, [allUsers, searchQuery]);
 
-  // Pagination display
+  // ===============================
+  // ✅ Pagination على النتائج المفلترة
+  // ===============================
+  const totalCount = filteredUsers.length;
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+
+  const paginatedUsers = useMemo(() => {
+    const start = (page - 1) * pageSize;
+    return filteredUsers.slice(start, start + pageSize);
+  }, [filteredUsers, page, pageSize]);
+
   const startItem = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const endItem = Math.min(page * pageSize, totalCount);
+
+  // ✅ رجّع للصفحة 1 عند البحث
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
 
   // فتح Dialog الإضافة
   const handleAddClick = () => {
     setFormData(emptyForm);
     setFormErrors({});
+    setBackendError("");
     setFormDialog({ open: true, mode: "add", user: null });
   };
 
@@ -324,6 +331,7 @@ export default function AccountsManagement() {
       workshopId: user.workshopId || "",
     });
     setFormErrors({});
+    setBackendError("");
     setFormDialog({ open: true, mode: "edit", user });
   };
 
@@ -333,6 +341,7 @@ export default function AccountsManagement() {
       setFormDialog({ open: false, mode: "add", user: null });
       setFormData(emptyForm);
       setFormErrors({});
+      setBackendError("");
     }
   };
 
@@ -349,6 +358,10 @@ export default function AccountsManagement() {
 
     if (formErrors[field]) {
       setFormErrors((prev) => ({ ...prev, [field]: "" }));
+    }
+
+    if (backendError) {
+      setBackendError("");
     }
   };
 
@@ -388,12 +401,15 @@ export default function AccountsManagement() {
     return Object.keys(errors).length === 0;
   };
 
-  // حفظ
+  // ===============================
+  // ✅ حفظ
+  // ===============================
   const handleSave = async () => {
     if (!validateForm()) return;
 
     try {
       setSaving(true);
+      setBackendError("");
 
       if (formDialog.mode === "add") {
         const payload = {
@@ -413,12 +429,19 @@ export default function AccountsManagement() {
         const result = await authService.createEmployee(payload);
 
         if (result?.success) {
-          toast.success(result?.message || "تم إضافة الموظف بنجاح");
+          toast.success(result?.message || "تم إضافة الموظف بنجاح", {
+            ...PERSISTENT_TOAST_OPTIONS,
+            toastId: "create-employee-success",
+          });
           handleCloseFormDialog();
-          setPage(1);
-          fetchUsers(1);
+          fetchAllUsers();
         } else {
-          toast.error(result?.message || "فشل إضافة الموظف");
+          const errorMsg = result?.message || "فشل إضافة الموظف";
+          setBackendError(errorMsg);
+          toast.error(errorMsg, {
+            ...PERSISTENT_TOAST_OPTIONS,
+            toastId: "save-user-error",
+          });
         }
       } else {
         const payload = {
@@ -432,16 +455,39 @@ export default function AccountsManagement() {
         );
 
         if (result?.success) {
-          toast.success(result?.message || "تم تعديل الموظف بنجاح");
+          toast.success(result?.message || "تم تعديل الموظف بنجاح", {
+            ...PERSISTENT_TOAST_OPTIONS,
+            toastId: "update-employee-success",
+          });
           handleCloseFormDialog();
-          fetchUsers(page);
+          fetchAllUsers();
         } else {
-          toast.error(result?.message || "فشل تعديل الموظف");
+          const errorMsg = result?.message || "فشل تعديل الموظف";
+          setBackendError(errorMsg);
+          toast.error(errorMsg, {
+            ...PERSISTENT_TOAST_OPTIONS,
+            toastId: "save-user-error",
+          });
         }
       }
     } catch (error) {
       console.error("Save User Error:", error);
-      toast.error(error?.response?.data?.message || "حدث خطأ أثناء الحفظ");
+
+      const errorMsg =
+        error?.response?.data?.message ||
+        error?.response?.data?.title ||
+        (Array.isArray(error?.response?.data?.errors)
+          ? error.response.data.errors[0]
+          : null) ||
+        error?.message ||
+        "حدث خطأ أثناء الحفظ";
+
+      setBackendError(errorMsg);
+
+      toast.error(errorMsg, {
+        ...PERSISTENT_TOAST_OPTIONS,
+        toastId: "save-user-error",
+      });
     } finally {
       setSaving(false);
     }
@@ -450,7 +496,10 @@ export default function AccountsManagement() {
   // حذف
   const handleDeleteClick = (user) => {
     if (user.id === currentUser?.id) {
-      toast.warning("لا يمكنك حذف حسابك الحالي");
+      toast.warning("لا يمكنك حذف حسابك الحالي", {
+        position: "top-center",
+        autoClose: 4000,
+      });
       return;
     }
     setDeleteDialog({ open: true, user });
@@ -465,21 +514,26 @@ export default function AccountsManagement() {
       const result = await authService.deleteUser(user.id);
 
       if (result?.success) {
-        toast.success(result?.message || "تم حذف المستخدم بنجاح");
-
-        // إذا كانت الصفحة الحالية فيها عنصر واحد فقط، ارجع للصفحة السابقة
-        const newPage = users.length === 1 && page > 1 ? page - 1 : page;
-        setPage(newPage);
-        fetchUsers(newPage);
-
+        toast.success(result?.message || "تم حذف المستخدم بنجاح", {
+          ...PERSISTENT_TOAST_OPTIONS,
+          toastId: "delete-user-success",
+        });
         setDeleteDialog({ open: false, user: null });
+        fetchAllUsers();
       } else {
-        toast.error(result?.message || "فشل حذف المستخدم");
+        toast.error(result?.message || "فشل حذف المستخدم", {
+          ...PERSISTENT_TOAST_OPTIONS,
+          toastId: "delete-user-error",
+        });
       }
     } catch (error) {
       console.error("Delete User Error:", error);
       toast.error(
-        error?.response?.data?.message || "حدث خطأ أثناء حذف المستخدم"
+        error?.response?.data?.message || "حدث خطأ أثناء حذف المستخدم",
+        {
+          ...PERSISTENT_TOAST_OPTIONS,
+          toastId: "delete-user-error",
+        }
       );
     } finally {
       setDeleting(false);
@@ -549,15 +603,25 @@ export default function AccountsManagement() {
       });
 
       if (result?.success) {
-        toast.success(result?.message || "تم تغيير كلمة المرور بنجاح");
+        toast.success(result?.message || "تم تغيير كلمة المرور بنجاح", {
+          ...PERSISTENT_TOAST_OPTIONS,
+          toastId: "password-success",
+        });
         handleClosePasswordDialog();
       } else {
-        toast.error(result?.message || "فشل تغيير كلمة المرور");
+        toast.error(result?.message || "فشل تغيير كلمة المرور", {
+          ...PERSISTENT_TOAST_OPTIONS,
+          toastId: "password-error",
+        });
       }
     } catch (error) {
       console.error("Change Password Error:", error);
       toast.error(
-        error?.response?.data?.message || "حدث خطأ أثناء تغيير كلمة المرور"
+        error?.response?.data?.message || "حدث خطأ أثناء تغيير كلمة المرور",
+        {
+          ...PERSISTENT_TOAST_OPTIONS,
+          toastId: "password-error",
+        }
       );
     } finally {
       setSavingPassword(false);
@@ -615,7 +679,7 @@ export default function AccountsManagement() {
         <div className="accounts-actions">
           <Tooltip title="تحديث">
             <IconButton
-              onClick={() => fetchUsers(page)}
+              onClick={fetchAllUsers}
               className="accounts-refresh-btn"
             >
               <RefreshIcon />
@@ -639,7 +703,7 @@ export default function AccountsManagement() {
           <Box className="accounts-loading">
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
-        ) : filteredUsers.length === 0 ? (
+        ) : paginatedUsers.length === 0 ? (
           <Box className="accounts-empty">
             <Typography>
               {searchQuery
@@ -669,7 +733,7 @@ export default function AccountsManagement() {
                 </TableHead>
 
                 <TableBody>
-                  {filteredUsers.map((user, index) => {
+                  {paginatedUsers.map((user, index) => {
                     const status = getAccountStatus(user);
                     return (
                       <TableRow key={user.id} className="accounts-table-row">
@@ -756,7 +820,7 @@ export default function AccountsManagement() {
             </TableContainer>
 
             {/* Pagination */}
-            {!searchQuery && totalPages > 1 && (
+            {totalPages > 1 && (
               <div className="accounts-pagination">
                 <div className="accounts-pagination-info">
                   عرض {startItem} - {endItem} من {totalCount} مستخدمين
@@ -791,6 +855,41 @@ export default function AccountsManagement() {
         </DialogTitle>
 
         <DialogContent className="accounts-form-content">
+          {backendError && (
+            <Box
+              sx={{
+                mb: 2,
+                p: 1.5,
+                borderRadius: 1.5,
+                backgroundColor: "#ffebee",
+                border: "1px solid #ef5350",
+                display: "flex",
+                alignItems: "flex-start",
+                gap: 1,
+              }}
+            >
+              <ErrorOutlinedIcon
+                sx={{
+                  color: "#d32f2f",
+                  fontSize: 20,
+                  mt: 0.2,
+                  flexShrink: 0,
+                }}
+              />
+              <Typography
+                sx={{
+                  color: "#c62828",
+                  fontSize: "0.85rem",
+                  fontFamily: "'Cairo', sans-serif",
+                  fontWeight: 600,
+                  lineHeight: 1.5,
+                }}
+              >
+                {backendError}
+              </Typography>
+            </Box>
+          )}
+
           <TextField
             fullWidth
             label="اسم الموظف"

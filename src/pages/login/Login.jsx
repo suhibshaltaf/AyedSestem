@@ -1,10 +1,9 @@
-// src/pages/login/Login.jsx
-
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
+import companyLogo from "../../assets/Logo.svg";
 
 import {
   Box,
@@ -259,77 +258,15 @@ export default function Login() {
         {/* ============================================
             الشعار AV + اسم المجموعة
         ============================================ */}
-        <Box
-          sx={{
-            mb: 2,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-          }}
-        >
-          {/* شعار AV المتشابك */}
-          <Box sx={{ width: 60, height: 55, mb: 0.3 }}>
-            <svg
-              viewBox="0 0 70 60"
-              width="60"
-              height="55"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <defs>
-                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="#d4af6a" />
-                  <stop offset="100%" stopColor="#a67c2e" />
-                </linearGradient>
-              </defs>
-              {/* حرف A */}
-              <path
-                d="M 10 52 L 22 12 L 34 52"
-                stroke="url(#goldGrad)"
-                strokeWidth="3.5"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              <line
-                x1="16" y1="38" x2="28" y2="38"
-                stroke="url(#goldGrad)"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
-              {/* حرف V متداخل */}
-              <path
-                d="M 32 14 L 42 52 L 52 14"
-                stroke="url(#goldGrad)"
-                strokeWidth="3.5"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-              {/* خط علوي أفقي صغير (شكل الشعار) */}
-              <line
-                x1="22" y1="12" x2="42" y2="12"
-                stroke="url(#goldGrad)"
-                strokeWidth="3.5"
-                strokeLinecap="round"
-              />
-            </svg>
-          </Box>
-
-          {/* اسم المجموعة */}
-          <Typography
-            sx={{
-              fontFamily: "'Amiri', 'Cairo', serif",
-              fontSize: { xs: "1.4rem", sm: "1.55rem" },
-              fontWeight: 700,
-              color: darkMode ? "#e6c878" : "#b8860b",
-              textAlign: "center",
-              lineHeight: 1.4,
-              letterSpacing: "0.3px",
-            }}
-          >
-            مجموعة عايد وإخوانه
-          </Typography>
-        </Box>
+        <div className="sidebar-header">
+               <img
+                 src={companyLogo}
+                 alt="مجموعة عايد دعنا"
+                 className="sidebar-logo"
+               />
+       
+               <Typography className="sidebar-title">مجموعة عايد دعنا</Typography>
+             </div>
 
         {/* ============================================
             كارت تسجيل الدخول

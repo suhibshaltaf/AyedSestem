@@ -102,6 +102,7 @@ export default function AppRouter() {
             />
           </Route>
 
+          {/* ✅ إنشاء تصليحة — Branch فقط */}
           <Route
             element={
               <ProtectedRoute
@@ -179,6 +180,26 @@ export default function AppRouter() {
             }
           >
             <Route path="/repairs/:id" element={<RepairOrderDetails />} />
+          </Route>
+
+          {/* ✅ تعديل تصليحة — Branch + OperatorManager */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                  "BranchAccountant",
+                  "OperatorManager",
+                ]}
+              />
+            }
+          >
+            <Route
+              path="/repairs/:id/edit"
+              element={<CreateRepairOrder />}
+            />
           </Route>
 
           {/* Representative Only */}
