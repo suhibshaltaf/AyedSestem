@@ -83,7 +83,7 @@ const READY_ITEMS = [
     label: "لوحة المندوب",
     icon: <LocalShippingIcon fontSize="small" />,
     path: "/repairs/representative",
-    roles: ["Representative"],
+    roles: ["SuperAdmin", "Admin", "BranchManager","Representative"],
   },
   {
     label: "لوحة المشغّل",
