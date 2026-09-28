@@ -1228,3 +1228,30 @@
     min-height: 100px;
   }
 }
+
+/* ===============================
+   Print Table Button
+   =============================== */
+.repairs-print-table-btn {
+  border-color: #8b6914 !important;
+  color: #8b6914 !important;
+  font-weight: 600 !important;
+  border-radius: 10px !important;
+  height: 40px !important;
+  text-transform: none !important;
+  font-family: "Cairo", sans-serif !important;
+}
+
+.repairs-print-table-btn:hover {
+  background-color: rgba(139, 105, 20, 0.08) !important;
+  border-color: #6b4f0a !important;
+}
+
+[data-theme="dark"] .repairs-print-table-btn {
+  border-color: #e6c878 !important;
+  color: #e6c878 !important;
+}
+
+[data-theme="dark"] .repairs-print-table-btn:hover {
+  background-color: rgba(230, 200, 120, 0.1) !important;
+}

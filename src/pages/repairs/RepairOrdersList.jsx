@@ -27,6 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import GridOnIcon from "@mui/icons-material/GridOn";
+import PrintIcon from "@mui/icons-material/Print";
 import { useNavigate } from "react-router-dom";
 
 import { useRepairOrders } from "../../hooks/useRepairOrders.js";
@@ -124,6 +125,288 @@ export default function RepairOrdersList() {
 
   const handleExportExcel = () => {
     exportRepairsToExcel(filteredOrders, "repairs");
+  };
+
+  /* ==========================================
+   * ✅ طباعة الجدول
+   * ========================================== */
+  const handlePrint = () => {
+    if (filteredOrders.length === 0) return;
+
+    const printWindow = window.open("", "_blank", "width=1200,height=800");
+    if (!printWindow) {
+      alert("الرجاء السماح بالنوافذ المنبثقة للطباعة");
+      return;
+    }
+
+    // ✅ بناء عنوان الفلاتر
+    const filterLabels = [];
+    if (fromDate) filterLabels.push(`من: ${fromDate}`);
+    if (toDate) filterLabels.push(`إلى: ${toDate}`);
+    if (branchFilter) {
+      const branch = branches.find((b) => b.id === Number(branchFilter));
+      if (branch) filterLabels.push(`الفرع: ${branch.name}`);
+    }
+    if (statusFilter) {
+      const status = statusOptions.find(
+        (s) => s.value === Number(statusFilter)
+      );
+      if (status) filterLabels.push(`الحالة: ${status.label}`);
+    }
+    if (searchQuery) filterLabels.push(`بحث: ${searchQuery}`);
+
+    const filterText =
+      filterLabels.length > 0
+        ? `<div class="filters">${filterLabels.join(" | ")}</div>`
+        : "";
+
+    // ✅ بناء صفوف الجدول
+    const rowsHtml = filteredOrders
+      .map((order, index) => {
+        const statusName =
+          order.statusName || getStatusName(order.status);
+        const createdDate = order.createdAt
+          ? new Date(order.createdAt).toLocaleDateString("ar-JO")
+          : "—";
+
+        // ✅ عمود الهاتف فقط للمصرّح لهم
+        const phoneCell = canViewPhone
+          ? `<td class="phone">${order.customerPhone || "—"}</td>`
+          : "";
+
+        return `
+          <tr>
+            <td class="center">${index + 1}</td>
+            <td class="barcode">${order.barcode || "—"}</td>
+            <td>${order.customerName || "—"}</td>
+            ${phoneCell}
+            <td>${order.description || "—"}</td>
+            <td>${order.pickupBranchName || "—"}</td>
+            <td class="center">${statusName}</td>
+            <td>${order.currentLocationName || "—"}</td>
+            <td class="center date">${createdDate}</td>
+          </tr>
+        `;
+      })
+      .join("");
+
+    // ✅ عنوان عمود الهاتف
+    const phoneHeader = canViewPhone
+      ? `<th>الهاتف</th>`
+      : "";
+
+    const now = new Date().toLocaleString("ar-JO", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html dir="rtl" lang="ar">
+        <head>
+          <meta charset="UTF-8" />
+          <title>كشف التصاليح</title>
+          <style>
+            * { box-sizing: border-box; }
+
+            body {
+              margin: 0;
+              padding: 20px;
+              font-family: 'Cairo', 'Arial', sans-serif;
+              background: #fff;
+              color: #222;
+              direction: rtl;
+            }
+
+            .header {
+              text-align: center;
+              margin-bottom: 20px;
+              padding-bottom: 12px;
+              border-bottom: 2px solid #b8860b;
+            }
+
+            .header h1 {
+              margin: 0 0 6px 0;
+              font-size: 1.5rem;
+              color: #8b6914;
+              font-weight: 700;
+            }
+
+            .header .subtitle {
+              margin: 0;
+              font-size: 0.9rem;
+              color: #666;
+            }
+
+            .filters {
+              margin-top: 10px;
+              font-size: 0.85rem;
+              color: #555;
+              font-weight: 600;
+              padding: 8px 12px;
+              background: #fdf6e3;
+              border-radius: 6px;
+              display: inline-block;
+            }
+
+            .meta {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 12px;
+              font-size: 0.82rem;
+              color: #666;
+            }
+
+            table {
+              width: 100%;
+              border-collapse: collapse;
+              font-size: 0.82rem;
+            }
+
+            thead {
+              background-color: #f5e6c8;
+            }
+
+            th {
+              padding: 10px 8px;
+              text-align: right;
+              font-weight: 700;
+              color: #8b6914;
+              border: 1px solid #d4b876;
+              font-size: 0.82rem;
+              white-space: nowrap;
+            }
+
+            td {
+              padding: 8px;
+              border: 1px solid #e0d0a0;
+              text-align: right;
+              color: #333;
+            }
+
+            tbody tr:nth-child(even) {
+              background-color: #fdfaf2;
+            }
+
+            tbody tr:hover {
+              background-color: #f9f1de;
+            }
+
+            .center { text-align: center; }
+
+            .barcode {
+              font-family: 'Courier New', monospace;
+              font-weight: 700;
+              color: #8b6914;
+              letter-spacing: 0.5px;
+              font-size: 0.78rem;
+            }
+
+            .phone {
+              direction: ltr;
+              text-align: right;
+              font-family: 'Courier New', monospace;
+            }
+
+            .date {
+              font-size: 0.78rem;
+              color: #666;
+              white-space: nowrap;
+            }
+
+            .footer {
+              margin-top: 20px;
+              padding-top: 10px;
+              border-top: 1px solid #d4b876;
+              text-align: center;
+              font-size: 0.78rem;
+              color: #888;
+            }
+
+            @media print {
+              @page {
+                size: A4 landscape;
+                margin: 10mm;
+              }
+
+              body {
+                padding: 0;
+                font-size: 10pt;
+              }
+
+              .header h1 { font-size: 14pt; }
+              .filters { font-size: 9pt; }
+
+              th, td {
+                padding: 6px 4px;
+                font-size: 9pt;
+              }
+
+              thead {
+                background-color: #f5e6c8 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+
+              tbody tr:nth-child(even) {
+                background-color: #fdfaf2 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>مجموعة عايد دعنا</h1>
+            <p class="subtitle">كشف التصاليح</p>
+            ${filterText}
+          </div>
+
+          <div class="meta">
+            <span>عدد التصاليح: <strong>${filteredOrders.length}</strong></span>
+            <span>تاريخ الطباعة: ${now}</span>
+          </div>
+
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px;">#</th>
+                <th>الباركود</th>
+                <th>العميل</th>
+                ${phoneHeader}
+                <th>الوصف</th>
+                <th>الفرع</th>
+                <th>الحالة</th>
+                <th>الموقع الحالي</th>
+                <th>تاريخ الإنشاء</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+
+          <div class="footer">
+            نظام GoldSystem — تم إنشاء هذا التقرير تلقائياً
+          </div>
+
+          <script>
+            window.onload = function () {
+              setTimeout(function () {
+                window.print();
+              }, 400);
+            };
+          </script>
+        </body>
+      </html>
+    `);
+
+    printWindow.document.close();
   };
 
   // ✅ الحالات الجديدة (7 حالات)
@@ -274,6 +557,21 @@ export default function RepairOrdersList() {
                 </span>
               </Tooltip>
 
+              {/* ✅ زر طباعة الجدول */}
+              <Tooltip title="طباعة الجدول">
+                <span>
+                  <Button
+                    variant="outlined"
+                    startIcon={<PrintIcon />}
+                    onClick={handlePrint}
+                    disabled={filteredOrders.length === 0}
+                    className="repairs-print-table-btn"
+                  >
+                    طباعة
+                  </Button>
+                </span>
+              </Tooltip>
+
               {canCreate && (
                 <Button
                   variant="contained"
@@ -308,7 +606,6 @@ export default function RepairOrdersList() {
                     <TableCell className="repairs-th">#</TableCell>
                     <TableCell className="repairs-th">الباركود</TableCell>
                     <TableCell className="repairs-th">العميل</TableCell>
-                    {/* ✅ إخفاء عمود الهاتف عن غير المصرّح لهم */}
                     {canViewPhone && (
                       <TableCell className="repairs-th">الهاتف</TableCell>
                     )}
@@ -344,7 +641,6 @@ export default function RepairOrdersList() {
                         {order.customerName || "—"}
                       </TableCell>
 
-                      {/* ✅ إخفاء رقم الهاتف عن غير المصرّح لهم */}
                       {canViewPhone && (
                         <TableCell className="repairs-td repairs-td-phone">
                           {order.customerPhone || "—"}
