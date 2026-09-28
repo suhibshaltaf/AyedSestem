@@ -79,6 +79,23 @@ const repairOrderSchema = yup.object({
     .typeError("يجب اختيار الموظف المستلم")
     .required("الموظف المستلم مطلوب")
     .min(1, "يجب اختيار الموظف المستلم"),
+
+  // ✅ الصورة الرئيسية (اختيارية)
+  mainImage: yup
+    .mixed()
+    .nullable()
+    .test("fileSize", "حجم الصورة يجب ألا يتجاوز 5 ميجابايت", (value) => {
+      if (!value) return true;
+      if (typeof value === "string") return true; // صورة موجودة مسبقاً
+      return value.size <= 5 * 1024 * 1024;
+    })
+    .test("fileType", "يجب أن تكون الصورة بصيغة JPG أو PNG أو WEBP", (value) => {
+      if (!value) return true;
+      if (typeof value === "string") return true;
+      return ["image/jpeg", "image/jpg", "image/png", "image/webp"].includes(
+        value.type
+      );
+    }),
 });
 
 export default repairOrderSchema;

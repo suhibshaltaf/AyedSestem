@@ -1,4 +1,4 @@
-import { useMemo, useEffect } from "react";
+import { useMemo, useEffect, useState, useRef } from "react";
 import {
   Box,
   Typography,
@@ -10,6 +10,7 @@ import {
   Divider,
   Grid,
   InputAdornment,
+  IconButton,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -28,6 +29,8 @@ import NumbersIcon from "@mui/icons-material/Numbers";
 import BuildIcon from "@mui/icons-material/Build";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import NotesIcon from "@mui/icons-material/Notes";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import repairOrderSchema from "./repairOrderSchema.js";
 import {
@@ -44,6 +47,7 @@ import {
   getEditableFields,
   canEditRepair,
 } from "../../utils/repairConstants.js";
+import { buildImageUrl } from "../../utils/imageUtils.js";
 import "../../styles/repairs.css";
 
 // ===============================================
@@ -104,11 +108,75 @@ const branchEmptyForm = {
   operatorNotes: "",
   deliveryBranchId: "",
   customerReceiverEmployeeId: "",
+  mainImage: null,
 };
 
 const operatorEmptyForm = {
   price: "",
   operatorNotes: "",
+};
+
+// ===============================================
+// ✅ بناء FormData للإنشاء
+// ===============================================
+const buildCreateFormData = (data, mainImageFile) => {
+  const formData = new FormData();
+
+  formData.append("CustomerName", String(data.customerName || "").trim());
+  formData.append("CustomerPhone", String(data.customerPhone || "").trim());
+  formData.append("Description", String(data.description || "").trim());
+  formData.append("Weight", String(data.weight ? Number(data.weight) : 0));
+  formData.append("Karat", String(data.karat || ""));
+  formData.append("Quantity", String(data.quantity ? Number(data.quantity) : 1));
+  formData.append("RequiredWork", String(data.requiredWork || "").trim());
+  formData.append("Price", "0");
+  formData.append("Notes", String(data.notes || "").trim());
+  formData.append("OperatorNotes", "");
+  formData.append("DeliveryBranchId", String(Number(data.deliveryBranchId)));
+  formData.append(
+    "CustomerReceiverEmployeeId",
+    String(Number(data.customerReceiverEmployeeId))
+  );
+
+  // ✅ إضافة الصورة فقط إذا وُجدت
+  if (mainImageFile instanceof File) {
+    formData.append("MainImage", mainImageFile);
+  }
+
+  return formData;
+};
+
+// ===============================================
+// ✅ بناء FormData للتعديل
+// ===============================================
+const buildUpdateFormData = (fullPayload, mainImageFile) => {
+  const formData = new FormData();
+
+  formData.append("CustomerName", String(fullPayload.customerName || "").trim());
+  formData.append(
+    "CustomerPhone",
+    String(fullPayload.customerPhone || "").trim()
+  );
+  formData.append("Description", String(fullPayload.description || "").trim());
+  formData.append("Weight", String(fullPayload.weight || 0));
+  formData.append("Karat", String(fullPayload.karat || ""));
+  formData.append("Quantity", String(fullPayload.quantity || 1));
+  formData.append("RequiredWork", String(fullPayload.requiredWork || "").trim());
+  formData.append("Price", String(fullPayload.price || 0));
+  formData.append("Notes", String(fullPayload.notes || "").trim());
+  formData.append("OperatorNotes", String(fullPayload.operatorNotes || "").trim());
+  formData.append("DeliveryBranchId", String(fullPayload.deliveryBranchId));
+  formData.append(
+    "CustomerReceiverEmployeeId",
+    String(fullPayload.customerReceiverEmployeeId)
+  );
+
+  // ✅ إضافة الصورة فقط إذا وُجدت
+  if (mainImageFile instanceof File) {
+    formData.append("MainImage", mainImageFile);
+  }
+
+  return formData;
 };
 
 // ===============================================
@@ -133,6 +201,11 @@ function RepairFormInner({
   const schema = isOperatorForm ? operatorEditSchema : repairOrderSchema;
   const defaultValues = isOperatorForm ? operatorEmptyForm : branchEmptyForm;
 
+  // ✅ state للصورة
+  const [imagePreview, setImagePreview] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const fileInputRef = useRef(null);
+
   const {
     register,
     handleSubmit,
@@ -145,6 +218,56 @@ function RepairFormInner({
     mode: "onSubmit",
     shouldUnregister: true,
   });
+
+  // ✅ تحميل الصورة الحالية في وضع التعديل
+  useEffect(() => {
+    if (isEditMode && existingOrder?.mainImage) {
+      setImagePreview(buildImageUrl(existingOrder.mainImage));
+    }
+  }, [isEditMode, existingOrder?.mainImage]);
+
+  /* ==========================================
+   * ✅ معالجة اختيار الصورة
+   * ========================================== */
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // ✅ التحقق من الحجم
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("حجم الصورة يجب ألا يتجاوز 5 ميجابايت", PERSISTENT_TOAST);
+      return;
+    }
+
+    // ✅ التحقق من النوع
+    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
+    if (!allowedTypes.includes(file.type)) {
+      toast.error("يجب أن تكون الصورة بصيغة JPG أو PNG أو WEBP", PERSISTENT_TOAST);
+      return;
+    }
+
+    setImageFile(file);
+    setValue("mainImage", file, { shouldValidate: true });
+
+    // ✅ إنشاء preview
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setImagePreview(reader.result);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  /* ==========================================
+   * ✅ إزالة الصورة
+   * ========================================== */
+  const handleRemoveImage = () => {
+    setImageFile(null);
+    setImagePreview(null);
+    setValue("mainImage", null, { shouldValidate: true });
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   /* ==========================================
    * ✅ Submit
@@ -188,9 +311,12 @@ function RepairFormInner({
           );
         }
 
+        // ✅ بناء FormData للتعديل
+        const formData = buildUpdateFormData(fullPayload, imageFile);
+
         await updateMutation.mutateAsync({
           id: editId,
-          payload: fullPayload,
+          payload: formData,
         });
         navigate(`/repairs/${editId}`);
         return;
@@ -212,22 +338,10 @@ function RepairFormInner({
         return;
       }
 
-      const payload = {
-        customerName: String(data.customerName || "").trim(),
-        customerPhone: String(data.customerPhone || "").trim(),
-        description: String(data.description || "").trim(),
-        weight: data.weight ? Number(data.weight) : 0,
-        karat: String(data.karat || ""),
-        quantity: data.quantity ? Number(data.quantity) : 1,
-        requiredWork: String(data.requiredWork || "").trim(),
-        price: 0,
-        notes: String(data.notes || "").trim(),
-        operatorNotes: "",
-        deliveryBranchId,
-        customerReceiverEmployeeId,
-      };
+      // ✅ بناء FormData للإنشاء
+      const formData = buildCreateFormData(data, imageFile);
 
-      const result = await createMutation.mutateAsync(payload);
+      const result = await createMutation.mutateAsync(formData);
       const orderId = result?.data?.id || result?.data?.Id;
 
       if (orderId) {
@@ -517,6 +631,77 @@ function RepairFormInner({
                       },
                     }}
                   />
+                </Grid>
+              </Grid>
+
+              {/* ✅ قسم الصورة الرئيسية */}
+              <Typography className="repairs-section-title">
+                الصورة الرئيسية
+              </Typography>
+
+              <Divider className="repairs-section-divider" />
+
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12}>
+                  <Box className="repairs-image-upload-container">
+                    {/* Input مخفي */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      onChange={handleImageChange}
+                      style={{ display: "none" }}
+                      id="main-image-input"
+                    />
+
+                    {/* Preview أو زر الرفع */}
+                    {imagePreview ? (
+                      <Box className="repairs-image-preview-wrapper">
+                        <img
+                          src={imagePreview}
+                          alt="معاينة الصورة"
+                          className="repairs-image-preview"
+                        />
+                        <IconButton
+                          className="repairs-image-remove-btn"
+                          onClick={handleRemoveImage}
+                          size="small"
+                          title="إزالة الصورة"
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
+                      </Box>
+                    ) : (
+                      <label
+                        htmlFor="main-image-input"
+                        className="repairs-image-upload-label"
+                      >
+                        <AddPhotoAlternateIcon
+                          sx={{ fontSize: 40, color: "#c9a44c" }}
+                        />
+                        <Typography className="repairs-image-upload-text">
+                          اختر صورة للقطعة (اختياري)
+                        </Typography>
+                        <Typography className="repairs-image-upload-hint">
+                          JPG, PNG, WEBP — بحد أقصى 5MB
+                        </Typography>
+                      </label>
+                    )}
+
+                    {/* زر تغيير الصورة إذا كانت موجودة */}
+                    {imagePreview && (
+                      <Button
+                        variant="outlined"
+                        component="label"
+                        htmlFor="main-image-input"
+                        className="repairs-image-change-btn"
+                        startIcon={<AddPhotoAlternateIcon />}
+                        size="small"
+                      >
+                        تغيير الصورة
+                      </Button>
+                    )}
+                  </Box>
                 </Grid>
               </Grid>
 

@@ -27,6 +27,7 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import HistoryIcon from "@mui/icons-material/History";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import ImageIcon from "@mui/icons-material/Image";
 
 import {
   useRepairOrderById,
@@ -44,6 +45,15 @@ import {
 } from "../../utils/repairConstants.js";
 import "../../styles/repairs.css";
 
+// ===============================
+// ✅ الأدوار المسموح لها برؤية رقم الهاتف
+// ===============================
+const PHONE_VISIBLE_ROLES = [
+  "Admin",
+  "SuperAdmin",
+  "BranchManager",
+];
+
 export default function RepairOrderDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -52,6 +62,12 @@ export default function RepairOrderDetails() {
   const roles = useMemo(
     () => currentUser?.roles?.map((r) => r.name) || [],
     [currentUser]
+  );
+
+  // ✅ هل يسمح له برؤية رقم الهاتف؟
+  const canViewPhone = useMemo(
+    () => roles.some((role) => PHONE_VISIBLE_ROLES.includes(role)),
+    [roles]
   );
 
   const { data: order, isLoading } = useRepairOrderById(id);
@@ -65,7 +81,13 @@ export default function RepairOrderDetails() {
   const showQr = organization?.showQrCode !== false;
 
   const [images, setImages] = useState({ barcode: null, qr: null });
+  const [mainImageUrl, setMainImageUrl] = useState(null);
+  const [mainImageLoading, setMainImageLoading] = useState(false);
+  const [mainImageError, setMainImageError] = useState(false);
 
+  /* ==========================================
+   * ✅ Barcode + QR
+   * ========================================== */
   useEffect(() => {
     if (!order?.barcode) return undefined;
     let active = true;
@@ -98,6 +120,32 @@ export default function RepairOrderDetails() {
       urls.forEach((url) => URL.revokeObjectURL(url));
     };
   }, [order?.barcode, showBarcode, showQr]);
+
+  /* ==========================================
+   * ✅ Main Image — Static URL
+   * ========================================== */
+  useEffect(() => {
+    setMainImageError(false);
+    setMainImageUrl(null);
+
+    const rawMainImage = order?.mainImage ?? order?.MainImage ?? null;
+
+    if (!rawMainImage) {
+      setMainImageLoading(false);
+      return undefined;
+    }
+
+    const staticUrl = repairOrderService.getMainImageUrl(rawMainImage);
+
+    if (staticUrl) {
+      console.log("🔍 Main image static URL:", staticUrl);
+      setMainImageUrl(staticUrl);
+      setMainImageLoading(false);
+      return undefined;
+    }
+
+    return undefined;
+  }, [order?.mainImage, order?.MainImage, order?.id]);
 
   const deleteMutation = useDeleteRepairOrder();
 
@@ -200,14 +248,20 @@ export default function RepairOrderDetails() {
     );
   }
 
+  // ✅ بناء قائمة التفاصيل (مع إخفاء الهاتف إذا لزم)
   const details = [
     { label: "العميل", value: order.customerName || "—", icon: <PersonIcon /> },
-    {
-      label: "الهاتف",
-      value: order.customerPhone || "—",
-      icon: <PhoneIcon />,
-      ltr: true,
-    },
+    // ✅ عرض الهاتف فقط للمصرّح لهم
+    ...(canViewPhone
+      ? [
+          {
+            label: "الهاتف",
+            value: order.customerPhone || "—",
+            icon: <PhoneIcon />,
+            ltr: true,
+          },
+        ]
+      : []),
     { label: "الوصف", value: order.description || "—" },
     {
       label: "الوزن",
@@ -317,6 +371,8 @@ export default function RepairOrderDetails() {
         )}
       </div>
 
+      
+
       {/* Barcode Display */}
       {(images.barcode || images.qr) && (
         <Paper elevation={0} className="repairs-details-card">
@@ -392,7 +448,40 @@ export default function RepairOrderDetails() {
           ))}
         </Grid>
       </Paper>
+{/* ✅ الصورة الرئيسية */}
+      <Paper elevation={0} className="repairs-details-card">
+        <Typography className="repairs-details-movements-history-title">
+          <ImageIcon sx={{ fontSize: 20 }} /> الصورة الرئيسية
+        </Typography>
 
+        <Divider className="repairs-details-divider" />
+
+        <Box className="repairs-main-image-container">
+          {mainImageLoading ? (
+            <CircularProgress size={40} sx={{ color: "#b8860b" }} />
+          ) : mainImageUrl && !mainImageError ? (
+            <img
+              src={mainImageUrl}
+              alt={`صورة القطعة - ${order.customerName || order.barcode || ""}`}
+              className="repairs-main-image"
+              onError={() => {
+                console.warn("❌ Image failed to load:", mainImageUrl);
+                setMainImageError(true);
+              }}
+              onLoad={() => {
+                console.log("✅ Image loaded:", mainImageUrl);
+              }}
+            />
+          ) : (
+            <Box className="repairs-main-image-placeholder">
+              <ImageIcon sx={{ fontSize: 48, color: "#c9a44c", opacity: 0.5 }} />
+              <Typography className="repairs-main-image-placeholder-text">
+                {mainImageError ? "تعذر تحميل الصورة" : "لا توجد صورة"}
+              </Typography>
+            </Box>
+          )}
+        </Box>
+      </Paper>
       {/* Current Responsibility */}
       <Paper elevation={0} className="repairs-details-card">
         <Typography className="repairs-details-movements-history-title">

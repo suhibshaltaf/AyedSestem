@@ -43,6 +43,15 @@ import "../../styles/repairs.css";
 
 const PAGE_SIZE = 10;
 
+// ===============================
+// ✅ الأدوار المسموح لها برؤية رقم الهاتف
+// ===============================
+const PHONE_VISIBLE_ROLES = [
+  "Admin",
+  "SuperAdmin",
+  "BranchManager",
+];
+
 export default function RepairOrdersList() {
   const navigate = useNavigate();
   const currentUser = useAuthStore((state) => state.user);
@@ -54,6 +63,12 @@ export default function RepairOrdersList() {
 
   const isAdmin = canViewAllBranches(roles);
   const canCreate = canCreateRepair(roles);
+
+  // ✅ هل يسمح له برؤية رقم الهاتف؟
+  const canViewPhone = useMemo(
+    () => roles.some((role) => PHONE_VISIBLE_ROLES.includes(role)),
+    [roles]
+  );
 
   const [searchQuery, setSearchQuery] = useState("");
   const [fromDate, setFromDate] = useState("");
@@ -293,7 +308,10 @@ export default function RepairOrdersList() {
                     <TableCell className="repairs-th">#</TableCell>
                     <TableCell className="repairs-th">الباركود</TableCell>
                     <TableCell className="repairs-th">العميل</TableCell>
-                    <TableCell className="repairs-th">الهاتف</TableCell>
+                    {/* ✅ إخفاء عمود الهاتف عن غير المصرّح لهم */}
+                    {canViewPhone && (
+                      <TableCell className="repairs-th">الهاتف</TableCell>
+                    )}
                     <TableCell className="repairs-th">الوصف</TableCell>
                     <TableCell className="repairs-th">الفرع</TableCell>
                     <TableCell className="repairs-th">الحالة</TableCell>
@@ -326,9 +344,12 @@ export default function RepairOrdersList() {
                         {order.customerName || "—"}
                       </TableCell>
 
-                      <TableCell className="repairs-td repairs-td-phone">
-                        {order.customerPhone || "—"}
-                      </TableCell>
+                      {/* ✅ إخفاء رقم الهاتف عن غير المصرّح لهم */}
+                      {canViewPhone && (
+                        <TableCell className="repairs-td repairs-td-phone">
+                          {order.customerPhone || "—"}
+                        </TableCell>
+                      )}
 
                       <TableCell className="repairs-td">
                         {order.description || "—"}
