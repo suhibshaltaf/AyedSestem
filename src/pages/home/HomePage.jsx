@@ -6,7 +6,6 @@ import {
   TextField,
   Button,
   CircularProgress,
-  Chip,
   Divider,
   IconButton,
   Tooltip,
@@ -18,10 +17,10 @@ import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import LoginIcon from "@mui/icons-material/Login";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 import { useTrackRepairOrder } from "../../hooks/usePublicTracking.js";
 import useAuthStore from "../../store/useAuthStore.js";
@@ -35,7 +34,6 @@ export default function HomePage() {
   const [searchTriggered, setSearchTriggered] = useState(false);
   const [formErrors, setFormErrors] = useState({});
 
-  // ✅ التتبع - بدون pickupBranchId
   const {
     data: order,
     isLoading: loadingOrder,
@@ -63,6 +61,7 @@ export default function HomePage() {
     setFormErrors({});
   };
 
+  // ✅ حالة الجاهزية
   const isReady = order?.isReadyForPickup === true;
   const isDelivered = order?.isDeliveredToCustomer === true;
 
@@ -189,6 +188,7 @@ export default function HomePage() {
       {/* Result */}
       {order && !loadingOrder && !isError && (
         <Paper elevation={0} className="home-result-card">
+          {/* ✅ حالة الجاهزية */}
           <div
             className={`home-status-highlight ${
               isReady || isDelivered ? "home-ready" : "home-not-ready"
@@ -221,7 +221,7 @@ export default function HomePage() {
                   التصليحة غير جاهزة للاستلام
                 </Typography>
                 <Typography className="home-status-sub">
-                  {order.status || "قيد التنفيذ"}
+                  قيد التنفيذ
                 </Typography>
               </>
             )}
@@ -229,10 +229,12 @@ export default function HomePage() {
 
           <Divider className="home-divider" />
 
+          {/* ✅ البيانات المطلوبة فقط */}
           <div className="home-details">
+            {/* رقم الباركود */}
             <div className="home-row">
               <Typography className="home-value home-value-mono">
-                {order.barcode}
+                {order.barcode || "—"}
               </Typography>
               <div className="home-label">
                 <span>رقم الباركود:</span>
@@ -242,6 +244,22 @@ export default function HomePage() {
 
             <Divider className="home-divider" />
 
+            {/* السعر */}
+            <div className="home-row">
+              <Typography className="home-value">
+                {order.price !== null && order.price !== undefined
+                  ? ` ${order.price} دينار `
+                  : "—"}
+              </Typography>
+              <div className="home-label">
+                <span>السعر:</span>
+                <AttachMoneyIcon sx={{ fontSize: 18 }} />
+              </div>
+            </div>
+
+            <Divider className="home-divider" />
+
+            {/* فرع الاستلام */}
             <div className="home-row">
               <Typography className="home-value">
                 {order.pickupBranchName || "—"}
@@ -249,45 +267,6 @@ export default function HomePage() {
               <div className="home-label">
                 <span>فرع الاستلام:</span>
                 <StorefrontIcon sx={{ fontSize: 18 }} />
-              </div>
-            </div>
-
-            <Divider className="home-divider" />
-
-            <div className="home-row">
-              <Typography className="home-value">
-                {order.deliveryBranchName || "—"}
-              </Typography>
-              <div className="home-label">
-                <span>فرع التسليم:</span>
-                <StorefrontIcon sx={{ fontSize: 18 }} />
-              </div>
-            </div>
-
-            <Divider className="home-divider" />
-
-            <div className="home-row">
-              <Chip
-                label={order.status || "—"}
-                className="home-status-chip"
-                size="small"
-              />
-              <div className="home-label">
-                <span>الحالة:</span>
-              </div>
-            </div>
-
-            <Divider className="home-divider" />
-
-            <div className="home-row">
-              <Typography className="home-value home-value-date">
-                {order.createdAt
-                  ? new Date(order.createdAt).toLocaleDateString("ar-JO")
-                  : "—"}
-              </Typography>
-              <div className="home-label">
-                <span>تاريخ الاستلام:</span>
-                <CalendarTodayIcon sx={{ fontSize: 18 }} />
               </div>
             </div>
           </div>

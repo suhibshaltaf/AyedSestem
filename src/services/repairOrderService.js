@@ -58,7 +58,7 @@ const repairOrderService = {
 
   // ===============================
   // POST: إنشاء تصليحة
-  // ✅ يدعم JSON و FormData (لرفع الصورة)
+  // ✅ يدعم JSON و FormData (لرفع الصور)
   // ===============================
   createRepairOrder: async (payload) => {
     const response = await authAxiosInstance.post(
@@ -71,7 +71,7 @@ const repairOrderService = {
 
   // ===============================
   // PUT: تعديل تصليحة
-  // ✅ يدعم JSON و FormData (لرفع الصورة)
+  // ✅ يدعم JSON و FormData (لرفع الصور)
   // ===============================
   updateRepairOrder: async (id, payload) => {
     const response = await authAxiosInstance.put(
@@ -155,14 +155,14 @@ const repairOrderService = {
   },
 
   // ===============================
-  // ✅ GET: رابط الصورة الرئيسية (Static URL)
-  // - mainImageName: اسم الملف فقط (مثل "abc123.jpg")
+  // ✅ GET: رابط صورة التصليح (Static URL)
+  // - fileName: اسم الملف فقط (مثل "abc123.jpg")
   //   أو مسار كامل
   // ===============================
-  getMainImageUrl: (mainImageName) => {
-    if (!mainImageName || typeof mainImageName !== "string") return null;
+  getRepairImageUrl: (fileName) => {
+    if (!fileName || typeof fileName !== "string") return null;
 
-    const trimmed = mainImageName.trim();
+    const trimmed = fileName.trim();
     if (!trimmed) return null;
 
     // ✅ URL كامل
@@ -179,37 +179,7 @@ const repairOrderService = {
     }
 
     // ✅ اسم ملف فقط — المسار الفعلي: /uploads/{fileName}
-    // ⚠️ تم التأكد أن Backend يحفظ في wwwroot/uploads/ مباشرة
     return `${base}/uploads/${trimmed}`;
-  },
-
-  // ===============================
-  // ✅ GET: الصورة الرئيسية كـ Blob (fallback)
-  // يستخدم فقط إذا فشل الـ Static URL
-  // ===============================
-  getMainImage: async (mainImageName) => {
-    if (!mainImageName) return null;
-
-    // ✅ جرب المسار المباشر عبر static files
-    const staticUrl = repairOrderService.getMainImageUrl(mainImageName);
-    if (staticUrl) {
-      try {
-        // ✅ نستخدم fetch بدل axios لأن الصور قد لا تحتاج Authorization
-        const res = await fetch(staticUrl);
-        if (res.ok) {
-          return await res.blob();
-        }
-      } catch {
-        // fallthrough → جرب axios
-      }
-    }
-
-    // ✅ fallback → axios مع endpoint مخصص (إذا كان موجوداً في Backend)
-    const response = await authAxiosInstance.get(
-      `/RepairOrders/main-image/${encodeURIComponent(mainImageName)}`,
-      { responseType: "blob" }
-    );
-    return response.data;
   },
 
   // ===============================

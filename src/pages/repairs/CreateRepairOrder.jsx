@@ -44,10 +44,9 @@ import useAuthStore from "../../store/useAuthStore.js";
 import {
   canEditAsBranch,
   canEditAsOperator,
-  getEditableFields,
   canEditRepair,
 } from "../../utils/repairConstants.js";
-import { buildImageUrl } from "../../utils/imageUtils.js";
+import repairOrderService from "../../services/repairOrderService.js";
 import "../../styles/repairs.css";
 
 // ===============================================
@@ -65,7 +64,7 @@ const KARAT_OPTIONS = [
 ];
 
 // ===============================================
-// ✅ خيارات التوست المهم (تبقى حتى يسكّرها المستخدم)
+// ✅ خيارات التوست المهم
 // ===============================================
 const PERSISTENT_TOAST = {
   containerId: "persistent",
@@ -78,7 +77,7 @@ const PERSISTENT_TOAST = {
 };
 
 // ===============================================
-// ✅ Schema خاص بالمشغل — فقط price و operatorNotes
+// ✅ Schema خاص بالمشغل
 // ===============================================
 const operatorEditSchema = yup.object({
   price: yup
@@ -108,7 +107,6 @@ const branchEmptyForm = {
   operatorNotes: "",
   deliveryBranchId: "",
   customerReceiverEmployeeId: "",
-  mainImage: null,
 };
 
 const operatorEmptyForm = {
@@ -117,9 +115,21 @@ const operatorEmptyForm = {
 };
 
 // ===============================================
+// ✅ حدود الصور
+// ===============================================
+const MAX_IMAGES = 5;
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/jpg",
+  "image/png",
+  "image/webp",
+];
+
+// ===============================================
 // ✅ بناء FormData للإنشاء
 // ===============================================
-const buildCreateFormData = (data, mainImageFile) => {
+const buildCreateFormData = (data, imageFiles) => {
   const formData = new FormData();
 
   formData.append("CustomerName", String(data.customerName || "").trim());
@@ -138,9 +148,10 @@ const buildCreateFormData = (data, mainImageFile) => {
     String(Number(data.customerReceiverEmployeeId))
   );
 
-  // ✅ إضافة الصورة فقط إذا وُجدت
-  if (mainImageFile instanceof File) {
-    formData.append("MainImage", mainImageFile);
+  if (imageFiles && imageFiles.length > 0) {
+    imageFiles.forEach((file) => {
+      formData.append("Images", file);
+    });
   }
 
   return formData;
@@ -149,7 +160,11 @@ const buildCreateFormData = (data, mainImageFile) => {
 // ===============================================
 // ✅ بناء FormData للتعديل
 // ===============================================
-const buildUpdateFormData = (fullPayload, mainImageFile) => {
+const buildUpdateFormData = (
+  fullPayload,
+  imageFiles,
+  deletedImageIds = []
+) => {
   const formData = new FormData();
 
   formData.append("CustomerName", String(fullPayload.customerName || "").trim());
@@ -164,16 +179,26 @@ const buildUpdateFormData = (fullPayload, mainImageFile) => {
   formData.append("RequiredWork", String(fullPayload.requiredWork || "").trim());
   formData.append("Price", String(fullPayload.price || 0));
   formData.append("Notes", String(fullPayload.notes || "").trim());
-  formData.append("OperatorNotes", String(fullPayload.operatorNotes || "").trim());
+  formData.append(
+    "OperatorNotes",
+    String(fullPayload.operatorNotes || "").trim()
+  );
   formData.append("DeliveryBranchId", String(fullPayload.deliveryBranchId));
   formData.append(
     "CustomerReceiverEmployeeId",
     String(fullPayload.customerReceiverEmployeeId)
   );
 
-  // ✅ إضافة الصورة فقط إذا وُجدت
-  if (mainImageFile instanceof File) {
-    formData.append("MainImage", mainImageFile);
+  if (imageFiles && imageFiles.length > 0) {
+    imageFiles.forEach((file) => {
+      formData.append("Images", file);
+    });
+  }
+
+  if (deletedImageIds && deletedImageIds.length > 0) {
+    deletedImageIds.forEach((imageId) => {
+      formData.append("DeletedImageIds", String(imageId));
+    });
   }
 
   return formData;
@@ -197,13 +222,13 @@ function RepairFormInner({
 }) {
   const saving = createMutation.isPending || updateMutation.isPending;
 
-  // ✅ Schema و defaultValues حسب الدور
   const schema = isOperatorForm ? operatorEditSchema : repairOrderSchema;
   const defaultValues = isOperatorForm ? operatorEmptyForm : branchEmptyForm;
 
-  // ✅ state للصورة
-  const [imagePreview, setImagePreview] = useState(null);
-  const [imageFile, setImageFile] = useState(null);
+  // ✅ state للصور المتعددة
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
+  const [deletedImageIds, setDeletedImageIds] = useState([]);
   const fileInputRef = useRef(null);
 
   const {
@@ -212,6 +237,7 @@ function RepairFormInner({
     formState: { errors },
     control,
     setValue,
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues,
@@ -219,62 +245,159 @@ function RepairFormInner({
     shouldUnregister: true,
   });
 
-  // ✅ تحميل الصورة الحالية في وضع التعديل
+  // ===============================================
+  // ✅ تعبئة الفورم بالبيانات عند وصول existingOrder
+  // ===============================================
   useEffect(() => {
-    if (isEditMode && existingOrder?.mainImage) {
-      setImagePreview(buildImageUrl(existingOrder.mainImage));
+    if (!isEditMode || !existingOrder) return;
+
+    if (isOperatorForm) {
+      reset({
+        price:
+          existingOrder.price !== null && existingOrder.price !== undefined
+            ? String(existingOrder.price)
+            : "",
+        operatorNotes: existingOrder.operatorNotes || "",
+      });
+    } else {
+      reset({
+        customerName: existingOrder.customerName || "",
+        customerPhone: existingOrder.customerPhone || "",
+        description: existingOrder.description || "",
+        weight:
+          existingOrder.weight !== null && existingOrder.weight !== undefined
+            ? String(existingOrder.weight)
+            : "",
+        karat: existingOrder.karat || "",
+        quantity:
+          existingOrder.quantity !== null && existingOrder.quantity !== undefined
+            ? String(existingOrder.quantity)
+            : "1",
+        requiredWork: existingOrder.requiredWork || "",
+        price:
+          existingOrder.price !== null && existingOrder.price !== undefined
+            ? String(existingOrder.price)
+            : "",
+        notes: existingOrder.notes || "",
+        operatorNotes: existingOrder.operatorNotes || "",
+        deliveryBranchId:
+          existingOrder.deliveryBranchId !== null &&
+          existingOrder.deliveryBranchId !== undefined
+            ? Number(existingOrder.deliveryBranchId)
+            : "",
+        customerReceiverEmployeeId:
+          existingOrder.customerReceiverEmployeeId !== null &&
+          existingOrder.customerReceiverEmployeeId !== undefined
+            ? Number(existingOrder.customerReceiverEmployeeId)
+            : "",
+      });
     }
-  }, [isEditMode, existingOrder?.mainImage]);
+  }, [isEditMode, existingOrder, isOperatorForm, reset]);
+
+  // ===============================================
+  // ✅ تحميل الصور الحالية في وضع التعديل
+  // ===============================================
+  useEffect(() => {
+    if (isEditMode && existingOrder?.images) {
+      const previews = existingOrder.images.map((img) => ({
+        id: img.id,
+        url: repairOrderService.getRepairImageUrl(img.fileName),
+        isExisting: true,
+        fileName: img.fileName,
+      }));
+      setImagePreviews(previews);
+      setDeletedImageIds([]);
+    }
+  }, [isEditMode, existingOrder?.images]);
 
   /* ==========================================
-   * ✅ معالجة اختيار الصورة
+   * ✅ معالجة اختيار الصور
    * ========================================== */
-  const handleImageChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleImagesChange = (e) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-    // ✅ التحقق من الحجم
-    if (file.size > 5 * 1024 * 1024) {
-      toast.error("حجم الصورة يجب ألا يتجاوز 5 ميجابايت", PERSISTENT_TOAST);
+    const existingCount = imagePreviews.filter((p) => p.isExisting).length;
+    const currentCount = imageFiles.length + existingCount;
+
+    if (currentCount + files.length > MAX_IMAGES) {
+      toast.error(`لا يمكن رفع أكثر من ${MAX_IMAGES} صور`, PERSISTENT_TOAST);
       return;
     }
 
-    // ✅ التحقق من النوع
-    const allowedTypes = ["image/jpeg", "image/jpg", "image/png", "image/webp"];
-    if (!allowedTypes.includes(file.type)) {
-      toast.error("يجب أن تكون الصورة بصيغة JPG أو PNG أو WEBP", PERSISTENT_TOAST);
-      return;
+    const validFiles = [];
+    const newPreviews = [];
+
+    for (const file of files) {
+      if (file.size > MAX_IMAGE_SIZE) {
+        toast.error(
+          `حجم الصورة "${file.name}" يجب ألا يتجاوز 5 ميجابايت`,
+          PERSISTENT_TOAST
+        );
+        continue;
+      }
+
+      if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+        toast.error(
+          `الصورة "${file.name}" يجب أن تكون بصيغة JPG أو PNG أو WEBP`,
+          PERSISTENT_TOAST
+        );
+        continue;
+      }
+
+      validFiles.push(file);
+      newPreviews.push({
+        file,
+        url: URL.createObjectURL(file),
+        isExisting: false,
+      });
     }
 
-    setImageFile(file);
-    setValue("mainImage", file, { shouldValidate: true });
+    if (validFiles.length > 0) {
+      setImageFiles((prev) => [...prev, ...validFiles]);
+      setImagePreviews((prev) => [...prev, ...newPreviews]);
+    }
 
-    // ✅ إنشاء preview
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(file);
-  };
-
-  /* ==========================================
-   * ✅ إزالة الصورة
-   * ========================================== */
-  const handleRemoveImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    setValue("mainImage", null, { shouldValidate: true });
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
   };
 
   /* ==========================================
+   * ✅ إزالة صورة
+   * ========================================== */
+  const handleRemoveImage = (index) => {
+    const preview = imagePreviews[index];
+
+    if (preview.isExisting) {
+      setDeletedImageIds((prev) => [...prev, preview.id]);
+      setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    } else {
+      setImageFiles((prev) => prev.filter((f) => f !== preview.file));
+      URL.revokeObjectURL(preview.url);
+      setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    }
+  };
+
+  /* ==========================================
+   * ✅ تنظيف URLs عند unmount
+   * ========================================== */
+  useEffect(() => {
+    return () => {
+      imagePreviews.forEach((preview) => {
+        if (!preview.isExisting && preview.url) {
+          URL.revokeObjectURL(preview.url);
+        }
+      });
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  /* ==========================================
    * ✅ Submit
    * ========================================== */
   const onSubmit = async (data) => {
     try {
-      // ✅ وضع التعديل
       if (isEditMode) {
         const fullPayload = {
           customerName: existingOrder?.customerName || "",
@@ -292,7 +415,6 @@ function RepairFormInner({
             existingOrder?.customerReceiverEmployeeId,
         };
 
-        // ✅ طبّق التعديلات الجديدة (حسب الدور)
         if (isOperatorForm) {
           fullPayload.price = data.price ? Number(data.price) : 0;
           fullPayload.operatorNotes = String(data.operatorNotes || "").trim();
@@ -311,8 +433,11 @@ function RepairFormInner({
           );
         }
 
-        // ✅ بناء FormData للتعديل
-        const formData = buildUpdateFormData(fullPayload, imageFile);
+        const formData = buildUpdateFormData(
+          fullPayload,
+          imageFiles,
+          deletedImageIds
+        );
 
         await updateMutation.mutateAsync({
           id: editId,
@@ -338,8 +463,7 @@ function RepairFormInner({
         return;
       }
 
-      // ✅ بناء FormData للإنشاء
-      const formData = buildCreateFormData(data, imageFile);
+      const formData = buildCreateFormData(data, imageFiles);
 
       const result = await createMutation.mutateAsync(formData);
       const orderId = result?.data?.id || result?.data?.Id;
@@ -356,11 +480,29 @@ function RepairFormInner({
     }
   };
 
-  /* ==========================================
-   * ✅ الأقسام
-   * ========================================== */
   const showOperatorSection = isOperatorForm;
   const showBranchSections = !isEditMode || isBranchEditor;
+
+  // ✅ لا نرسم الفورم حتى تجهز الـ lookups
+  // (هذا يمنع مشكلة عدم ظهور القيم في Select)
+  const lookupsReady =
+    availableBranches.length >= 0 && // دائماً جاهز
+    (!isBranchEditor || employees.length >= 0);
+
+  if (!lookupsReady) {
+    return (
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          minHeight: "60vh",
+        }}
+      >
+        <CircularProgress sx={{ color: "#b8860b" }} />
+      </Box>
+    );
+  }
 
   return (
     <Box className="repairs-create-container">
@@ -387,7 +529,6 @@ function RepairFormInner({
         </Typography>
       </Box>
 
-      {/* Form Card */}
       <Paper elevation={0} className="repairs-create-card">
         <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate>
           {/* قسم المشغل */}
@@ -451,6 +592,70 @@ function RepairFormInner({
                       },
                     }}
                   />
+                </Grid>
+              </Grid>
+
+              <Typography className="repairs-section-title">
+                صور التصليح
+              </Typography>
+
+              <Divider className="repairs-section-divider" />
+
+              <Grid container spacing={2} sx={{ mb: 3 }}>
+                <Grid item xs={12}>
+                  <Box className="repairs-images-upload-container">
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/jpg,image/png,image/webp"
+                      multiple
+                      onChange={handleImagesChange}
+                      style={{ display: "none" }}
+                      id="repair-images-input-operator"
+                    />
+
+                    {imagePreviews.length > 0 && (
+                      <Box className="repairs-images-grid">
+                        {imagePreviews.map((preview, index) => (
+                          <Box
+                            key={preview.id || preview.url}
+                            className="repairs-image-preview-wrapper"
+                          >
+                            <img
+                              src={preview.url}
+                              alt={`صورة ${index + 1}`}
+                              className="repairs-image-preview"
+                            />
+                            <IconButton
+                              className="repairs-image-remove-btn"
+                              onClick={() => handleRemoveImage(index)}
+                              size="small"
+                              title="إزالة الصورة"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ))}
+                      </Box>
+                    )}
+
+                    {imagePreviews.length < MAX_IMAGES && (
+                      <label
+                        htmlFor="repair-images-input-operator"
+                        className="repairs-image-upload-label"
+                      >
+                        <AddPhotoAlternateIcon
+                          sx={{ fontSize: 40, color: "#c9a44c" }}
+                        />
+                        <Typography className="repairs-image-upload-text">
+                          إضافة صور ({imagePreviews.length}/{MAX_IMAGES})
+                        </Typography>
+                        <Typography className="repairs-image-upload-hint">
+                          JPG, PNG, WEBP — بحد أقصى 5MB لكل صورة
+                        </Typography>
+                      </label>
+                    )}
+                  </Box>
                 </Grid>
               </Grid>
             </>
@@ -571,7 +776,6 @@ function RepairFormInner({
                   />
                 </Grid>
 
-                {/* ✅ العيار — قائمة منسدلة */}
                 <Grid item xs={12} sm={4}>
                   <Controller
                     name="karat"
@@ -579,6 +783,8 @@ function RepairFormInner({
                     render={({ field }) => (
                       <TextField
                         {...field}
+                        value={field.value ?? ""}
+                        onChange={(e) => field.onChange(e.target.value)}
                         fullWidth
                         select
                         label="العيار"
@@ -634,72 +840,65 @@ function RepairFormInner({
                 </Grid>
               </Grid>
 
-              {/* ✅ قسم الصورة الرئيسية */}
               <Typography className="repairs-section-title">
-                الصورة الرئيسية
+                صور التصليح
               </Typography>
 
               <Divider className="repairs-section-divider" />
 
               <Grid container spacing={2} sx={{ mb: 3 }}>
                 <Grid item xs={12}>
-                  <Box className="repairs-image-upload-container">
-                    {/* Input مخفي */}
+                  <Box className="repairs-images-upload-container">
                     <input
                       ref={fileInputRef}
                       type="file"
                       accept="image/jpeg,image/jpg,image/png,image/webp"
-                      onChange={handleImageChange}
+                      multiple
+                      onChange={handleImagesChange}
                       style={{ display: "none" }}
-                      id="main-image-input"
+                      id="repair-images-input"
                     />
 
-                    {/* Preview أو زر الرفع */}
-                    {imagePreview ? (
-                      <Box className="repairs-image-preview-wrapper">
-                        <img
-                          src={imagePreview}
-                          alt="معاينة الصورة"
-                          className="repairs-image-preview"
-                        />
-                        <IconButton
-                          className="repairs-image-remove-btn"
-                          onClick={handleRemoveImage}
-                          size="small"
-                          title="إزالة الصورة"
-                        >
-                          <DeleteIcon fontSize="small" />
-                        </IconButton>
+                    {imagePreviews.length > 0 && (
+                      <Box className="repairs-images-grid">
+                        {imagePreviews.map((preview, index) => (
+                          <Box
+                            key={preview.id || preview.url}
+                            className="repairs-image-preview-wrapper"
+                          >
+                            <img
+                              src={preview.url}
+                              alt={`صورة ${index + 1}`}
+                              className="repairs-image-preview"
+                            />
+                            <IconButton
+                              className="repairs-image-remove-btn"
+                              onClick={() => handleRemoveImage(index)}
+                              size="small"
+                              title="إزالة الصورة"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ))}
                       </Box>
-                    ) : (
+                    )}
+
+                    {imagePreviews.length < MAX_IMAGES && (
                       <label
-                        htmlFor="main-image-input"
+                        htmlFor="repair-images-input"
                         className="repairs-image-upload-label"
                       >
                         <AddPhotoAlternateIcon
                           sx={{ fontSize: 40, color: "#c9a44c" }}
                         />
                         <Typography className="repairs-image-upload-text">
-                          اختر صورة للقطعة (اختياري)
+                          إضافة صور ({imagePreviews.length}/{MAX_IMAGES})
                         </Typography>
                         <Typography className="repairs-image-upload-hint">
-                          JPG, PNG, WEBP — بحد أقصى 5MB
+                          JPG, PNG, WEBP — بحد أقصى 5MB لكل صورة
                         </Typography>
                       </label>
-                    )}
-
-                    {/* زر تغيير الصورة إذا كانت موجودة */}
-                    {imagePreview && (
-                      <Button
-                        variant="outlined"
-                        component="label"
-                        htmlFor="main-image-input"
-                        className="repairs-image-change-btn"
-                        startIcon={<AddPhotoAlternateIcon />}
-                        size="small"
-                      >
-                        تغيير الصورة
-                      </Button>
                     )}
                   </Box>
                 </Grid>
@@ -741,9 +940,7 @@ function RepairFormInner({
                 </Grid>
               </Grid>
 
-              <Typography className="repairs-section-title">
-                ملاحظات
-              </Typography>
+              <Typography className="repairs-section-title">ملاحظات</Typography>
 
               <Divider className="repairs-section-divider" />
 
@@ -777,6 +974,12 @@ function RepairFormInner({
                     render={({ field }) => (
                       <TextField
                         {...field}
+                        value={
+                          field.value === undefined || field.value === null
+                            ? ""
+                            : field.value
+                        }
+                        onChange={(e) => field.onChange(e.target.value)}
                         fullWidth
                         select
                         label="فرع التسليم للعميل"
@@ -785,6 +988,9 @@ function RepairFormInner({
                         helperText={errors.deliveryBranchId?.message}
                         className="repairs-form-field"
                       >
+                        <MenuItem value="" disabled>
+                          — اختر فرعاً —
+                        </MenuItem>
                         {availableBranches.length === 0 ? (
                           <MenuItem value="" disabled>
                             لا توجد فروع نشطة متاحة
@@ -808,6 +1014,12 @@ function RepairFormInner({
                     render={({ field }) => (
                       <TextField
                         {...field}
+                        value={
+                          field.value === undefined || field.value === null
+                            ? ""
+                            : field.value
+                        }
+                        onChange={(e) => field.onChange(e.target.value)}
                         fullWidth
                         select
                         label="الموظف المستلم من العميل"
@@ -816,6 +1028,9 @@ function RepairFormInner({
                         helperText={errors.customerReceiverEmployeeId?.message}
                         className="repairs-form-field"
                       >
+                        <MenuItem value="" disabled>
+                          — اختر موظفاً —
+                        </MenuItem>
                         {!userBranchId ? (
                           <MenuItem value="" disabled>
                             أنت غير مرتبط بفرع
@@ -896,32 +1111,20 @@ export default function CreateRepairOrder() {
 
   const userBranchId = currentUser?.branchId;
 
-  /* ==========================================
-   * الفروع
-   * ========================================== */
   const { data: branches = [] } = useBranchLookup();
 
   const availableBranches = useMemo(() => {
     return branches.filter((b) => b.isActive !== false);
   }, [branches]);
 
-  /* ==========================================
-   * الميوتيشن
-   * ========================================== */
   const createMutation = useCreateRepairOrder();
   const updateMutation = useUpdateRepairOrder();
 
-  /* ==========================================
-   * جلب بيانات التصليحة
-   * ========================================== */
   const { data: existingOrder, isLoading: loadingOrder } = useRepairOrderById(
     editId,
     { enabled: isEditMode }
   );
 
-  /* ==========================================
-   * ✅ الأدوار والصلاحيات
-   * ========================================== */
   const isBranchEditor = useMemo(
     () => canEditAsBranch(userRoles),
     [userRoles]
@@ -934,9 +1137,6 @@ export default function CreateRepairOrder() {
 
   const isOperatorForm = isEditMode && isOperatorEditor;
 
-  /* ==========================================
-   * ✅ التحقق من الصلاحية
-   * ========================================== */
   useEffect(() => {
     if (!isEditMode || !existingOrder) return;
 
@@ -955,17 +1155,12 @@ export default function CreateRepairOrder() {
     }
   }, [isEditMode, existingOrder, userRoles, navigate, editId]);
 
-  /* ==========================================
-   * موظفو الفرع
-   * ========================================== */
   const { data: employees = [] } = useBranchEmployees(userBranchId, {
     enabled: !!userBranchId,
   });
 
-  /* ==========================================
-   * شاشة التحميل
-   * ========================================== */
-  if (isEditMode && loadingOrder) {
+  // ✅ لا نرسم الفورم حتى يصل existingOrder في وضع التعديل
+  if (isEditMode && (loadingOrder || !existingOrder)) {
     return (
       <Box
         sx={{
@@ -980,12 +1175,10 @@ export default function CreateRepairOrder() {
     );
   }
 
-  /* ==========================================
-   * ✅ الحل: key ديناميكي
-   * ========================================== */
+  // ✅ key ثابت = editId فقط (بدون isOperatorForm)
   return (
     <RepairFormInner
-      key={isOperatorForm ? `operator-${editId}` : `branch-${editId || "new"}`}
+      key={editId || "new"}
       isEditMode={isEditMode}
       editId={editId}
       existingOrder={existingOrder}
