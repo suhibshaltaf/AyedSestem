@@ -1,85 +1,47 @@
 import { useMemo, useState, useEffect } from "react";
 
 import {
-
   Box,
-
   Typography,
-
   Paper,
-
   Chip,
-
   CircularProgress,
-
   Button,
-
   Divider,
-
   Grid,
-
   Dialog,
-
   DialogContent,
-
   IconButton,
-
 } from "@mui/material";
 
 import { useParams, useNavigate } from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
 
-
-
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-
 import PrintIcon from "@mui/icons-material/Print";
-
 import PersonIcon from "@mui/icons-material/Person";
-
 import PhoneIcon from "@mui/icons-material/Phone";
-
 import ScaleIcon from "@mui/icons-material/Scale";
-
 import DiamondIcon from "@mui/icons-material/Diamond";
-
 import NumbersIcon from "@mui/icons-material/Numbers";
-
 import BuildIcon from "@mui/icons-material/Build";
-
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-
 import NotesIcon from "@mui/icons-material/Notes";
-
 import StorefrontIcon from "@mui/icons-material/Storefront";
-
 import HistoryIcon from "@mui/icons-material/History";
-
 import EditIcon from "@mui/icons-material/Edit";
-
 import DeleteIcon from "@mui/icons-material/Delete";
-
 import ImageIcon from "@mui/icons-material/Image";
-
 import CloseIcon from "@mui/icons-material/Close";
-
 import ZoomInIcon from "@mui/icons-material/ZoomIn";
-
 import PersonOutlineIcon from "@mui/icons-material/PersonOutlineOutlined";
-
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-
-
 import {
-
   useRepairOrderById,
-
   useDeleteRepairOrder,
-
 } from "../../hooks/useRepairOrders.js";
 
 import useAuthStore from "../../store/useAuthStore.js";
@@ -89,131 +51,91 @@ import repairOrderService from "../../services/repairOrderService.js";
 import organizationService from "../../services/organizationService.js";
 
 import {
-
   getStatusName,
-
   getStatusColor,
-
   getStatusLocation,
-
   canEditRepair,
-
   canDeleteRepair,
-
 } from "../../utils/repairConstants.js";
 
 import "../../styles/repairs.css";
 
-
-
 // ===============================
-
-// ✅ الأدوار المسموح لها برؤية رقم الهاتف
-
+// الأدوار المسموح لها برؤية رقم الهاتف
 // ===============================
 
 const PHONE_VISIBLE_ROLES = [
-
   "Admin",
-
   "SuperAdmin",
-
   "BranchManager",
-
 ];
 
-
-
 // ===============================
-
-// ✅ أسماء المصادر بالعربي
-
+// أسماء المصادر بالعربي
 // ===============================
 
 const SOURCE_LABELS = {
-
   Branch: "الفرع",
-
   Operator: "المشغل",
-
   BranchManager: "مدير الفرع",
-
   OperatorManager: "مدير المشغل",
-
 };
 
-
-
 export default function RepairOrderDetails() {
-
   const { id } = useParams();
 
   const navigate = useNavigate();
 
   const currentUser = useAuthStore((state) => state.user);
 
-
-
   const roles = useMemo(
-
     () => currentUser?.roles?.map((r) => r.name) || [],
-
     [currentUser]
-
   );
 
-
-
-  // ✅ هل يسمح له برؤية رقم الهاتف؟
+  // ===============================
+  // هل يسمح له برؤية رقم الهاتف؟
+  // ===============================
 
   const canViewPhone = useMemo(
-
-    () => roles.some((role) => PHONE_VISIBLE_ROLES.includes(role)),
-
+    () =>
+      roles.some((role) =>
+        PHONE_VISIBLE_ROLES.includes(role)
+      ),
     [roles]
-
   );
 
-
-
-  const { data: order, isLoading } = useRepairOrderById(id);
-
-
+  const { data: order, isLoading } =
+    useRepairOrderById(id);
 
   const { data: organization } = useQuery({
-
     queryKey: ["organization-settings"],
-
     queryFn: organizationService.getSettings,
-
   });
 
+  const showBarcode =
+    organization?.showBarcode !== false;
 
+  const showQr =
+    organization?.showQrCode !== false;
 
-  const showBarcode = organization?.showBarcode !== false;
+  const [images, setImages] = useState({
+    barcode: null,
+    qr: null,
+  });
 
-  const showQr = organization?.showQrCode !== false;
+  // ===============================
+  // حالة عرض الصورة المكبرة
+  // ===============================
 
+  const [selectedImage, setSelectedImage] =
+    useState(null);
 
-
-  const [images, setImages] = useState({ barcode: null, qr: null });
-
-
-
-  // ✅ حالة عرض الصورة المكبرة
-
-  const [selectedImage, setSelectedImage] = useState(null);
-
-
-
-  /* ==========================================
-
-   * ✅ Barcode + QR
-
-   * ========================================== */
+  // ==========================================
+  // Barcode + QR
+  // ==========================================
 
   useEffect(() => {
-
     if (!order?.barcode) return undefined;
 
     let active = true;
@@ -221,124 +143,144 @@ export default function RepairOrderDetails() {
     const urls = [];
 
     const load = async () => {
+      const [barcodeResult, qrResult] =
+        await Promise.allSettled([
+          showBarcode
+            ? repairOrderService.getBarcodeImage(
+                order.barcode
+              )
+            : Promise.resolve(null),
 
-      const [barcodeResult, qrResult] = await Promise.allSettled([
-
-        showBarcode
-
-          ? repairOrderService.getBarcodeImage(order.barcode)
-
-          : Promise.resolve(null),
-
-        showQr
-
-          ? repairOrderService.getQrImage(order.barcode)
-
-          : Promise.resolve(null),
-
-      ]);
+          showQr
+            ? repairOrderService.getQrImage(
+                order.barcode
+              )
+            : Promise.resolve(null),
+        ]);
 
       if (!active) return;
 
       const barcode =
-
-        barcodeResult.status === "fulfilled" && barcodeResult.value
-
-          ? URL.createObjectURL(barcodeResult.value)
-
+        barcodeResult.status === "fulfilled" &&
+        barcodeResult.value
+          ? URL.createObjectURL(
+              barcodeResult.value
+            )
           : null;
 
       const qr =
-
-        qrResult.status === "fulfilled" && qrResult.value
-
-          ? URL.createObjectURL(qrResult.value)
-
+        qrResult.status === "fulfilled" &&
+        qrResult.value
+          ? URL.createObjectURL(
+              qrResult.value
+            )
           : null;
 
       if (barcode) urls.push(barcode);
 
       if (qr) urls.push(qr);
 
-      setImages({ barcode, qr });
-
+      setImages({
+        barcode,
+        qr,
+      });
     };
 
     load();
 
     return () => {
-
       active = false;
 
-      urls.forEach((url) => URL.revokeObjectURL(url));
-
+      urls.forEach((url) =>
+        URL.revokeObjectURL(url)
+      );
     };
+  }, [
+    order?.barcode,
+    showBarcode,
+    showQr,
+  ]);
 
-  }, [order?.barcode, showBarcode, showQr]);
+  const deleteMutation =
+    useDeleteRepairOrder();
 
+  // ==========================================
+  // التعديل:
+  // المشغل فقط هو الذي يظهر له زر التعديل
+  // ==========================================
 
-
-  const deleteMutation = useDeleteRepairOrder();
-
-
-
-  const canEdit = canEditRepair(roles, order?.status, order?.movements || []);
+  const canEdit =
+    roles.includes("OperatorManager") &&
+    canEditRepair(
+      roles,
+      order?.status,
+      order?.movements || []
+    );
 
   const canDelete = canDeleteRepair(
-
     roles,
-
     order?.status,
-
     order?.movements || []
-
   );
 
-
+  // ==========================================
+  // حذف التصليحة
+  // ==========================================
 
   const handleDelete = async () => {
-
-    if (!window.confirm("هل أنت متأكد من حذف التصليحة؟")) return;
-
-    try {
-
-      await deleteMutation.mutateAsync(order.id);
-
-      navigate("/repairs/list");
-
-    } catch {
-
-      /* الـ hook يعرض الرسالة */
-
+    if (
+      !window.confirm(
+        "هل أنت متأكد من حذف التصليحة؟"
+      )
+    ) {
+      return;
     }
 
+    try {
+      await deleteMutation.mutateAsync(
+        order.id
+      );
+
+      navigate("/repairs/list");
+    } catch {
+      // الـ hook يعرض الرسالة
+    }
   };
 
-
+  // ==========================================
+  // طباعة الباركود
+  // ==========================================
 
   const handlePrintBarcode = () => {
-  if (!images.barcode) return;
+    if (!images.barcode) return;
 
-  const printWindow = window.open(
-    "",
-    "_blank",
-    "width=600,height=400"
-  );
+    const printWindow = window.open(
+      "",
+      "_blank",
+      "width=600,height=400"
+    );
 
-  if (!printWindow) {
-    alert("الرجاء السماح بالنوافذ المنبثقة للطباعة");
-    return;
-  }
+    if (!printWindow) {
+      alert(
+        "الرجاء السماح بالنوافذ المنبثقة للطباعة"
+      );
 
-  const printableBarcode = order.barcode.replace(
-    /[^A-Za-z0-9_-]/g,
-    ""
-  );
+      return;
+    }
 
-  printWindow.document.write(`
+    const printableBarcode =
+      order.barcode.replace(
+        /[^A-Za-z0-9_-]/g,
+        ""
+      );
+
+    printWindow.document.write(`
 <!DOCTYPE html>
+
 <html dir="ltr">
+
 <head>
+
   <meta charset="UTF-8" />
 
   <title>طباعة الباركود - ${printableBarcode}</title>
@@ -348,10 +290,6 @@ export default function RepairOrderDetails() {
     * {
       box-sizing: border-box;
     }
-
-    /* =========================================
-       حجم الورقة الحقيقي
-       ========================================= */
 
     @page {
       size: 118mm 15mm;
@@ -380,11 +318,6 @@ export default function RepairOrderDetails() {
       print-color-adjust: exact;
     }
 
-
-    /* =========================================
-       الليبل كامل
-       ========================================= */
-
     .barcode-label {
       position: relative;
 
@@ -399,37 +332,13 @@ export default function RepairOrderDetails() {
       overflow: hidden;
     }
 
-
-    /* =========================================
-       منطقة الطباعة
-
-       الهدف:
-       باركود قريب من الصورة المرجعية
-       كبير وواضح لكن بدون تمديد زائد
-       ========================================= */
-
     .barcode-content {
       position: absolute;
 
-      /*
-        نزول الباركود داخل الليبل
-      */
       top: 2.3mm;
-
-      /*
-        بداية الطباعة من اليسار
-      */
       left: 3mm;
 
-      /*
-        العرض مهم جداً للقارئ.
-        لا نصغره أكثر من اللازم.
-      */
       width: 58mm;
-
-      /*
-        مساحة الباركود + الرقم
-      */
       height: 10mm;
 
       margin: 0;
@@ -437,11 +346,6 @@ export default function RepairOrderDetails() {
 
       overflow: visible;
     }
-
-
-    /* =========================================
-       صورة الباركود
-       ========================================= */
 
     .barcode-img {
       position: absolute;
@@ -451,15 +355,7 @@ export default function RepairOrderDetails() {
 
       display: block;
 
-      /*
-        نحافظ على العرض الذي أثبت أنه يُقرأ
-      */
       width: 58mm;
-
-      /*
-        ارتفاع مناسب مثل المرجع،
-        وليس عالي جداً
-      */
       height: 5.7mm;
 
       margin: 0;
@@ -471,19 +367,10 @@ export default function RepairOrderDetails() {
       object-position: left top;
     }
 
-
-    /* =========================================
-       رقم الباركود
-       ========================================= */
-
     .barcode-text {
       position: absolute;
 
-      /*
-        مباشرة تحت الباركود
-      */
       top: 5.9mm;
-
       left: 0;
 
       width: 58mm;
@@ -512,11 +399,6 @@ export default function RepairOrderDetails() {
       overflow: visible;
     }
 
-
-    /* =========================================
-       إعدادات الطباعة
-       ========================================= */
-
     @media print {
 
       html,
@@ -532,14 +414,12 @@ export default function RepairOrderDetails() {
         overflow: hidden !important;
       }
 
-
       body {
         position: relative !important;
 
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
       }
-
 
       .barcode-label {
         position: relative !important;
@@ -563,7 +443,6 @@ export default function RepairOrderDetails() {
         break-inside: avoid-page !important;
       }
 
-
       .barcode-content {
         position: absolute !important;
 
@@ -578,7 +457,6 @@ export default function RepairOrderDetails() {
 
         overflow: visible !important;
       }
-
 
       .barcode-img {
         position: absolute !important;
@@ -599,7 +477,6 @@ export default function RepairOrderDetails() {
         object-fit: fill !important;
         object-position: left top !important;
       }
-
 
       .barcode-text {
         position: absolute !important;
@@ -635,6 +512,7 @@ export default function RepairOrderDetails() {
     }
 
   </style>
+
 </head>
 
 <body>
@@ -650,21 +528,22 @@ export default function RepairOrderDetails() {
         alt="Barcode"
       />
 
-      <div class="barcode-text">${printableBarcode}</div>
+      <div class="barcode-text">
+        ${printableBarcode}
+      </div>
 
     </div>
 
   </div>
 
-
   <script>
 
     window.onload = function () {
 
-      const img = document.getElementById("barcodeImage");
+      const img =
+        document.getElementById("barcodeImage");
 
       let printed = false;
-
 
       function printLabel() {
 
@@ -674,12 +553,6 @@ export default function RepairOrderDetails() {
 
         printed = true;
 
-
-        /*
-          نعطي الصورة وقت حتى يتم تحميلها
-          بالكامل قبل إرسالها للطابعة
-        */
-
         setTimeout(function () {
 
           window.focus();
@@ -687,13 +560,7 @@ export default function RepairOrderDetails() {
           window.print();
 
         }, 700);
-
       }
-
-
-      /*
-        إذا كانت الصورة محملة أصلاً
-      */
 
       if (
         img.complete &&
@@ -704,19 +571,9 @@ export default function RepairOrderDetails() {
 
       } else {
 
-        /*
-          انتظر تحميل صورة الباركود
-        */
-
         img.onload = function () {
           printLabel();
         };
-
-
-        /*
-          حتى لا تبقى النافذة معلقة
-          في حالة خطأ تحميل الصورة
-        */
 
         img.onerror = function () {
           printLabel();
@@ -729,55 +586,55 @@ export default function RepairOrderDetails() {
   </script>
 
 </body>
+
 </html>
-  `);
+    `);
 
-  printWindow.document.close();
-};
+    printWindow.document.close();
+  };
 
+  // ==========================================
+  // Loading
+  // ==========================================
 
   if (isLoading) {
-
     return (
-
       <Box className="repairs-details-loading">
-
-        <CircularProgress sx={{ color: "#b8860b" }} />
-
+        <CircularProgress
+          sx={{ color: "#b8860b" }}
+        />
       </Box>
-
     );
-
   }
 
-
+  // ==========================================
+  // Order not found
+  // ==========================================
 
   if (!order) {
-
     return (
-
       <div className="repairs-details-container">
 
-        <Paper elevation={0} className="repairs-details-card">
+        <Paper
+          elevation={0}
+          className="repairs-details-card"
+        >
 
           <Box className="repairs-details-empty">
 
-            <Typography>التصليحة غير موجودة</Typography>
+            <Typography>
+              التصليحة غير موجودة
+            </Typography>
 
             <Button
-
               variant="contained"
-
               startIcon={<ArrowBackIcon />}
-
-              onClick={() => navigate("/repairs/list")}
-
+              onClick={() =>
+                navigate("/repairs/list")
+              }
               className="repairs-details-back-btn"
-
             >
-
               العودة
-
             </Button>
 
           </Box>
@@ -785,125 +642,109 @@ export default function RepairOrderDetails() {
         </Paper>
 
       </div>
-
     );
-
   }
 
-
-
-  // ✅ بناء قائمة التفاصيل (مع إخفاء الهاتف إذا لزم)
+  // ==========================================
+  // تفاصيل التصليحة
+  // ==========================================
 
   const details = [
-
-    { label: "العميل", value: order.customerName || "—", icon: <PersonIcon /> },
-
-    // ✅ عرض الهاتف فقط للمصرّح لهم
+    {
+      label: "العميل",
+      value: order.customerName || "—",
+      icon: <PersonIcon />,
+    },
 
     ...(canViewPhone
-
       ? [
-
           {
-
             label: "الهاتف",
-
-            value: order.customerPhone || "—",
-
+            value:
+              order.customerPhone || "—",
             icon: <PhoneIcon />,
-
             ltr: true,
-
           },
-
         ]
-
       : []),
 
-    { label: "الوصف", value: order.description || "—" },
+    {
+      label: "الوصف",
+      value: order.description || "—",
+    },
 
     {
-
       label: "الوزن",
-
-      value: order.weight ? `${order.weight} غ` : "—",
-
+      value: order.weight
+        ? `${order.weight} غ`
+        : "—",
       icon: <ScaleIcon />,
-
     },
 
-    { label: "العيار", value: order.karat || "—", icon: <DiamondIcon /> },
-
-    { label: "العدد", value: order.quantity || "—", icon: <NumbersIcon /> },
+    {
+      label: "العيار",
+      value: order.karat || "—",
+      icon: <DiamondIcon />,
+    },
 
     {
+      label: "العدد",
+      value: order.quantity || "—",
+      icon: <NumbersIcon />,
+    },
 
+    {
       label: "العمل المطلوب",
-
-      value: order.requiredWork || "—",
-
+      value:
+        order.requiredWork || "—",
       icon: <BuildIcon />,
-
     },
 
     {
-
       label: "السعر",
-
-      value: order.price ? `${order.price}` : "—",
-
+      value: order.price
+        ? `${order.price}`
+        : "—",
       icon: <AttachMoneyIcon />,
-
     },
 
-    { label: "ملاحظات", value: order.notes || "—", icon: <NotesIcon /> },
-
     {
-
-      label: "ملاحظات المشغل",
-
-      value: order.operatorNotes || "—",
-
+      label: "ملاحظات",
+      value: order.notes || "—",
       icon: <NotesIcon />,
-
     },
 
     {
+      label: "ملاحظات المشغل",
+      value:
+        order.operatorNotes || "—",
+      icon: <NotesIcon />,
+    },
 
+    {
       label: "فرع الاستلام",
-
-      value: order.pickupBranchName || "—",
-
+      value:
+        order.pickupBranchName || "—",
       icon: <StorefrontIcon />,
-
     },
 
     {
-
       label: "فرع التسليم",
-
-      value: order.deliveryBranchName || "—",
-
+      value:
+        order.deliveryBranchName || "—",
       icon: <StorefrontIcon />,
-
     },
 
     {
-
       label: "الموظف المستلم",
-
-      value: order.customerReceiverEmployeeName || "—",
-
+      value:
+        order.customerReceiverEmployeeName ||
+        "—",
       icon: <PersonIcon />,
-
     },
-
   ];
 
-
-
   return (
-
     <div className="repairs-details-container">
 
       {/* Header */}
@@ -911,31 +752,22 @@ export default function RepairOrderDetails() {
       <div className="repairs-details-header">
 
         <div className="repairs-details-header-icon">
-
-          <ReceiptLongIcon sx={{ fontSize: 34 }} />
-
+          <ReceiptLongIcon
+            sx={{ fontSize: 34 }}
+          />
         </div>
 
-
-
         <Typography className="repairs-details-title">
-
           تفاصيل التصليحة
-
         </Typography>
-
-
 
         <div className="repairs-details-title-decor">
 
           <span className="repairs-details-title-line" />
 
           <Chip
-
             label={order.barcode || "—"}
-
             className="repairs-details-barcode-chip"
-
           />
 
           <span className="repairs-details-title-line" />
@@ -944,236 +776,173 @@ export default function RepairOrderDetails() {
 
       </div>
 
-
-
       {/* Actions */}
 
       <div className="repairs-details-actions">
 
         <Button
-
           variant="outlined"
-
           startIcon={<ArrowBackIcon />}
-
-          onClick={() => navigate("/repairs/list")}
-
+          onClick={() =>
+            navigate("/repairs/list")
+          }
           className="repairs-details-back-btn-outline"
-
         >
-
           العودة
-
         </Button>
 
-
+        {/* ===============================
+            زر التعديل للمشغل فقط
+            =============================== */}
 
         {canEdit && (
-
           <Button
-
             variant="outlined"
-
             startIcon={<EditIcon />}
-
-            onClick={() => navigate(`/repairs/${order.id}/edit`)}
-
+            onClick={() =>
+              navigate(
+                `/repairs/${order.id}/edit`
+              )
+            }
             className="repairs-details-back-btn-outline"
-
           >
-
             تعديل
-
           </Button>
-
         )}
-
-
 
         {canDelete && (
-
           <Button
-
             variant="outlined"
-
             color="error"
-
             startIcon={<DeleteIcon />}
-
             onClick={handleDelete}
-
-            disabled={deleteMutation.isPending}
-
+            disabled={
+              deleteMutation.isPending
+            }
           >
-
-            {deleteMutation.isPending ? "جاري الحذف..." : "حذف"}
-
+            {deleteMutation.isPending
+              ? "جاري الحذف..."
+              : "حذف"}
           </Button>
-
         )}
 
-
-
         {images.barcode && (
-
           <Button
-
             variant="contained"
-
             startIcon={<PrintIcon />}
-
             onClick={handlePrintBarcode}
-
             className="repairs-details-print-btn"
-
           >
-
             طباعة الباركود
-
           </Button>
-
         )}
 
       </div>
 
-
-
       {/* Barcode Display */}
 
       {(images.barcode || images.qr) && (
-
-        <Paper elevation={0} className="repairs-details-card">
+        <Paper
+          elevation={0}
+          className="repairs-details-card"
+        >
 
           <Typography className="repairs-details-movements-history-title">
-
             الباركود و QR Code
-
           </Typography>
 
-
-
           <Divider className="repairs-details-divider" />
-
-
 
           <div className="repairs-barcode-display">
 
             {images.barcode && (
-
               <img
-
                 src={images.barcode}
-
                 alt={`Barcode ${order.barcode}`}
-
                 className="repairs-barcode-image"
-
               />
-
             )}
 
             <Typography className="repairs-barcode-text">
-
               {order.barcode}
-
             </Typography>
 
-
-
             {images.qr && (
-
               <img
-
                 src={images.qr}
-
                 alt="QR Code"
-
                 className="repairs-qrcode-image"
-
               />
-
             )}
 
           </div>
 
         </Paper>
-
       )}
-
-
 
       {/* Status */}
 
-      <Paper elevation={0} className="repairs-details-card">
+      <Paper
+        elevation={0}
+        className="repairs-details-card"
+      >
 
         <div className="repairs-details-status-row">
 
           <Typography className="repairs-details-status-label">
-
             الحالة الحالية:
-
           </Typography>
 
           <Chip
-
-            label={order.statusName || getStatusName(order.status)}
-
+            label={
+              order.statusName ||
+              getStatusName(order.status)
+            }
             className={`repairs-details-status-chip repairs-status-${getStatusColor(
-
               order.status
-
             )}`}
-
           />
 
         </div>
 
-
-
         <Divider className="repairs-details-divider" />
 
-
-
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ mt: 1 }}
+        >
 
           {details.map((item) => (
-
-            <Grid item xs={12} sm={6} key={item.label}>
+            <Grid
+              item
+              xs={12}
+              sm={6}
+              key={item.label}
+            >
 
               <div className="repairs-details-row">
 
                 <Typography
-
                   className={`repairs-details-value ${
-
-                    item.ltr ? "repairs-details-value-ltr" : ""
-
+                    item.ltr
+                      ? "repairs-details-value-ltr"
+                      : ""
                   }`}
-
                 >
-
                   {item.value}
-
                 </Typography>
-
-
 
                 <div className="repairs-details-label">
 
                   <span className="repairs-details-label-text">
-
                     {item.label}:
-
                   </span>
 
                   {item.icon && (
-
                     <span className="repairs-details-label-icon">
-
                       {item.icon}
-
                     </span>
-
                   )}
 
                 </div>
@@ -1181,181 +950,170 @@ export default function RepairOrderDetails() {
               </div>
 
             </Grid>
-
           ))}
 
         </Grid>
 
       </Paper>
 
+      {/* الصور */}
 
+      {order.images &&
+        order.images.length > 0 && (
+          <Paper
+            elevation={0}
+            className="repairs-details-card"
+          >
 
-      {/* ✅ قسم الصور المتعددة */}
+            <Typography className="repairs-details-movements-history-title">
 
-      {order.images && order.images.length > 0 && (
+              <ImageIcon
+                sx={{ fontSize: 20 }}
+              />
 
-        <Paper elevation={0} className="repairs-details-card">
+              {" "}
+              صور التصليح (
+              {order.images.length}
+              )
 
-          <Typography className="repairs-details-movements-history-title">
+            </Typography>
 
-            <ImageIcon sx={{ fontSize: 20 }} /> صور التصليح ({order.images.length})
+            <Divider className="repairs-details-divider" />
 
-          </Typography>
+            <Box className="repairs-images-grid-details">
 
+              {order.images.map((img) => (
+                <Box
+                  key={img.id}
+                  className="repairs-image-card"
+                  onClick={() =>
+                    setSelectedImage(img)
+                  }
+                >
 
+                  <Box className="repairs-image-card-img-wrapper">
 
-          <Divider className="repairs-details-divider" />
+                    <img
+                      src={repairOrderService.getRepairImageUrl(
+                        img.fileName
+                      )}
+                      alt={img.fileName}
+                      className="repairs-image-card-img"
+                      loading="lazy"
+                    />
 
+                    <Box className="repairs-image-card-overlay">
 
+                      <ZoomInIcon
+                        sx={{
+                          color: "#fff",
+                          fontSize: 28,
+                        }}
+                      />
 
-          <Box className="repairs-images-grid-details">
+                    </Box>
 
-            {order.images.map((img) => (
+                  </Box>
 
-              <Box
+                  <Box className="repairs-image-card-info">
 
-                key={img.id}
+                    {img.uploadedByUserName && (
+                      <Typography className="repairs-image-card-meta">
 
-                className="repairs-image-card"
+                        <PersonOutlineIcon
+                          sx={{
+                            fontSize: 14,
+                          }}
+                        />
 
-                onClick={() => setSelectedImage(img)}
+                        {img.uploadedByUserName}
 
-              >
+                      </Typography>
+                    )}
 
-                <Box className="repairs-image-card-img-wrapper">
+                    {img.source && (
+                      <Chip
+                        label={
+                          SOURCE_LABELS[
+                            img.source
+                          ] || img.source
+                        }
+                        size="small"
+                        className="repairs-image-card-source"
+                      />
+                    )}
 
-                  <img
+                    {img.createdAt && (
+                      <Typography className="repairs-image-card-meta">
 
-                    src={repairOrderService.getRepairImageUrl(img.fileName)}
+                        <AccessTimeIcon
+                          sx={{
+                            fontSize: 14,
+                          }}
+                        />
 
-                    alt={img.fileName}
+                        {new Date(
+                          img.createdAt
+                        ).toLocaleString(
+                          "ar-JO",
+                          {
+                            year: "numeric",
+                            month: "2-digit",
+                            day: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          }
+                        )}
 
-                    className="repairs-image-card-img"
-
-                    loading="lazy"
-
-                  />
-
-                  <Box className="repairs-image-card-overlay">
-
-                    <ZoomInIcon sx={{ color: "#fff", fontSize: 28 }} />
+                      </Typography>
+                    )}
 
                   </Box>
 
                 </Box>
+              ))}
 
+            </Box>
 
-
-                <Box className="repairs-image-card-info">
-
-                  {img.uploadedByUserName && (
-
-                    <Typography className="repairs-image-card-meta">
-
-                      <PersonOutlineIcon sx={{ fontSize: 14 }} />
-
-                      {img.uploadedByUserName}
-
-                    </Typography>
-
-                  )}
-
-
-
-                  {img.source && (
-
-                    <Chip
-
-                      label={SOURCE_LABELS[img.source] || img.source}
-
-                      size="small"
-
-                      className="repairs-image-card-source"
-
-                    />
-
-                  )}
-
-
-
-                  {img.createdAt && (
-
-                    <Typography className="repairs-image-card-meta">
-
-                      <AccessTimeIcon sx={{ fontSize: 14 }} />
-
-                      {new Date(img.createdAt).toLocaleString("ar-JO", {
-
-                        year: "numeric",
-
-                        month: "2-digit",
-
-                        day: "2-digit",
-
-                        hour: "2-digit",
-
-                        minute: "2-digit",
-
-                      })}
-
-                    </Typography>
-
-                  )}
-
-                </Box>
-
-              </Box>
-
-            ))}
-
-          </Box>
-
-        </Paper>
-
-      )}
-
-
+          </Paper>
+        )}
 
       {/* Current Responsibility */}
 
-      <Paper elevation={0} className="repairs-details-card">
+      <Paper
+        elevation={0}
+        className="repairs-details-card"
+      >
 
         <Typography className="repairs-details-movements-history-title">
-
           المسؤولية الحالية
-
         </Typography>
-
-
 
         <Divider className="repairs-details-divider" />
 
-
-
-        <Grid container spacing={2} sx={{ mt: 1 }}>
+        <Grid
+          container
+          spacing={2}
+          sx={{ mt: 1 }}
+        >
 
           <Grid item xs={12} sm={6}>
 
             <div className="repairs-details-row">
 
               <Typography className="repairs-details-value">
-
-                {order.currentResponsibleUserName || "—"}
-
+                {order.currentResponsibleUserName ||
+                  "—"}
               </Typography>
 
               <div className="repairs-details-label">
 
                 <span className="repairs-details-label-text">
-
                   المسؤول الحالي:
-
                 </span>
 
                 <span className="repairs-details-label-icon">
-
                   <PersonIcon />
-
                 </span>
 
               </div>
@@ -1363,31 +1121,25 @@ export default function RepairOrderDetails() {
             </div>
 
           </Grid>
-
-
 
           <Grid item xs={12} sm={6}>
 
             <div className="repairs-details-row">
 
               <Typography className="repairs-details-value">
-
-                {getStatusLocation(order.status)}
-
+                {getStatusLocation(
+                  order.status
+                )}
               </Typography>
 
               <div className="repairs-details-label">
 
                 <span className="repairs-details-label-text">
-
                   الموقع الحالي:
-
                 </span>
 
                 <span className="repairs-details-label-icon">
-
                   <StorefrontIcon />
-
                 </span>
 
               </div>
@@ -1395,27 +1147,26 @@ export default function RepairOrderDetails() {
             </div>
 
           </Grid>
-
-
 
           {order.responsibilitySince && (
-
             <Grid item xs={12} sm={6}>
 
               <div className="repairs-details-row">
 
                 <Typography className="repairs-details-value">
 
-                  {new Date(order.responsibilitySince).toLocaleString("ar-JO")}
+                  {new Date(
+                    order.responsibilitySince
+                  ).toLocaleString(
+                    "ar-JO"
+                  )}
 
                 </Typography>
 
                 <div className="repairs-details-label">
 
                   <span className="repairs-details-label-text">
-
                     المسؤولية منذ:
-
                   </span>
 
                 </div>
@@ -1423,228 +1174,239 @@ export default function RepairOrderDetails() {
               </div>
 
             </Grid>
-
           )}
 
-
-
           {order.isPendingConfirmation && (
-
             <Grid item xs={12} sm={6}>
 
               <div className="repairs-details-row">
 
-                <Chip label="بانتظار التأكيد" color="warning" size="small" />
+                <Chip
+                  label="بانتظار التأكيد"
+                  color="warning"
+                  size="small"
+                />
 
                 <div className="repairs-details-label">
 
-                  <span className="repairs-details-label-text">الحالة:</span>
+                  <span className="repairs-details-label-text">
+                    الحالة:
+                  </span>
 
                 </div>
 
               </div>
 
             </Grid>
-
           )}
 
         </Grid>
 
       </Paper>
 
-
-
       {/* Movement History */}
 
-      <Paper elevation={0} className="repairs-details-card">
+      <Paper
+        elevation={0}
+        className="repairs-details-card"
+      >
 
         <Typography className="repairs-details-movements-history-title">
 
-          <HistoryIcon sx={{ fontSize: 20 }} /> سجل الحركات
+          <HistoryIcon
+            sx={{ fontSize: 20 }}
+          />
+
+          {" "}
+          سجل الحركات
 
         </Typography>
 
-
-
         <Divider className="repairs-details-divider" />
 
+        {!order.movements ||
+        order.movements.length === 0 ? (
+          <Box
+            sx={{
+              py: 3,
+              textAlign: "center",
+            }}
+          >
 
-
-        {!order.movements || order.movements.length === 0 ? (
-
-          <Box sx={{ py: 3, textAlign: "center" }}>
-
-            <Typography color="text.secondary">لا توجد حركات بعد</Typography>
+            <Typography color="text.secondary">
+              لا توجد حركات بعد
+            </Typography>
 
           </Box>
-
         ) : (
 
           <div className="repairs-timeline-table">
 
-            {order.movements.map((movement) => (
-
-              <div
-
-                key={movement.id}
-
-                className="repairs-timeline-row repairs-timeline-done"
-
-                style={{
-
-                  flexDirection: "column",
-
-                  alignItems: "stretch",
-
-                  gap: 6,
-
-                }}
-
-              >
+            {order.movements.map(
+              (movement) => (
 
                 <div
-
+                  key={movement.id}
+                  className="repairs-timeline-row repairs-timeline-done"
                   style={{
-
-                    display: "flex",
-
-                    justifyContent: "space-between",
-
-                    alignItems: "center",
-
-                    gap: 12,
-
-                    flexWrap: "wrap",
-
+                    flexDirection:
+                      "column",
+                    alignItems:
+                      "stretch",
+                    gap: 6,
                   }}
-
                 >
 
-                  <Typography
-
-                    className="repairs-timeline-text"
-
-                    sx={{ fontWeight: 700 }}
-
+                  <div
+                    style={{
+                      display: "flex",
+                      justifyContent:
+                        "space-between",
+                      alignItems:
+                        "center",
+                      gap: 12,
+                      flexWrap:
+                        "wrap",
+                    }}
                   >
 
-                    {movement.movementName || "—"}
+                    <Typography
+                      className="repairs-timeline-text"
+                      sx={{
+                        fontWeight: 700,
+                      }}
+                    >
+                      {movement.movementName ||
+                        "—"}
+                    </Typography>
+
+                    <Typography className="repairs-timeline-date-text">
+
+                      {movement.createdAt
+                        ? new Date(
+                            movement.createdAt
+                          ).toLocaleString(
+                            "ar-JO",
+                            {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "—"}
+
+                    </Typography>
+
+                  </div>
+
+                  <Typography
+                    sx={{
+                      fontSize:
+                        "0.85rem",
+                      color:
+                        "text.secondary",
+                    }}
+                  >
+
+                    من:{" "}
+                    <strong>
+                      {movement.previousStatusName ||
+                        "—"}
+                    </strong>
+
+                    {" → "}
+
+                    إلى:{" "}
+                    <strong>
+                      {movement.newStatusName ||
+                        "—"}
+                    </strong>
 
                   </Typography>
 
+                  <Typography
+                    sx={{
+                      fontSize:
+                        "0.85rem",
+                      color:
+                        "text.secondary",
+                    }}
+                  >
 
+                    نفّذها:{" "}
+                    <strong>
+                      {movement.performedByName ||
+                        "—"}
+                    </strong>
 
-                  <Typography className="repairs-timeline-date-text">
+                    {movement.branchName && (
+                      <>
+                        {" "}
+                        — الفرع:{" "}
+                        <strong>
+                          {
+                            movement.branchName
+                          }
+                        </strong>
+                      </>
+                    )}
 
-                    {movement.createdAt
-
-                      ? new Date(movement.createdAt).toLocaleString("ar-JO", {
-
-                          year: "numeric",
-
-                          month: "2-digit",
-
-                          day: "2-digit",
-
-                          hour: "2-digit",
-
-                          minute: "2-digit",
-
-                        })
-
-                      : "—"}
+                    {movement.workshopName && (
+                      <>
+                        {" "}
+                        — المشغل:{" "}
+                        <strong>
+                          {
+                            movement.workshopName
+                          }
+                        </strong>
+                      </>
+                    )}
 
                   </Typography>
+
+                  {movement.newResponsibleUserName && (
+                    <Typography
+                      sx={{
+                        fontSize:
+                          "0.85rem",
+                        color:
+                          "text.secondary",
+                      }}
+                    >
+
+                      المسؤول الجديد:{" "}
+                      <strong>
+                        {
+                          movement.newResponsibleUserName
+                        }
+                      </strong>
+
+                    </Typography>
+                  )}
+
+                  {movement.notes && (
+                    <Typography
+                      sx={{
+                        fontSize:
+                          "0.85rem",
+                        color:
+                          "text.secondary",
+                      }}
+                    >
+
+                      ملاحظات:{" "}
+                      {movement.notes}
+
+                    </Typography>
+                  )}
 
                 </div>
 
-
-
-                <Typography
-
-                  sx={{ fontSize: "0.85rem", color: "text.secondary" }}
-
-                >
-
-                  من: <strong>{movement.previousStatusName || "—"}</strong> →
-
-                  إلى: <strong>{movement.newStatusName || "—"}</strong>
-
-                </Typography>
-
-
-
-                <Typography
-
-                  sx={{ fontSize: "0.85rem", color: "text.secondary" }}
-
-                >
-
-                  نفّذها: <strong>{movement.performedByName || "—"}</strong>
-
-                  {movement.branchName && (
-
-                    <>
-
-                      {" "}
-
-                      — الفرع: <strong>{movement.branchName}</strong>
-
-                    </>
-
-                  )}
-
-                  {movement.workshopName && (
-
-                    <>
-
-                      {" "}
-
-                      — المشغل: <strong>{movement.workshopName}</strong>
-
-                    </>
-
-                  )}
-
-                </Typography>
-
-
-
-                {movement.newResponsibleUserName && (
-
-                  <Typography
-
-                    sx={{ fontSize: "0.85rem", color: "text.secondary" }}
-
-                  >
-
-                    المسؤول الجديد:{" "}
-
-                    <strong>{movement.newResponsibleUserName}</strong>
-
-                  </Typography>
-
-                )}
-
-
-
-                {movement.notes && (
-
-                  <Typography
-
-                    sx={{ fontSize: "0.85rem", color: "text.secondary" }}
-
-                  >
-
-                    ملاحظات: {movement.notes}
-
-                  </Typography>
-
-                )}
-
-              </div>
-
-            ))}
+              )
+            )}
 
           </div>
 
@@ -1652,194 +1414,170 @@ export default function RepairOrderDetails() {
 
       </Paper>
 
-
-
-      {/* ✅ Dialog لعرض الصورة المكبرة */}
+      {/* Dialog لعرض الصورة المكبرة */}
 
       <Dialog
-
         open={!!selectedImage}
-
-        onClose={() => setSelectedImage(null)}
-
+        onClose={() =>
+          setSelectedImage(null)
+        }
         maxWidth="lg"
-
         fullWidth
-
         PaperProps={{
-
           sx: {
-
-            backgroundColor: "rgba(0, 0, 0, 0.9)",
-
+            backgroundColor:
+              "rgba(0, 0, 0, 0.9)",
             boxShadow: "none",
-
           },
-
         }}
-
       >
 
-        <DialogContent sx={{ p: 0, position: "relative" }}>
+        <DialogContent
+          sx={{
+            p: 0,
+            position: "relative",
+          }}
+        >
 
           <IconButton
-
-            onClick={() => setSelectedImage(null)}
-
+            onClick={() =>
+              setSelectedImage(null)
+            }
             sx={{
-
-              position: "absolute",
-
+              position:
+                "absolute",
               top: 8,
-
               right: 8,
-
               color: "#fff",
-
-              backgroundColor: "rgba(0, 0, 0, 0.5)",
-
-              "&:hover": { backgroundColor: "rgba(0, 0, 0, 0.7)" },
-
+              backgroundColor:
+                "rgba(0, 0, 0, 0.5)",
+              "&:hover": {
+                backgroundColor:
+                  "rgba(0, 0, 0, 0.7)",
+              },
               zIndex: 1,
-
             }}
-
           >
-
             <CloseIcon />
-
           </IconButton>
 
-
-
           {selectedImage && (
-
             <Box
-
               sx={{
-
                 display: "flex",
-
-                flexDirection: "column",
-
-                alignItems: "center",
-
-                justifyContent: "center",
-
-                minHeight: "50vh",
-
+                flexDirection:
+                  "column",
+                alignItems:
+                  "center",
+                justifyContent:
+                  "center",
+                minHeight:
+                  "50vh",
                 p: 2,
-
               }}
-
             >
 
               <img
-
                 src={repairOrderService.getRepairImageUrl(
-
                   selectedImage.fileName
-
                 )}
-
-                alt={selectedImage.fileName}
-
+                alt={
+                  selectedImage.fileName
+                }
                 style={{
-
                   maxWidth: "100%",
-
                   maxHeight: "80vh",
-
                   objectFit: "contain",
-
                   borderRadius: 8,
-
                 }}
-
               />
 
-
-
               <Box
-
                 sx={{
-
                   mt: 2,
-
                   display: "flex",
-
                   gap: 2,
-
-                  alignItems: "center",
-
-                  flexWrap: "wrap",
-
-                  justifyContent: "center",
-
+                  alignItems:
+                    "center",
+                  flexWrap:
+                    "wrap",
+                  justifyContent:
+                    "center",
                 }}
-
               >
 
                 {selectedImage.uploadedByUserName && (
-
-                  <Typography sx={{ color: "#fff", fontSize: "0.9rem" }}>
+                  <Typography
+                    sx={{
+                      color: "#fff",
+                      fontSize:
+                        "0.9rem",
+                    }}
+                  >
 
                     <PersonOutlineIcon
-
-                      sx={{ fontSize: 16, verticalAlign: "middle", ml: 0.5 }}
-
+                      sx={{
+                        fontSize: 16,
+                        verticalAlign:
+                          "middle",
+                        ml: 0.5,
+                      }}
                     />
 
-                    {selectedImage.uploadedByUserName}
-
-                  </Typography>
-
-                )}
-
-
-
-                {selectedImage.source && (
-
-                  <Chip
-
-                    label={
-
-                      SOURCE_LABELS[selectedImage.source] ||
-
-                      selectedImage.source
-
+                    {
+                      selectedImage.uploadedByUserName
                     }
 
-                    size="small"
-
-                    sx={{ backgroundColor: "#c9a44c", color: "#fff" }}
-
-                  />
-
+                  </Typography>
                 )}
 
-
+                {selectedImage.source && (
+                  <Chip
+                    label={
+                      SOURCE_LABELS[
+                        selectedImage.source
+                      ] ||
+                      selectedImage.source
+                    }
+                    size="small"
+                    sx={{
+                      backgroundColor:
+                        "#c9a44c",
+                      color: "#fff",
+                    }}
+                  />
+                )}
 
                 {selectedImage.createdAt && (
-
-                  <Typography sx={{ color: "#fff", fontSize: "0.9rem" }}>
+                  <Typography
+                    sx={{
+                      color: "#fff",
+                      fontSize:
+                        "0.9rem",
+                    }}
+                  >
 
                     <AccessTimeIcon
-
-                      sx={{ fontSize: 16, verticalAlign: "middle", ml: 0.5 }}
-
+                      sx={{
+                        fontSize: 16,
+                        verticalAlign:
+                          "middle",
+                        ml: 0.5,
+                      }}
                     />
 
-                    {new Date(selectedImage.createdAt).toLocaleString("ar-JO")}
+                    {new Date(
+                      selectedImage.createdAt
+                    ).toLocaleString(
+                      "ar-JO"
+                    )}
 
                   </Typography>
-
                 )}
 
               </Box>
 
             </Box>
-
           )}
 
         </DialogContent>
@@ -1847,7 +1585,5 @@ export default function RepairOrderDetails() {
       </Dialog>
 
     </div>
-
   );
-
 }
