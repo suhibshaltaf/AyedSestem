@@ -102,43 +102,105 @@ const operatorEditSchema = yup.object({
     .max(
       1000,
       "ملاحظات المشغل يجب ألا تتجاوز 1000 حرف"
-    ),
+    )
+    .notRequired(),
 });
 
 // =====================================================
 // Schema خاص بالتعديل
 //
-// مهم:
+// مهم جداً:
 // هذا Schema مستقل عن repairOrderSchema.
 //
-// لذلك:
-// - karat ليس مطلوباً
-// - deliveryBranchId ليس مطلوباً
-// - customerReceiverEmployeeId ليس مطلوباً
+// أثناء التعديل:
+// - العيار اختياري
+// - فرع التسليم اختياري
+// - الموظف المستلم اختياري
 //
-// أما باقي الحقول فنستخدم نفس قواعدها الموجودة
-// في repairOrderSchema عن طريق clone + shape.
-//
+// لأن القيم القديمة يتم أخذها من existingOrder
+// وإرسالها مع الطلب حتى لو لم يتم تعديلها.
 // =====================================================
 
-const repairOrderEditSchema = repairOrderSchema
-  .clone()
-  .shape({
-    karat: yup
-      .string()
-      .nullable()
-      .notRequired(),
+const repairOrderEditSchema = yup.object({
+  customerName: yup
+    .string()
+    .trim()
+    .required("اسم العميل مطلوب"),
 
-    deliveryBranchId: yup
-      .mixed()
-      .nullable()
-      .notRequired(),
+  customerPhone: yup
+    .string()
+    .trim()
+    .required("رقم الهاتف مطلوب"),
 
-    customerReceiverEmployeeId: yup
-      .mixed()
-      .nullable()
-      .notRequired(),
-  });
+  description: yup
+    .string()
+    .trim()
+    .required("وصف القطعة مطلوب"),
+
+  weight: yup
+    .number()
+    .typeError("الوزن يجب أن يكون رقماً")
+    .min(0, "الوزن لا يمكن أن يكون سالباً")
+    .required("الوزن مطلوب"),
+
+  // ===================================================
+  // العيار ليس مطلوباً أثناء التعديل
+  // ===================================================
+
+  karat: yup
+    .string()
+    .nullable()
+    .notRequired(),
+
+  quantity: yup
+    .number()
+    .typeError("العدد يجب أن يكون رقماً")
+    .min(1, "العدد يجب أن يكون 1 على الأقل")
+    .required("العدد مطلوب"),
+
+  requiredWork: yup
+    .string()
+    .trim()
+    .required("العمل المطلوب مطلوب"),
+
+  price: yup
+    .number()
+    .typeError("السعر يجب أن يكون رقماً")
+    .min(0, "السعر لا يمكن أن يكون سالباً")
+    .required("السعر مطلوب"),
+
+  notes: yup
+    .string()
+    .trim()
+    .notRequired(),
+
+  operatorNotes: yup
+    .string()
+    .trim()
+    .max(
+      1000,
+      "ملاحظات المشغل يجب ألا تتجاوز 1000 حرف"
+    )
+    .notRequired(),
+
+  // ===================================================
+  // فرع التسليم ليس مطلوباً أثناء التعديل
+  // ===================================================
+
+  deliveryBranchId: yup
+    .mixed()
+    .nullable()
+    .notRequired(),
+
+  // ===================================================
+  // الموظف المستلم ليس مطلوباً أثناء التعديل
+  // ===================================================
+
+  customerReceiverEmployeeId: yup
+    .mixed()
+    .nullable()
+    .notRequired(),
+});
 
 // =====================================================
 // القيم الافتراضية
@@ -314,9 +376,11 @@ const buildUpdateFormData = (
     )
   );
 
-  // مهم:
-  // نرسل العيار القديم كما هو.
-  // إذا كان فارغاً فعلاً نرسل قيمة فارغة.
+  // ===================================================
+  // العيار
+  // نرسل القيمة القديمة أو الجديدة
+  // ===================================================
+
   formData.append(
     "Karat",
     String(
@@ -360,15 +424,15 @@ const buildUpdateFormData = (
   );
 
   // ===================================================
-  // مهم جداً:
-  // لا نفقد فرع التسليم القديم
+  // فرع التسليم
+  //
+  // إذا كان موجوداً نرسله.
+  // إذا كان فارغاً فعلاً لا نرسل قيمة جديدة.
   // ===================================================
 
   if (
-    fullPayload.deliveryBranchId !==
-      null &&
-    fullPayload.deliveryBranchId !==
-      undefined &&
+    fullPayload.deliveryBranchId !== null &&
+    fullPayload.deliveryBranchId !== undefined &&
     fullPayload.deliveryBranchId !== ""
   ) {
     formData.append(
@@ -380,15 +444,15 @@ const buildUpdateFormData = (
   }
 
   // ===================================================
-  // مهم جداً:
-  // لا نفقد الموظف المستلم القديم
+  // الموظف المستلم
+  //
+  // إذا كان موجوداً نرسله.
+  // إذا كان فارغاً فعلاً لا نرسل قيمة جديدة.
   // ===================================================
 
   if (
-    fullPayload.customerReceiverEmployeeId !==
-      null &&
-    fullPayload.customerReceiverEmployeeId !==
-      undefined &&
+    fullPayload.customerReceiverEmployeeId !== null &&
+    fullPayload.customerReceiverEmployeeId !== undefined &&
     fullPayload.customerReceiverEmployeeId !== ""
   ) {
     formData.append(
@@ -500,11 +564,8 @@ function RepairFormInner({
     reset,
   } = useForm({
     resolver: yupResolver(schema),
-
     defaultValues,
-
     mode: "onSubmit",
-
     shouldUnregister: true,
   });
 
@@ -567,10 +628,6 @@ function RepairFormInner({
             )
           : "",
 
-      // مهم جداً:
-      // حتى لو العيار فارغ في الداتا
-      // نضعه كـ ""
-      // وليس undefined
       karat:
         existingOrder.karat !== null &&
         existingOrder.karat !== undefined
@@ -608,20 +665,16 @@ function RepairFormInner({
         "",
 
       deliveryBranchId:
-        existingOrder.deliveryBranchId !==
-          null &&
-        existingOrder.deliveryBranchId !==
-          undefined
+        existingOrder.deliveryBranchId !== null &&
+        existingOrder.deliveryBranchId !== undefined
           ? Number(
               existingOrder.deliveryBranchId
             )
           : "",
 
       customerReceiverEmployeeId:
-        existingOrder.customerReceiverEmployeeId !==
-          null &&
-        existingOrder.customerReceiverEmployeeId !==
-          undefined
+        existingOrder.customerReceiverEmployeeId !== null &&
+        existingOrder.customerReceiverEmployeeId !== undefined
           ? Number(
               existingOrder.customerReceiverEmployeeId
             )
@@ -892,9 +945,6 @@ function RepairFormInner({
             existingOrder?.weight ??
             0,
 
-          // مهم:
-          // لا نجعل العيار مطلوباً
-          // ونحافظ على القيمة القديمة
           karat:
             existingOrder?.karat ??
             "",
@@ -944,7 +994,8 @@ function RepairFormInner({
               ? Number(
                   data.price
                 )
-              : 0;
+              : existingOrder?.price ??
+                0;
 
           fullPayload.operatorNotes =
             String(
@@ -958,122 +1009,197 @@ function RepairFormInner({
         // =================================================
 
         else {
-          fullPayload.customerName =
-            String(
-              data.customerName ||
-                ""
-            ).trim();
+          // -----------------------------------------------
+          // العميل
+          // -----------------------------------------------
 
-          fullPayload.customerPhone =
-            String(
-              data.customerPhone ||
-                ""
-            ).trim();
+          if (
+            data.customerName !==
+              undefined
+          ) {
+            fullPayload.customerName =
+              String(
+                data.customerName ||
+                  ""
+              ).trim();
+          }
 
-          fullPayload.description =
-            String(
-              data.description ||
-                ""
-            ).trim();
+          if (
+            data.customerPhone !==
+              undefined
+          ) {
+            fullPayload.customerPhone =
+              String(
+                data.customerPhone ||
+                  ""
+              ).trim();
+          }
 
-          fullPayload.weight =
+          // -----------------------------------------------
+          // وصف القطعة
+          // -----------------------------------------------
+
+          if (
+            data.description !==
+              undefined
+          ) {
+            fullPayload.description =
+              String(
+                data.description ||
+                  ""
+              ).trim();
+          }
+
+          // -----------------------------------------------
+          // الوزن
+          // -----------------------------------------------
+
+          if (
             data.weight !==
               undefined &&
             data.weight !==
               null &&
-            data.weight !== ""
-              ? Number(
-                  data.weight
-                )
-              : existingOrder?.weight ??
-                0;
+            data.weight !==
+              ""
+          ) {
+            fullPayload.weight =
+              Number(
+                data.weight
+              );
+          }
 
-          // =================================================
+          // -----------------------------------------------
           // العيار
           //
-          // إذا المستخدم غيّره نستخدم الجديد.
-          // إذا لم يغيّره نستخدم القديم.
-          // إذا كان الاثنين فارغين نرسل فارغ.
-          //
-          // لا يوجد required هنا.
-          // =================================================
+          // إذا اختار المستخدم قيمة جديدة نستخدمها.
+          // إذا تركه فارغاً نحافظ على القيمة القديمة.
+          // وإذا القيمة القديمة فارغة تبقى فارغة.
+          // -----------------------------------------------
 
-          fullPayload.karat =
+          if (
             data.karat !==
               undefined &&
             data.karat !==
               null &&
             data.karat !== ""
-              ? String(
-                  data.karat
-                ).trim()
-              : existingOrder?.karat ??
-                "";
+          ) {
+            fullPayload.karat =
+              String(
+                data.karat
+              ).trim();
+          }
 
-          fullPayload.quantity =
+          // -----------------------------------------------
+          // العدد
+          // -----------------------------------------------
+
+          if (
             data.quantity !==
               undefined &&
             data.quantity !==
               null &&
-            data.quantity !== ""
-              ? Number(
-                  data.quantity
-                )
-              : existingOrder?.quantity ??
-                1;
+            data.quantity !==
+              ""
+          ) {
+            fullPayload.quantity =
+              Number(
+                data.quantity
+              );
+          }
 
-          fullPayload.requiredWork =
-            String(
-              data.requiredWork ||
-                ""
-            ).trim();
+          // -----------------------------------------------
+          // العمل المطلوب
+          // -----------------------------------------------
 
-          fullPayload.notes =
-            String(
-              data.notes || ""
-            ).trim();
+          if (
+            data.requiredWork !==
+              undefined
+          ) {
+            fullPayload.requiredWork =
+              String(
+                data.requiredWork ||
+                  ""
+              ).trim();
+          }
 
-          // =================================================
+          // -----------------------------------------------
+          // السعر
+          //
+          // نحافظ على السعر القديم أثناء تعديل الفرع.
+          // -----------------------------------------------
+
+          fullPayload.price =
+            existingOrder?.price ??
+            0;
+
+          // -----------------------------------------------
+          // الملاحظات
+          // -----------------------------------------------
+
+          if (
+            data.notes !==
+              undefined
+          ) {
+            fullPayload.notes =
+              String(
+                data.notes || ""
+              ).trim();
+          }
+
+          // -----------------------------------------------
+          // ملاحظات المشغل
+          // نحافظ عليها أثناء تعديل الفرع.
+          // -----------------------------------------------
+
+          fullPayload.operatorNotes =
+            existingOrder?.operatorNotes ||
+            "";
+
+          // -----------------------------------------------
           // فرع التسليم
           //
-          // إذا تغيّر نستخدم الجديد.
-          // إذا لم يتغير نستخدم القديم.
-          // لا نطلبه من جديد أثناء التعديل.
-          // =================================================
+          // لا نطلبه أثناء التعديل.
+          //
+          // إذا اختار المستخدم فرعاً جديداً نستخدمه.
+          // إذا لم يختر شيئاً نحافظ على القديم.
+          // -----------------------------------------------
 
-          fullPayload.deliveryBranchId =
+          if (
             data.deliveryBranchId !==
               undefined &&
             data.deliveryBranchId !==
               null &&
             data.deliveryBranchId !==
               ""
-              ? Number(
-                  data.deliveryBranchId
-                )
-              : existingOrder?.deliveryBranchId ??
-                "";
+          ) {
+            fullPayload.deliveryBranchId =
+              Number(
+                data.deliveryBranchId
+              );
+          }
 
-          // =================================================
+          // -----------------------------------------------
           // الموظف المستلم
           //
-          // إذا تغيّر نستخدم الجديد.
-          // إذا لم يتغير نستخدم القديم.
-          // لا نطلبه من جديد أثناء التعديل.
-          // =================================================
+          // لا نطلبه أثناء التعديل.
+          //
+          // إذا اختار المستخدم موظفاً جديداً نستخدمه.
+          // إذا لم يختر شيئاً نحافظ على القديم.
+          // -----------------------------------------------
 
-          fullPayload.customerReceiverEmployeeId =
+          if (
             data.customerReceiverEmployeeId !==
               undefined &&
             data.customerReceiverEmployeeId !==
               null &&
             data.customerReceiverEmployeeId !==
               ""
-              ? Number(
-                  data.customerReceiverEmployeeId
-                )
-              : existingOrder?.customerReceiverEmployeeId ??
-                "";
+          ) {
+            fullPayload.customerReceiverEmployeeId =
+              Number(
+                data.customerReceiverEmployeeId
+              );
+          }
         }
 
         // =================================================
@@ -1197,6 +1323,18 @@ function RepairFormInner({
         "Repair Order Submit Error:",
         error
       );
+
+      const message =
+        error?.response?.data?.message ||
+        error?.response?.data?.Message ||
+        error?.message;
+
+      if (message) {
+        toast.error(
+          message,
+          PERSISTENT_TOAST
+        );
+      }
     }
   };
 
@@ -2302,8 +2440,29 @@ export default function CreateRepairOrder() {
   const navigate =
     useNavigate();
 
-  const { id: editId } =
+  // ===================================================
+  // مهم جداً:
+  //
+  // ندعم أكثر من اسم للـ route parameter.
+  //
+  // إذا كان Route عندك:
+  // /repairs/edit/:id
+  // أو
+  // /repairs/edit/:repairId
+  // أو
+  // /repairs/edit/:orderId
+  //
+  // سيعمل التعديل بشكل صحيح.
+  // ===================================================
+
+  const params =
     useParams();
+
+  const editId =
+    params.id ??
+    params.repairId ??
+    params.orderId ??
+    null;
 
   const isEditMode =
     !!editId;
