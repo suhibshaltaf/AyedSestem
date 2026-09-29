@@ -29,12 +29,12 @@ const repairOrderSchema = yup.object({
     .min(0.001, "الوزن يجب أن يكون أكبر من صفر")
     .required("الوزن مطلوب"),
 
-  karat: yup
+ /* karat: yup
     .string()
     .trim()
     .required("العيار مطلوب")
     .max(20, "العيار يجب ألا يتجاوز 20 حرف"),
-
+  */
   quantity: yup
     .number()
     .typeError("العدد يجب أن يكون رقماً")
@@ -67,7 +67,7 @@ const repairOrderSchema = yup.object({
     .string()
     .trim()
     .max(1000, "ملاحظات المشغل يجب ألا تتجاوز 1000 حرف"),
-
+/*
   deliveryBranchId: yup
     .number()
     .typeError("يجب اختيار فرع التسليم")
@@ -78,7 +78,7 @@ const repairOrderSchema = yup.object({
     .number()
     .typeError("يجب اختيار الموظف المستلم")
     .required("الموظف المستلم مطلوب")
-    .min(1, "يجب اختيار الموظف المستلم"),
+    .min(1, "يجب اختيار الموظف المستلم"),*/
 });
 
 export default repairOrderSchema;
