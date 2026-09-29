@@ -446,8 +446,8 @@ export default function RepairOrderDetails() {
     .barcode-img {
       position: absolute;
 
-      top: 0;
-      left: 0;
+      top: 5mm;
+      left: 2mm;
 
       display: block;
 
