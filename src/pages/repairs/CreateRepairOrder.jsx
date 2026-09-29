@@ -109,16 +109,14 @@ const operatorEditSchema = yup.object({
 // =====================================================
 // Schema خاص بالتعديل
 //
-// مهم جداً:
-// هذا Schema مستقل عن repairOrderSchema.
+// مهم:
+// لا يوجد أي Validation على:
+// - karat
+// - deliveryBranchId
+// - customerReceiverEmployeeId
 //
-// أثناء التعديل:
-// - العيار اختياري
-// - فرع التسليم اختياري
-// - الموظف المستلم اختياري
-//
-// لأن القيم القديمة يتم أخذها من existingOrder
-// وإرسالها مع الطلب حتى لو لم يتم تعديلها.
+// لأن هذه القيم يتم أخذها من existingOrder
+// والمحافظة عليها أثناء التعديل.
 // =====================================================
 
 const repairOrderEditSchema = yup.object({
@@ -143,10 +141,7 @@ const repairOrderEditSchema = yup.object({
     .min(0, "الوزن لا يمكن أن يكون سالباً")
     .required("الوزن مطلوب"),
 
-  // ===================================================
-  // العيار ليس مطلوباً أثناء التعديل
-  // ===================================================
-
+  // لا يوجد required
   karat: yup
     .string()
     .nullable()
@@ -183,19 +178,13 @@ const repairOrderEditSchema = yup.object({
     )
     .notRequired(),
 
-  // ===================================================
-  // فرع التسليم ليس مطلوباً أثناء التعديل
-  // ===================================================
-
+  // لا يوجد Validation
   deliveryBranchId: yup
     .mixed()
     .nullable()
     .notRequired(),
 
-  // ===================================================
-  // الموظف المستلم ليس مطلوباً أثناء التعديل
-  // ===================================================
-
+  // لا يوجد Validation
   customerReceiverEmployeeId: yup
     .mixed()
     .nullable()
@@ -378,7 +367,7 @@ const buildUpdateFormData = (
 
   // ===================================================
   // العيار
-  // نرسل القيمة القديمة أو الجديدة
+  // نحافظ على القيمة القديمة أو الجديدة
   // ===================================================
 
   formData.append(
@@ -427,7 +416,7 @@ const buildUpdateFormData = (
   // فرع التسليم
   //
   // إذا كان موجوداً نرسله.
-  // إذا كان فارغاً فعلاً لا نرسل قيمة جديدة.
+  // إذا لم يكن موجوداً لا نضع Validation عليه.
   // ===================================================
 
   if (
@@ -447,7 +436,7 @@ const buildUpdateFormData = (
   // الموظف المستلم
   //
   // إذا كان موجوداً نرسله.
-  // إذا كان فارغاً فعلاً لا نرسل قيمة جديدة.
+  // إذا لم يكن موجوداً لا نضع Validation عليه.
   // ===================================================
 
   if (
@@ -628,6 +617,7 @@ function RepairFormInner({
             )
           : "",
 
+      // العيار اختياري
       karat:
         existingOrder.karat !== null &&
         existingOrder.karat !== undefined
@@ -664,6 +654,7 @@ function RepairFormInner({
         existingOrder.operatorNotes ||
         "",
 
+      // نضع القيمة القديمة إن وجدت
       deliveryBranchId:
         existingOrder.deliveryBranchId !== null &&
         existingOrder.deliveryBranchId !== undefined
@@ -672,6 +663,7 @@ function RepairFormInner({
             )
           : "",
 
+      // نضع القيمة القديمة إن وجدت
       customerReceiverEmployeeId:
         existingOrder.customerReceiverEmployeeId !== null &&
         existingOrder.customerReceiverEmployeeId !== undefined
@@ -945,6 +937,7 @@ function RepairFormInner({
             existingOrder?.weight ??
             0,
 
+          // المحافظة على العيار القديم
           karat:
             existingOrder?.karat ??
             "",
@@ -969,10 +962,12 @@ function RepairFormInner({
             existingOrder?.operatorNotes ||
             "",
 
+          // المحافظة على فرع التسليم القديم
           deliveryBranchId:
             existingOrder?.deliveryBranchId ??
             "",
 
+          // المحافظة على الموظف القديم
           customerReceiverEmployeeId:
             existingOrder?.customerReceiverEmployeeId ??
             "",
@@ -1071,9 +1066,8 @@ function RepairFormInner({
           // -----------------------------------------------
           // العيار
           //
-          // إذا اختار المستخدم قيمة جديدة نستخدمها.
-          // إذا تركه فارغاً نحافظ على القيمة القديمة.
-          // وإذا القيمة القديمة فارغة تبقى فارغة.
+          // إذا اختار قيمة جديدة يتم استخدامها.
+          // إذا تركه فارغاً نحافظ على القديم.
           // -----------------------------------------------
 
           if (
@@ -1148,7 +1142,6 @@ function RepairFormInner({
 
           // -----------------------------------------------
           // ملاحظات المشغل
-          // نحافظ عليها أثناء تعديل الفرع.
           // -----------------------------------------------
 
           fullPayload.operatorNotes =
@@ -1158,10 +1151,9 @@ function RepairFormInner({
           // -----------------------------------------------
           // فرع التسليم
           //
-          // لا نطلبه أثناء التعديل.
-          //
-          // إذا اختار المستخدم فرعاً جديداً نستخدمه.
-          // إذا لم يختر شيئاً نحافظ على القديم.
+          // لا يوجد Validation.
+          // إذا اختار جديداً نستخدمه.
+          // إذا لم يختار نحافظ على القديم.
           // -----------------------------------------------
 
           if (
@@ -1181,10 +1173,9 @@ function RepairFormInner({
           // -----------------------------------------------
           // الموظف المستلم
           //
-          // لا نطلبه أثناء التعديل.
-          //
-          // إذا اختار المستخدم موظفاً جديداً نستخدمه.
-          // إذا لم يختر شيئاً نحافظ على القديم.
+          // لا يوجد Validation.
+          // إذا اختار جديداً نستخدمه.
+          // إذا لم يختار نحافظ على القديم.
           // -----------------------------------------------
 
           if (
@@ -1355,6 +1346,7 @@ function RepairFormInner({
 
   return (
     <Box className="repairs-create-container">
+
       {/* Header */}
 
       <Box className="repairs-create-header">
@@ -1394,6 +1386,7 @@ function RepairFormInner({
           )}
           noValidate
         >
+
           {/* =================================================
               قسم المشغل
           ================================================= */}
@@ -1627,6 +1620,7 @@ function RepairFormInner({
 
           {showBranchSections && (
             <>
+
               {/* معلومات العميل */}
 
               <Typography className="repairs-section-title">
@@ -1888,9 +1882,7 @@ function RepairFormInner({
                           },
                         }}
                       >
-                        <MenuItem
-                          value=""
-                        >
+                        <MenuItem value="">
                           — بدون تحديد —
                         </MenuItem>
 
@@ -2194,6 +2186,7 @@ function RepairFormInner({
                 container
                 spacing={2}
               >
+
                 {/* فرع التسليم */}
 
                 <Grid
@@ -2238,9 +2231,7 @@ function RepairFormInner({
                         }
                         className="repairs-form-field"
                       >
-                        <MenuItem
-                          value=""
-                        >
+                        <MenuItem value="">
                           — اختر فرعاً —
                         </MenuItem>
 
@@ -2325,9 +2316,7 @@ function RepairFormInner({
                         }
                         className="repairs-form-field"
                       >
-                        <MenuItem
-                          value=""
-                        >
+                        <MenuItem value="">
                           — اختر موظفاً —
                         </MenuItem>
 
@@ -2382,6 +2371,7 @@ function RepairFormInner({
           ================================================= */}
 
           <Box className="repairs-create-actions">
+
             <Button
               variant="outlined"
               onClick={() =>
@@ -2425,6 +2415,7 @@ function RepairFormInner({
                   ? "حفظ التعديلات"
                   : "إنشاء التصليحة"}
             </Button>
+
           </Box>
         </Box>
       </Paper>
@@ -2441,18 +2432,7 @@ export default function CreateRepairOrder() {
     useNavigate();
 
   // ===================================================
-  // مهم جداً:
-  //
-  // ندعم أكثر من اسم للـ route parameter.
-  //
-  // إذا كان Route عندك:
-  // /repairs/edit/:id
-  // أو
-  // /repairs/edit/:repairId
-  // أو
-  // /repairs/edit/:orderId
-  //
-  // سيعمل التعديل بشكل صحيح.
+  // دعم جميع أسماء Route Parameters
   // ===================================================
 
   const params =
