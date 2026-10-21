@@ -1,4 +1,5 @@
-import { useMemo } from "react";
+
+import { useMemo, useState } from "react";
 import {
   Box,
   Typography,
@@ -15,8 +16,10 @@ import {
   Tooltip,
   CircularProgress,
   Grid,
+  TextField,
+  InputAdornment,
+  Pagination,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
 
 import BuildIcon from "@mui/icons-material/Build";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -26,19 +29,29 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import SearchIcon from "@mui/icons-material/Search";
+
+import { useNavigate } from "react-router-dom";
 
 import {
   useOperatorDashboard,
   useOperatorOrders,
 } from "../../hooks/useRepairOrders.js";
+
 import {
   getStatusName,
   getStatusColor,
 } from "../../utils/repairConstants.js";
+
 import "../../styles/repairs.css";
+
+const PAGE_SIZE = 10;
 
 export default function OperatorDashboard() {
   const navigate = useNavigate();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
 
   const {
     data: dashboard,
@@ -49,8 +62,43 @@ export default function OperatorDashboard() {
   const {
     data: orders = [],
     isLoading: loadingOrders,
+    isFetching,
     refetch: refetchOrders,
   } = useOperatorOrders();
+
+  const filteredOrders = useMemo(() => {
+    const query = searchQuery.trim().toLocaleLowerCase();
+
+    if (!query) return orders;
+
+    return orders.filter((order) =>
+      [
+        order.barcode,
+        order.customerName,
+        order.customerPhone,
+        order.description,
+        order.pickupBranchName,
+        order.statusName,
+      ].some((value) =>
+        String(value ?? "").toLocaleLowerCase().includes(query)
+      )
+    );
+  }, [orders, searchQuery]);
+
+  const pageCount = Math.ceil(filteredOrders.length / PAGE_SIZE);
+
+  const paginatedOrders = useMemo(() => {
+    const start = (page - 1) * PAGE_SIZE;
+    return filteredOrders.slice(start, start + PAGE_SIZE);
+  }, [filteredOrders, page]);
+
+  const startItem =
+    filteredOrders.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+
+  const endItem = Math.min(
+    page * PAGE_SIZE,
+    filteredOrders.length
+  );
 
   const stats = useMemo(
     () => [
@@ -91,20 +139,20 @@ export default function OperatorDashboard() {
 
   return (
     <div className="repairs-list-container">
-      {/* Header */}
       <div className="repairs-list-header">
         <div className="repairs-list-header-icon">
           <BuildIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="repairs-list-title">لوحة المشغّل</Typography>
+        <Typography className="repairs-list-title">
+          لوحة المشغّل
+        </Typography>
 
         <Typography className="repairs-list-subtitle">
           القطع الموجودة حالياً في المشغل
         </Typography>
       </div>
 
-      {/* زر المسح */}
       <Box
         sx={{
           display: "flex",
@@ -136,17 +184,19 @@ export default function OperatorDashboard() {
         </Button>
 
         <Tooltip title="تحديث">
-          <IconButton
-            onClick={handleRefresh}
-            className="repairs-refresh-btn"
-            sx={{ width: 52, height: 52 }}
-          >
-            <RefreshIcon />
-          </IconButton>
+          <span>
+            <IconButton
+              onClick={handleRefresh}
+              disabled={isFetching}
+              className="repairs-refresh-btn"
+              sx={{ width: 52, height: 52 }}
+            >
+              <RefreshIcon />
+            </IconButton>
+          </span>
         </Tooltip>
       </Box>
 
-      {/* الإحصائيات */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {stats.map((stat) => (
           <Grid item xs={6} md={3} key={stat.title}>
@@ -161,13 +211,21 @@ export default function OperatorDashboard() {
                 textAlign: "center",
               }}
             >
-              <Box sx={{ color: stat.color, mb: 1 }}>{stat.icon}</Box>
+              <Box sx={{ color: stat.color, mb: 1 }}>
+                {stat.icon}
+              </Box>
+
               <Typography
                 variant="h4"
-                sx={{ fontWeight: 800, color: stat.color, mb: 0.5 }}
+                sx={{
+                  fontWeight: 800,
+                  color: stat.color,
+                  mb: 0.5,
+                }}
               >
                 {stat.value}
               </Typography>
+
               <Typography
                 sx={{
                   fontFamily: "'Cairo', sans-serif",
@@ -182,107 +240,171 @@ export default function OperatorDashboard() {
         ))}
       </Grid>
 
-      {/* الجدول */}
+      <Paper
+        elevation={0}
+        className="repairs-filters-paper"
+        sx={{ mb: 2 }}
+      >
+        <TextField
+          fullWidth
+          size="small"
+          placeholder="ابحث بالباركود أو اسم العميل أو الوصف..."
+          value={searchQuery}
+          onChange={(event) => {
+            setSearchQuery(event.target.value);
+            setPage(1);
+          }}
+          className="repairs-search"
+          slotProps={{
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: "#c9a44c", fontSize: 20 }} />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      </Paper>
+
       <Paper elevation={0} className="repairs-table-paper">
         {loading ? (
           <Box className="repairs-loading">
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
-        ) : orders.length === 0 ? (
+        ) : filteredOrders.length === 0 ? (
           <Box className="repairs-empty">
-            <Typography>لا توجد قطع حالياً في المشغل</Typography>
+            <Typography>
+              {searchQuery.trim()
+                ? "لا توجد نتائج مطابقة للبحث"
+                : "لا توجد قطع حالياً في المشغل"}
+            </Typography>
           </Box>
         ) : (
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow className="repairs-table-head-row">
-                  <TableCell className="repairs-th">#</TableCell>
-                  <TableCell className="repairs-th">الباركود</TableCell>
-                  <TableCell className="repairs-th">العميل</TableCell>
-                  <TableCell className="repairs-th">الوصف</TableCell>
-                  <TableCell className="repairs-th">الفرع الداخل</TableCell>
-                  <TableCell className="repairs-th">الحالة</TableCell>
-                  <TableCell className="repairs-th">آخر تحديث</TableCell>
-                  <TableCell className="repairs-th" align="center">
-                    الإجراءات
-                  </TableCell>
-                </TableRow>
-              </TableHead>
-
-              <TableBody>
-                {orders.map((order, index) => (
-                  <TableRow key={order.id} className="repairs-table-row">
-                    <TableCell className="repairs-td">{index + 1}</TableCell>
-
-                    <TableCell className="repairs-td">
-                      <Chip
-                        label={order.barcode || "—"}
-                        size="small"
-                        className="repairs-barcode-chip"
-                      />
-                    </TableCell>
-
-                    <TableCell className="repairs-td repairs-td-name">
-                      {order.customerName || "—"}
-                    </TableCell>
-
-                    <TableCell className="repairs-td">
-                      {order.description || "—"}
-                    </TableCell>
-
-                    <TableCell className="repairs-td">
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: 0.5,
-                        }}
-                      >
-                        <StorefrontIcon
-                          sx={{ fontSize: 16, color: "var(--gold-primary)" }}
-                        />
-                        <span>{order.pickupBranchName || "—"}</span>
-                      </Box>
-                    </TableCell>
-
-                    <TableCell className="repairs-td">
-                      <Chip
-                        label={order.statusName || getStatusName(order.status)}
-                        size="small"
-                        className={`repairs-status-chip repairs-status-${getStatusColor(
-                          order.status
-                        )}`}
-                      />
-                    </TableCell>
-
-                    <TableCell className="repairs-td repairs-td-date">
-                      {order.updatedAt
-                        ? new Date(order.updatedAt).toLocaleString("ar-JO", {
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "—"}
-                    </TableCell>
-
-                    <TableCell className="repairs-td" align="center">
-                      <Tooltip title="عرض التفاصيل">
-                        <IconButton
-                          size="small"
-                          className="repairs-action-btn repairs-view-btn"
-                          onClick={() => navigate(`/repairs/${order.id}`)}
-                        >
-                          <VisibilityIcon fontSize="small" />
-                        </IconButton>
-                      </Tooltip>
+          <>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow className="repairs-table-head-row">
+                    <TableCell className="repairs-th">#</TableCell>
+                    <TableCell className="repairs-th">الباركود</TableCell>
+                    <TableCell className="repairs-th">العميل</TableCell>
+                    <TableCell className="repairs-th">الوصف</TableCell>
+                    <TableCell className="repairs-th">الفرع الداخل</TableCell>
+                    <TableCell className="repairs-th">الحالة</TableCell>
+                    <TableCell className="repairs-th">آخر تحديث</TableCell>
+                    <TableCell className="repairs-th" align="center">
+                      الإجراءات
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                </TableHead>
+
+                <TableBody>
+                  {paginatedOrders.map((order, index) => (
+                    <TableRow
+                      key={order.id}
+                      className="repairs-table-row"
+                    >
+                      <TableCell className="repairs-td">
+                        {(page - 1) * PAGE_SIZE + index + 1}
+                      </TableCell>
+
+                      <TableCell className="repairs-td">
+                        <Chip
+                          label={order.barcode || "—"}
+                          size="small"
+                          className="repairs-barcode-chip"
+                        />
+                      </TableCell>
+
+                      <TableCell className="repairs-td repairs-td-name">
+                        {order.customerName || "—"}
+                      </TableCell>
+
+                      <TableCell className="repairs-td">
+                        {order.description || "—"}
+                      </TableCell>
+
+                      <TableCell className="repairs-td">
+                        <Box
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: 0.5,
+                          }}
+                        >
+                          <StorefrontIcon
+                            sx={{
+                              fontSize: 16,
+                              color: "var(--gold-primary)",
+                            }}
+                          />
+                          <span>{order.pickupBranchName || "—"}</span>
+                        </Box>
+                      </TableCell>
+
+                      <TableCell className="repairs-td">
+                        <Chip
+                          label={
+                            order.statusName ||
+                            getStatusName(order.status)
+                          }
+                          size="small"
+                          className={`repairs-status-chip repairs-status-${getStatusColor(
+                            order.status
+                          )}`}
+                        />
+                      </TableCell>
+
+                      <TableCell className="repairs-td repairs-td-date">
+                        {order.updatedAt
+                          ? new Date(order.updatedAt).toLocaleString(
+                              "ar-JO",
+                              {
+                                month: "2-digit",
+                                day: "2-digit",
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              }
+                            )
+                          : "—"}
+                      </TableCell>
+
+                      <TableCell className="repairs-td" align="center">
+                        <Tooltip title="عرض التفاصيل">
+                          <IconButton
+                            size="small"
+                            className="repairs-action-btn repairs-view-btn"
+                            onClick={() =>
+                              navigate(`/repairs/${order.id}`)
+                            }
+                          >
+                            <VisibilityIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+
+            <div className="repairs-pagination">
+              <div className="repairs-pagination-info">
+                عرض {startItem} - {endItem} من{" "}
+                {filteredOrders.length} تصليحة
+              </div>
+
+              <Pagination
+                count={pageCount}
+                page={Math.min(page, Math.max(pageCount, 1))}
+                onChange={(_, value) => setPage(value)}
+                shape="rounded"
+                className="repairs-pagination-control"
+                dir="ltr"
+              />
+            </div>
+          </>
         )}
       </Paper>
     </div>

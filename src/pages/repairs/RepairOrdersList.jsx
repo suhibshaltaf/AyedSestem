@@ -1,4 +1,5 @@
-import { useState, useMemo } from "react";
+
+import { useState, useMemo, useEffect } from "react";
 import {
   Box,
   Typography,
@@ -44,13 +45,21 @@ import "../../styles/repairs.css";
 
 const PAGE_SIZE = 10;
 
-// ===============================
-// ✅ الأدوار المسموح لها برؤية رقم الهاتف
-// ===============================
 const PHONE_VISIBLE_ROLES = [
   "Admin",
   "SuperAdmin",
   "BranchManager",
+];
+
+const STATUS_OPTIONS = [
+  { value: "", label: "الكل" },
+  { value: 1, label: "جديدة" },
+  { value: 2, label: "مع المندوب" },
+  { value: 3, label: "في المشغل" },
+  { value: 4, label: "تم التصليح" },
+  { value: 5, label: "مع المندوب بعد التصليح" },
+  { value: 6, label: "جاهزة للاستلام" },
+  { value: 7, label: "تم التسليم للعميل" },
 ];
 
 export default function RepairOrdersList() {
@@ -58,20 +67,20 @@ export default function RepairOrdersList() {
   const currentUser = useAuthStore((state) => state.user);
 
   const roles = useMemo(
-    () => currentUser?.roles?.map((r) => r.name) || [],
+    () => currentUser?.roles?.map((role) => role.name) || [],
     [currentUser]
   );
 
   const isAdmin = canViewAllBranches(roles);
   const canCreate = canCreateRepair(roles);
 
-  // ✅ هل يسمح له برؤية رقم الهاتف؟
   const canViewPhone = useMemo(
     () => roles.some((role) => PHONE_VISIBLE_ROLES.includes(role)),
     [roles]
   );
 
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [fromDate, setFromDate] = useState("");
   const [toDate, setToDate] = useState("");
   const [branchFilter, setBranchFilter] = useState("");
@@ -80,120 +89,194 @@ export default function RepairOrdersList() {
 
   const { data: branches = [] } = useBranches();
 
+  // تأخير إرسال البحث قليلًا حتى لا نرسل طلبًا مع كل حرف
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setPage(1);
+    }, 350);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery]);
+
+  // معاملات البحث والفلاتر وتقسيم الصفحات المرسلة إلى الـ API
   const params = useMemo(() => {
-    const p = {};
-    if (fromDate) p.fromDate = fromDate;
-    if (toDate) p.toDate = toDate;
-    if (branchFilter) p.branchId = Number(branchFilter);
-    if (statusFilter) p.status = Number(statusFilter);
-    return p;
-  }, [fromDate, toDate, branchFilter, statusFilter]);
+    const queryParams = {
+      pageNumber: page,
+      pageSize: PAGE_SIZE,
+    };
 
-  const { data: orders = [], isLoading, refetch } = useRepairOrders(params);
+    if (debouncedSearch) {
+      queryParams.search = debouncedSearch;
+    }
 
-  const filteredOrders = useMemo(() => {
-    if (!searchQuery.trim()) return orders;
-    const q = searchQuery.toLowerCase();
-    return orders.filter((o) => {
-      return (
-        (o.barcode || "").toLowerCase().includes(q) ||
-        (o.customerName || "").toLowerCase().includes(q) ||
-        (o.customerPhone || "").toLowerCase().includes(q) ||
-        (o.description || "").toLowerCase().includes(q)
+    if (fromDate) {
+      queryParams.fromDate = fromDate;
+    }
+
+    if (toDate) {
+      queryParams.toDate = toDate;
+    }
+
+    if (branchFilter) {
+      queryParams.branchId = Number(branchFilter);
+    }
+
+    if (statusFilter !== "") {
+      queryParams.status = Number(statusFilter);
+    }
+
+    return queryParams;
+  }, [
+    page,
+    debouncedSearch,
+    fromDate,
+    toDate,
+    branchFilter,
+    statusFilter,
+  ]);
+
+  const {
+    data: pageData,
+    isLoading,
+    isFetching,
+    refetch,
+  } = useRepairOrders(params);
+
+  // يدعم شكل البيانات المرقمة، وكذلك الشكل القديم مؤقتًا
+  const orders = Array.isArray(pageData)
+    ? pageData
+    : pageData?.items ?? pageData?.Items ?? [];
+
+  const totalCount = Array.isArray(pageData)
+    ? pageData.length
+    : Number(pageData?.totalCount ?? pageData?.TotalCount ?? 0);
+
+  const apiTotalPages = Array.isArray(pageData)
+    ? Math.ceil(pageData.length / PAGE_SIZE)
+    : Number(
+        pageData?.totalPages ??
+          pageData?.TotalPages ??
+          Math.ceil(totalCount / PAGE_SIZE)
       );
-    });
-  }, [orders, searchQuery]);
 
-  const pageCount = Math.ceil(filteredOrders.length / PAGE_SIZE);
-  const paginatedOrders = useMemo(() => {
-    const start = (page - 1) * PAGE_SIZE;
-    return filteredOrders.slice(start, start + PAGE_SIZE);
-  }, [filteredOrders, page]);
-
-  const startItem =
-    filteredOrders.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
-  const endItem = Math.min(page * PAGE_SIZE, filteredOrders.length);
+  const pageCount = Math.max(1, apiTotalPages);
+  const startItem = totalCount === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const endItem =
+    totalCount === 0
+      ? 0
+      : Math.min((page - 1) * PAGE_SIZE + orders.length, totalCount);
 
   const handleClearFilters = () => {
+    setSearchQuery("");
+    setDebouncedSearch("");
     setFromDate("");
     setToDate("");
     setBranchFilter("");
     setStatusFilter("");
-    setSearchQuery("");
+    setPage(1);
+  };
+
+  const handleFilterChange = (setter) => (event) => {
+    setter(event.target.value);
     setPage(1);
   };
 
   const handleExportExcel = () => {
-    exportRepairsToExcel(filteredOrders, "repairs");
+    if (orders.length === 0) return;
+
+    exportRepairsToExcel(orders, "repairs");
   };
 
-  /* ==========================================
-   * ✅ طباعة الجدول
-   * ========================================== */
   const handlePrint = () => {
-    if (filteredOrders.length === 0) return;
+    if (orders.length === 0) return;
 
     const printWindow = window.open("", "_blank", "width=1200,height=800");
+
     if (!printWindow) {
       alert("الرجاء السماح بالنوافذ المنبثقة للطباعة");
       return;
     }
 
-    // ✅ بناء عنوان الفلاتر
     const filterLabels = [];
+
     if (fromDate) filterLabels.push(`من: ${fromDate}`);
     if (toDate) filterLabels.push(`إلى: ${toDate}`);
+
     if (branchFilter) {
-      const branch = branches.find((b) => b.id === Number(branchFilter));
-      if (branch) filterLabels.push(`الفرع: ${branch.name}`);
-    }
-    if (statusFilter) {
-      const status = statusOptions.find(
-        (s) => s.value === Number(statusFilter)
+      const branch = branches.find(
+        (item) => item.id === Number(branchFilter)
       );
-      if (status) filterLabels.push(`الحالة: ${status.label}`);
+
+      if (branch) {
+        filterLabels.push(`الفرع: ${branch.name}`);
+      }
     }
-    if (searchQuery) filterLabels.push(`بحث: ${searchQuery}`);
+
+    if (statusFilter !== "") {
+      const status = STATUS_OPTIONS.find(
+        (item) => item.value === Number(statusFilter)
+      );
+
+      if (status) {
+        filterLabels.push(`الحالة: ${status.label}`);
+      }
+    }
+
+    if (debouncedSearch) {
+      filterLabels.push(`بحث: ${debouncedSearch}`);
+    }
+
+    const escapeHtml = (value) =>
+      String(value ?? "—").replace(/[&<>"']/g, (char) => {
+        const entities = {
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;",
+        };
+
+        return entities[char];
+      });
 
     const filterText =
       filterLabels.length > 0
-        ? `<div class="filters">${filterLabels.join(" | ")}</div>`
+        ? `<div class="filters">${filterLabels
+            .map(escapeHtml)
+            .join(" | ")}</div>`
         : "";
 
-    // ✅ بناء صفوف الجدول
-    const rowsHtml = filteredOrders
+    const rowsHtml = orders
       .map((order, index) => {
         const statusName =
           order.statusName || getStatusName(order.status);
+
         const createdDate = order.createdAt
           ? new Date(order.createdAt).toLocaleDateString("ar-JO")
           : "—";
 
-        // ✅ عمود الهاتف فقط للمصرّح لهم
         const phoneCell = canViewPhone
-          ? `<td class="phone">${order.customerPhone || "—"}</td>`
+          ? `<td class="phone">${escapeHtml(order.customerPhone)}</td>`
           : "";
 
         return `
           <tr>
-            <td class="center">${index + 1}</td>
-            <td class="barcode">${order.barcode || "—"}</td>
-            <td>${order.customerName || "—"}</td>
+            <td class="center">${(page - 1) * PAGE_SIZE + index + 1}</td>
+            <td class="barcode">${escapeHtml(order.barcode)}</td>
+            <td>${escapeHtml(order.customerName)}</td>
             ${phoneCell}
-            <td>${order.description || "—"}</td>
-            <td>${order.pickupBranchName || "—"}</td>
-            <td class="center">${statusName}</td>
-            <td>${order.currentLocationName || "—"}</td>
-            <td class="center date">${createdDate}</td>
+            <td>${escapeHtml(order.description)}</td>
+            <td>${escapeHtml(order.pickupBranchName)}</td>
+            <td class="center">${escapeHtml(statusName)}</td>
+            <td>${escapeHtml(order.currentLocationName)}</td>
+            <td class="center date">${escapeHtml(createdDate)}</td>
           </tr>
         `;
       })
       .join("");
 
-    // ✅ عنوان عمود الهاتف
-    const phoneHeader = canViewPhone
-      ? `<th>الهاتف</th>`
-      : "";
+    const phoneHeader = canViewPhone ? "<th>الهاتف</th>" : "";
 
     const now = new Date().toLocaleString("ar-JO", {
       year: "numeric",
@@ -215,7 +298,7 @@ export default function RepairOrdersList() {
             body {
               margin: 0;
               padding: 20px;
-              font-family: 'Cairo', 'Arial', sans-serif;
+              font-family: Arial, sans-serif;
               background: #fff;
               color: #222;
               direction: rtl;
@@ -229,55 +312,47 @@ export default function RepairOrdersList() {
             }
 
             .header h1 {
-              margin: 0 0 6px 0;
+              margin: 0 0 6px;
               font-size: 1.5rem;
               color: #8b6914;
-              font-weight: 700;
             }
 
-            .header .subtitle {
+            .subtitle {
               margin: 0;
-              font-size: 0.9rem;
+              font-size: .9rem;
               color: #666;
             }
 
             .filters {
               margin-top: 10px;
-              font-size: 0.85rem;
-              color: #555;
-              font-weight: 600;
               padding: 8px 12px;
+              display: inline-block;
               background: #fdf6e3;
               border-radius: 6px;
-              display: inline-block;
+              font-size: .85rem;
             }
 
             .meta {
               display: flex;
               justify-content: space-between;
-              align-items: center;
               margin-bottom: 12px;
-              font-size: 0.82rem;
+              font-size: .82rem;
               color: #666;
             }
 
             table {
               width: 100%;
               border-collapse: collapse;
-              font-size: 0.82rem;
+              font-size: .82rem;
             }
 
-            thead {
-              background-color: #f5e6c8;
-            }
+            thead { background: #f5e6c8; }
 
             th {
               padding: 10px 8px;
               text-align: right;
-              font-weight: 700;
               color: #8b6914;
               border: 1px solid #d4b876;
-              font-size: 0.82rem;
               white-space: nowrap;
             }
 
@@ -285,37 +360,26 @@ export default function RepairOrdersList() {
               padding: 8px;
               border: 1px solid #e0d0a0;
               text-align: right;
-              color: #333;
+              overflow-wrap: anywhere;
             }
 
-            tbody tr:nth-child(even) {
-              background-color: #fdfaf2;
-            }
-
-            tbody tr:hover {
-              background-color: #f9f1de;
-            }
-
+            tbody tr:nth-child(even) { background: #fdfaf2; }
             .center { text-align: center; }
 
             .barcode {
-              font-family: 'Courier New', monospace;
-              font-weight: 700;
+              font-family: monospace;
+              font-weight: bold;
               color: #8b6914;
-              letter-spacing: 0.5px;
-              font-size: 0.78rem;
             }
 
             .phone {
               direction: ltr;
-              text-align: right;
-              font-family: 'Courier New', monospace;
+              font-family: monospace;
             }
 
             .date {
-              font-size: 0.78rem;
-              color: #666;
               white-space: nowrap;
+              color: #666;
             }
 
             .footer {
@@ -323,7 +387,7 @@ export default function RepairOrdersList() {
               padding-top: 10px;
               border-top: 1px solid #d4b876;
               text-align: center;
-              font-size: 0.78rem;
+              font-size: .78rem;
               color: #888;
             }
 
@@ -333,13 +397,7 @@ export default function RepairOrdersList() {
                 margin: 10mm;
               }
 
-              body {
-                padding: 0;
-                font-size: 10pt;
-              }
-
-              .header h1 { font-size: 14pt; }
-              .filters { font-size: 9pt; }
+              body { padding: 0; }
 
               th, td {
                 padding: 6px 4px;
@@ -347,13 +405,13 @@ export default function RepairOrdersList() {
               }
 
               thead {
-                background-color: #f5e6c8 !important;
+                background: #f5e6c8 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
 
               tbody tr:nth-child(even) {
-                background-color: #fdfaf2 !important;
+                background: #fdfaf2 !important;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
               }
@@ -368,14 +426,15 @@ export default function RepairOrdersList() {
           </div>
 
           <div class="meta">
-            <span>عدد التصاليح: <strong>${filteredOrders.length}</strong></span>
-            <span>تاريخ الطباعة: ${now}</span>
+            <span>عدد التصاليح في هذه الصفحة: <strong>${orders.length}</strong></span>
+            <span>إجمالي النتائج المطابقة: <strong>${totalCount}</strong></span>
+            <span>تاريخ الطباعة: ${escapeHtml(now)}</span>
           </div>
 
           <table>
             <thead>
               <tr>
-                <th style="width: 40px;">#</th>
+                <th>#</th>
                 <th>الباركود</th>
                 <th>العميل</th>
                 ${phoneHeader}
@@ -386,9 +445,7 @@ export default function RepairOrdersList() {
                 <th>تاريخ الإنشاء</th>
               </tr>
             </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
+            <tbody>${rowsHtml}</tbody>
           </table>
 
           <div class="footer">
@@ -409,43 +466,31 @@ export default function RepairOrdersList() {
     printWindow.document.close();
   };
 
-  // ✅ الحالات الجديدة (7 حالات)
-  const statusOptions = [
-    { value: "", label: "الكل" },
-    { value: 1, label: "جديدة" },
-    { value: 2, label: "مع المندوب" },
-    { value: 3, label: "في المشغل" },
-    { value: 4, label: "تم التصليح" },
-    { value: 5, label: "مع المندوب بعد التصليح" },
-    { value: 6, label: "جاهزة للاستلام" },
-    { value: 7, label: "تم التسليم للعميل" },
-  ];
-
   return (
     <div className="repairs-list-container">
-      {/* Header */}
       <div className="repairs-list-header">
         <div className="repairs-list-header-icon">
           <ReceiptLongIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="repairs-list-title">كشف التصاليح</Typography>
+        <Typography className="repairs-list-title">
+          كشف التصاليح
+        </Typography>
 
         <Typography className="repairs-list-subtitle">
           عرض وإدارة جميع التصاليح
         </Typography>
       </div>
 
-      {/* Toolbar */}
       <Paper elevation={0} className="repairs-filters-paper">
         <Grid container spacing={2} alignItems="center">
           <Grid item xs={12} md={3}>
             <TextField
               fullWidth
               size="small"
-              placeholder="بحث بالباركود أو اسم العميل..."
+              placeholder="بحث بالباركود أو اسم العميل أو الهاتف..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(event) => setSearchQuery(event.target.value)}
               className="repairs-search"
               slotProps={{
                 input: {
@@ -466,7 +511,7 @@ export default function RepairOrdersList() {
               type="date"
               label="من تاريخ"
               value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
+              onChange={handleFilterChange(setFromDate)}
               InputLabelProps={{ shrink: true }}
               className="repairs-date-filter"
             />
@@ -479,7 +524,7 @@ export default function RepairOrdersList() {
               type="date"
               label="إلى تاريخ"
               value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
+              onChange={handleFilterChange(setToDate)}
               InputLabelProps={{ shrink: true }}
               className="repairs-date-filter"
             />
@@ -493,13 +538,13 @@ export default function RepairOrdersList() {
                 select
                 label="الفرع"
                 value={branchFilter}
-                onChange={(e) => setBranchFilter(e.target.value)}
+                onChange={handleFilterChange(setBranchFilter)}
                 className="repairs-branch-filter"
               >
                 <MenuItem value="">الكل</MenuItem>
-                {branches.map((b) => (
-                  <MenuItem key={b.id} value={b.id}>
-                    {b.name}
+                {branches.map((branch) => (
+                  <MenuItem key={branch.id} value={branch.id}>
+                    {branch.name}
                   </MenuItem>
                 ))}
               </TextField>
@@ -513,12 +558,12 @@ export default function RepairOrdersList() {
               select
               label="الحالة"
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={handleFilterChange(setStatusFilter)}
               className="repairs-status-filter"
             >
-              {statusOptions.map((opt) => (
-                <MenuItem key={opt.value} value={opt.value}>
-                  {opt.label}
+              {STATUS_OPTIONS.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
                 </MenuItem>
               ))}
             </TextField>
@@ -527,12 +572,15 @@ export default function RepairOrdersList() {
           <Grid item xs={12} md="auto">
             <div className="repairs-filters-actions">
               <Tooltip title="تحديث">
-                <IconButton
-                  onClick={() => refetch()}
-                  className="repairs-refresh-btn"
-                >
-                  <RefreshIcon />
-                </IconButton>
+                <span>
+                  <IconButton
+                    onClick={() => refetch()}
+                    disabled={isFetching}
+                    className="repairs-refresh-btn"
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </span>
               </Tooltip>
 
               <Button
@@ -543,13 +591,13 @@ export default function RepairOrdersList() {
                 مسح
               </Button>
 
-              <Tooltip title="تصدير Excel">
+              <Tooltip title="تصدير Excel — الصفحة الحالية">
                 <span>
                   <Button
                     variant="outlined"
                     startIcon={<GridOnIcon />}
                     onClick={handleExportExcel}
-                    disabled={filteredOrders.length === 0}
+                    disabled={orders.length === 0}
                     className="repairs-export-excel-btn"
                   >
                     Excel
@@ -557,14 +605,13 @@ export default function RepairOrdersList() {
                 </span>
               </Tooltip>
 
-              {/* ✅ زر طباعة الجدول */}
-              <Tooltip title="طباعة الجدول">
+              <Tooltip title="طباعة الصفحة الحالية">
                 <span>
                   <Button
                     variant="outlined"
                     startIcon={<PrintIcon />}
                     onClick={handlePrint}
-                    disabled={filteredOrders.length === 0}
+                    disabled={orders.length === 0}
                     className="repairs-print-table-btn"
                   >
                     طباعة
@@ -587,15 +634,16 @@ export default function RepairOrdersList() {
         </Grid>
       </Paper>
 
-      {/* Table */}
       <Paper elevation={0} className="repairs-table-paper">
         {isLoading ? (
           <Box className="repairs-loading">
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
-        ) : filteredOrders.length === 0 ? (
+        ) : orders.length === 0 ? (
           <Box className="repairs-empty">
-            <Typography>لا توجد تصاليح لعرضها</Typography>
+            <Typography>
+              لا توجد تصاليح مطابقة للبحث أو الفلاتر
+            </Typography>
           </Box>
         ) : (
           <>
@@ -606,9 +654,11 @@ export default function RepairOrdersList() {
                     <TableCell className="repairs-th">#</TableCell>
                     <TableCell className="repairs-th">الباركود</TableCell>
                     <TableCell className="repairs-th">العميل</TableCell>
+
                     {canViewPhone && (
                       <TableCell className="repairs-th">الهاتف</TableCell>
                     )}
+
                     <TableCell className="repairs-th">الوصف</TableCell>
                     <TableCell className="repairs-th">الفرع</TableCell>
                     <TableCell className="repairs-th">الحالة</TableCell>
@@ -623,7 +673,7 @@ export default function RepairOrdersList() {
                 </TableHead>
 
                 <TableBody>
-                  {paginatedOrders.map((order, index) => (
+                  {orders.map((order, index) => (
                     <TableRow key={order.id} className="repairs-table-row">
                       <TableCell className="repairs-td">
                         {(page - 1) * PAGE_SIZE + index + 1}
@@ -669,6 +719,7 @@ export default function RepairOrdersList() {
 
                       <TableCell className="repairs-td">
                         {order.currentLocationName || "—"}
+
                         {order.currentResponsibleUserName && (
                           <Typography
                             sx={{
@@ -695,7 +746,9 @@ export default function RepairOrdersList() {
                           <IconButton
                             size="small"
                             className="repairs-action-btn repairs-view-btn"
-                            onClick={() => navigate(`/repairs/${order.id}`)}
+                            onClick={() =>
+                              navigate(`/repairs/${order.id}`)
+                            }
                           >
                             <VisibilityIcon fontSize="small" />
                           </IconButton>
@@ -709,16 +762,18 @@ export default function RepairOrdersList() {
 
             <div className="repairs-pagination">
               <div className="repairs-pagination-info">
-                عرض {startItem} - {endItem} من {filteredOrders.length} تصليحة
+                عرض {startItem} - {endItem} من {totalCount} تصليحة
+                {isFetching ? " — جاري التحديث..." : ""}
               </div>
 
               <Pagination
                 count={pageCount}
-                page={page}
-                onChange={(e, value) => setPage(value)}
+                page={Math.min(page, pageCount)}
+                onChange={(_event, value) => setPage(value)}
                 shape="rounded"
                 className="repairs-pagination-control"
                 dir="ltr"
+                disabled={isFetching}
               />
             </div>
           </>

@@ -1,3 +1,4 @@
+
 import { useMemo } from "react";
 import { Box, Grid, Paper, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
@@ -28,52 +29,119 @@ export default function Dashboard() {
 
   const isAdmin =
     roles.includes("SuperAdmin") || roles.includes("Admin");
+
   const isBranchUser =
     roles.includes("BranchManager") ||
     roles.includes("BranchAccountant");
+
   const isRepresentative = roles.includes("Representative");
   const isOperator = roles.includes("OperatorManager");
 
-  const { data: orders = [] } = useRepairOrders(
+  const {
+    data: ordersResponse,
+    isLoading: isLoadingOrders,
+    isError: isOrdersError,
+  } = useRepairOrders(
     {},
     {
       enabled: isAdmin || isBranchUser,
     }
   );
 
+  // التعامل مع استجابة API سواء كانت مصفوفة أو بيانات مقسمة إلى صفحات.
+  const orders = useMemo(() => {
+    if (Array.isArray(ordersResponse)) {
+      return ordersResponse;
+    }
+
+    if (Array.isArray(ordersResponse?.items)) {
+      return ordersResponse.items;
+    }
+
+    if (Array.isArray(ordersResponse?.Items)) {
+      return ordersResponse.Items;
+    }
+
+    if (Array.isArray(ordersResponse?.data)) {
+      return ordersResponse.data;
+    }
+
+    if (Array.isArray(ordersResponse?.data?.items)) {
+      return ordersResponse.data.items;
+    }
+
+    if (Array.isArray(ordersResponse?.data?.Items)) {
+      return ordersResponse.data.Items;
+    }
+
+    return [];
+  }, [ordersResponse]);
+
   const todayKey = new Date().toLocaleDateString("en-CA");
-  const todayOrders = orders.filter(
-    (order) =>
-      order.createdAt &&
-      new Date(order.createdAt).toLocaleDateString("en-CA") === todayKey
+
+  const todayOrders = useMemo(
+    () =>
+      orders.filter(
+        (order) =>
+          order.createdAt &&
+          new Date(order.createdAt).toLocaleDateString("en-CA") ===
+            todayKey
+      ),
+    [orders, todayKey]
   );
 
   const completed = (list) =>
     list.filter((order) => Number(order.status) >= 5).length;
 
   const metrics = [
-    { title: "تصاليح اليوم", value: todayOrders.length },
+    {
+      title: "تصاليح اليوم",
+      value: isOrdersError
+        ? "—"
+        : isLoadingOrders
+          ? "..."
+          : todayOrders.length,
+    },
     {
       title: "إنجاز اليوم",
-      value: `${
-        todayOrders.length
-          ? Math.round(
-              (completed(todayOrders) / todayOrders.length) * 100
-            )
-          : 0
-      }%`,
+      value: isOrdersError
+        ? "—"
+        : isLoadingOrders
+          ? "..."
+          : `${
+              todayOrders.length
+                ? Math.round(
+                    (completed(todayOrders) / todayOrders.length) * 100
+                  )
+                : 0
+            }%`,
       progress: todayOrders.length
         ? (completed(todayOrders) / todayOrders.length) * 100
         : 0,
     },
-    { title: "مجموع التصاليح", value: orders.length },
+    {
+      title: "مجموع التصاليح",
+      value: isOrdersError
+        ? "—"
+        : isLoadingOrders
+          ? "..."
+          : ordersResponse?.totalCount ??
+            ordersResponse?.TotalCount ??
+            orders.length,
+    },
     {
       title: "الإنجاز الكلي",
-      value: `${
-        orders.length
-          ? Math.round((completed(orders) / orders.length) * 100)
-          : 0
-      }%`,
+      value: isOrdersError
+        ? "—"
+        : isLoadingOrders
+          ? "..."
+          : `${
+              orders.length
+                ? Math.round(
+                    (completed(orders) / orders.length) * 100
+                  )
+                : 0
+            }%`,
       progress: orders.length
         ? (completed(orders) / orders.length) * 100
         : 0,
@@ -158,6 +226,7 @@ export default function Dashboard() {
         <Typography className="dashboard-welcome-sub">
           مرحباً بك في
         </Typography>
+
         <Typography className="dashboard-welcome-title">
           مجموعة عايد دعنا
         </Typography>
@@ -194,6 +263,7 @@ export default function Dashboard() {
                 >
                   {metric.title}
                 </Typography>
+
                 <Typography
                   variant="h4"
                   sx={{
@@ -204,6 +274,7 @@ export default function Dashboard() {
                 >
                   {metric.value}
                 </Typography>
+
                 {metric.progress !== undefined && (
                   <Box
                     sx={{
@@ -240,7 +311,10 @@ export default function Dashboard() {
               onClick={() => navigate(card.path)}
               className="dashboard-card"
             >
-              <div className="dashboard-card-circle">{card.icon}</div>
+              <div className="dashboard-card-circle">
+                {card.icon}
+              </div>
+
               <Typography className="dashboard-card-title">
                 {card.title}
               </Typography>

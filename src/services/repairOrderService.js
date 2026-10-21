@@ -1,194 +1,167 @@
+
 import authAxiosInstance from "../api/axios.js";
 
-// ===============================
-// ✅ Helper: ضبط الهيدر المناسب حسب نوع الـ payload
-// - FormData → multipart/form-data (Axios يضيف boundary تلقائياً)
-// - JSON → application/json
-// ===============================
+// إعداد الطلب حسب نوع البيانات
 const getRequestConfig = (payload) => {
   if (payload instanceof FormData) {
     return {
       headers: { "Content-Type": "multipart/form-data" },
     };
   }
+
   return {};
 };
 
-// ===============================
-// ✅ Helper: بناء base URL للـ static files (الصور)
-// - يحذف /api من النهاية لأن الصور في الجذر
-// - مثال: https://localhost:7082/api → https://localhost:7082
-// ===============================
+// رابط الصور بدون /api
 const getStaticBaseUrl = () => {
   const base = authAxiosInstance.defaults.baseURL || "";
-  // ✅ احذف /api أو /api/v1 من النهاية
+
   return base
     .replace(/\/api(\/v\d+)?\/?$/i, "")
     .replace(/\/$/, "");
 };
 
 const repairOrderService = {
-  // ===============================
-  // GET: قائمة التصاليح
-  // ===============================
+  // قائمة التصاليح مع البحث والفلاتر وتقسيم الصفحات من السيرفر
   getRepairOrders: async (params = {}) => {
     const response = await authAxiosInstance.get("/RepairOrders", {
-      params,
+      params: {
+        ...params,
+        pageNumber: params.pageNumber ?? 1,
+        pageSize: params.pageSize ?? 10,
+      },
     });
+
     return response.data;
   },
 
-  // ===============================
-  // GET: تفاصيل تصليحة
-  // ===============================
+  // تفاصيل تصليحة
   getRepairOrderById: async (id) => {
     const response = await authAxiosInstance.get(`/RepairOrders/${id}`);
     return response.data;
   },
 
-  // ===============================
-  // GET: بواسطة Barcode
-  // ===============================
+  // البحث بالباركود
   getRepairOrderByBarcode: async (barcode) => {
     const response = await authAxiosInstance.get(
-      `/RepairOrders/barcode/${barcode}`
+      `/RepairOrders/barcode/${encodeURIComponent(barcode)}`
     );
+
     return response.data;
   },
 
-  // ===============================
-  // POST: إنشاء تصليحة
-  // ✅ يدعم JSON و FormData (لرفع الصور)
-  // ===============================
+  // إنشاء تصليحة
   createRepairOrder: async (payload) => {
     const response = await authAxiosInstance.post(
       "/RepairOrders",
       payload,
       getRequestConfig(payload)
     );
+
     return response.data;
   },
 
-  // ===============================
-  // PUT: تعديل تصليحة
-  // ✅ يدعم JSON و FormData (لرفع الصور)
-  // ===============================
+  // تعديل تصليحة
   updateRepairOrder: async (id, payload) => {
     const response = await authAxiosInstance.put(
       `/RepairOrders/${id}`,
       payload,
       getRequestConfig(payload)
     );
+
     return response.data;
   },
 
-  // ===============================
-  // DELETE: حذف تصليحة
-  // ===============================
+  // حذف تصليحة
   deleteRepairOrder: async (id) => {
     const response = await authAxiosInstance.delete(`/RepairOrders/${id}`);
     return response.data;
   },
 
-  // ===============================
-  // POST: مسح الباركود/QR — Backend يقرر
-  // ===============================
+  // مسح الباركود
   scanRepairOrder: async (payload) => {
-    // payload = { barcode: "..." } فقط
     const response = await authAxiosInstance.post(
       "/RepairOrders/scan",
       payload
     );
+
     return response.data;
   },
 
-  // ===============================
-  // GET: ملخص المندوبين
-  // ===============================
+  // ملخص المندوبين - المسار المطابق للـ Controller
   getRepresentativesSummary: async () => {
     const response = await authAxiosInstance.get(
-      "/RepairOrders/representatives-summary"
+      "/RepairOrders/representatives/summary"
     );
+
     return response.data;
   },
 
-  // ===============================
-  // GET: لوحة المندوب
-  // ===============================
+  // لوحة المندوب
   getRepresentativeDashboard: async () => {
     const response = await authAxiosInstance.get(
       "/RepairOrders/representative/dashboard"
     );
+
     return response.data;
   },
 
-  // ===============================
-  // GET: طلبات المندوب
-  // ===============================
+  // طلبات المندوب
   getRepresentativeOrders: async () => {
     const response = await authAxiosInstance.get(
       "/RepairOrders/representative/orders"
     );
+
     return response.data;
   },
 
-  // ===============================
-  // GET: صورة الباركود (Blob)
-  // ===============================
+  // صورة الباركود
   getBarcodeImage: async (barcode) => {
     const response = await authAxiosInstance.get(
-      `/RepairOrders/barcode/${barcode}/image`,
+      `/RepairOrders/barcode/${encodeURIComponent(barcode)}/image`,
       { responseType: "blob" }
     );
+
     return response.data;
   },
 
-  // ===============================
-  // GET: صورة QR (Blob)
-  // ===============================
+  // صورة QR
   getQrImage: async (barcode) => {
     const response = await authAxiosInstance.get(
-      `/RepairOrders/barcode/${barcode}/qr`,
+      `/RepairOrders/barcode/${encodeURIComponent(barcode)}/qr`,
       { responseType: "blob" }
     );
+
     return response.data;
   },
 
-  // ===============================
-  // ✅ GET: رابط صورة التصليح (Static URL)
-  // - fileName: اسم الملف فقط (مثل "abc123.jpg")
-  //   أو مسار كامل
-  // ===============================
+  // رابط صورة التصليحة
   getRepairImageUrl: (fileName) => {
     if (!fileName || typeof fileName !== "string") return null;
 
     const trimmed = fileName.trim();
+
     if (!trimmed) return null;
 
-    // ✅ URL كامل
-    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+    if (/^https?:\/\//i.test(trimmed)) {
       return trimmed;
     }
 
-    // ✅ استخدم الـ base URL بدون /api
     const base = getStaticBaseUrl();
 
-    // ✅ مسار كامل من الجذر
     if (trimmed.startsWith("/")) {
       return `${base}${trimmed}`;
     }
 
-    // ✅ اسم ملف فقط — المسار الفعلي: /uploads/{fileName}
     return `${base}/uploads/${trimmed}`;
   },
 
-  // ===============================
-  // GET: تتبع عام (للزبون)
-  // ===============================
+  // تتبع التصليحة للزبون
   trackRepairOrder: async (barcode) => {
     const response = await authAxiosInstance.get("/RepairOrders/track", {
       params: { barcode },
     });
+
     return response.data;
   },
 };
