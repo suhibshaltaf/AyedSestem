@@ -1,6 +1,7 @@
-/* ===============================
-   Public Tracking Container
-   =============================== */
+/* =====================================
+   Public Tracking
+===================================== */
+
 .tracking-container {
   min-height: 100vh;
   width: 100%;
@@ -12,12 +13,13 @@
   direction: rtl;
 }
 
-/* ===============================
+/* =====================================
    Header
-   =============================== */
+===================================== */
+
 .tracking-header {
   text-align: center;
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .tracking-header-icon {
@@ -50,66 +52,54 @@
   color: var(--text-muted) !important;
 }
 
-/* ===============================
-   Form Card
-   =============================== */
+/* =====================================
+   Search Form
+===================================== */
+
 .tracking-form-card {
   width: 100%;
-  max-width: 700px;
-  border-radius: 16px !important;
+  max-width: 750px;
+  margin: 0 auto 30px;
   padding: 24px !important;
+  border-radius: 16px !important;
   background-color: var(--bg-paper) !important;
   border: 1px solid var(--border-gold-strong) !important;
   box-shadow: var(--shadow-medium) !important;
-  margin-bottom: 24px;
 }
 
-.tracking-field .MuiOutlinedInput-root {
+.tracking-form-card .MuiOutlinedInput-root {
   border-radius: 10px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.tracking-field .MuiOutlinedInput-root fieldset {
+.tracking-form-card .MuiOutlinedInput-notchedOutline {
   border-color: var(--border-gold-strong) !important;
 }
 
-.tracking-field .MuiOutlinedInput-root:hover fieldset {
-  border-color: var(--gold-soft) !important;
-}
-
-.tracking-field .MuiOutlinedInput-root.Mui-focused fieldset {
+.tracking-form-card .MuiOutlinedInput-root:hover
+.MuiOutlinedInput-notchedOutline {
   border-color: var(--gold-primary) !important;
 }
 
-.tracking-field .MuiInputLabel-root {
+.tracking-form-card .Mui-focused
+.MuiOutlinedInput-notchedOutline {
+  border-color: var(--gold-primary) !important;
+}
+
+.tracking-form-card .MuiInputLabel-root {
   font-family: "Cairo", sans-serif !important;
-  font-size: 0.9rem !important;
-}
-
-.tracking-field .MuiInputLabel-root.Mui-focused {
-  color: var(--gold-primary) !important;
-}
-
-.tracking-field .MuiFormHelperText-root {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.72rem !important;
-}
-
-.tracking-form-actions {
-  display: flex;
-  gap: 12px;
-  margin-top: 20px;
-  flex-wrap: wrap;
 }
 
 .tracking-search-btn {
+  min-height: 56px;
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 10px !important;
   text-transform: none !important;
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
-  padding: 10px 32px !important;
+  padding: 10px 28px !important;
+  white-space: nowrap;
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
@@ -118,186 +108,217 @@
 }
 
 .tracking-search-btn.Mui-disabled {
-  background: linear-gradient(90deg, #d4b98a, #c0a068) !important;
+  background: #c0a068 !important;
   color: #fff !important;
 }
 
-.tracking-reset-btn {
-  color: var(--text-secondary) !important;
-  border-color: var(--border-gold-strong) !important;
-  border-radius: 10px !important;
-  text-transform: none !important;
-  font-family: "Cairo", sans-serif !important;
-  padding: 10px 24px !important;
-}
-
-/* ===============================
+/* =====================================
    Loading
-   =============================== */
+===================================== */
+
 .tracking-loading {
   display: flex;
   justify-content: center;
   padding: 40px;
 }
 
-/* ===============================
-   Result Card
-   =============================== */
-.tracking-result-card {
+/* =====================================
+   Results Header
+===================================== */
+
+.tracking-results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin: 30px 0 18px;
+  flex-wrap: wrap;
+}
+
+.tracking-count {
+  padding: 8px 18px;
+  border-radius: 10px;
+  color: #8b6914;
+  background: rgba(184, 134, 11, 0.12);
+  border: 1px solid var(--border-gold-strong);
+  font-family: "Cairo", sans-serif;
+  font-weight: 700;
+}
+
+/* =====================================
+   Table
+===================================== */
+
+.tracking-table-container {
   width: 100%;
-  max-width: 700px;
   border-radius: 16px !important;
-  padding: 0 !important;
+  overflow-x: auto;
   background-color: var(--bg-paper) !important;
   border: 1px solid var(--border-gold-strong) !important;
   box-shadow: var(--shadow-medium) !important;
-  overflow: hidden;
+}
+
+.tracking-table-container table {
+  min-width: 750px;
+}
+
+.tracking-table-container .MuiTableHead-root {
+  background-color: #faf6ee;
+}
+
+.tracking-table-container .MuiTableHead-root .MuiTableCell-root {
+  color: #8b6914;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 800 !important;
+  white-space: nowrap;
+  padding: 18px 14px;
+}
+
+[data-theme="dark"] .tracking-table-container .MuiTableHead-root {
+  background-color: #34302a;
+}
+
+[data-theme="dark"] .tracking-table-container .MuiTableHead-root .MuiTableCell-root {
+  color: #e6c878;
+}
+
+.tracking-table-container .MuiTableBody-root .MuiTableCell-root {
+  font-family: "Cairo", sans-serif !important;
+  color: var(--text-primary);
+  padding: 18px 14px;
+  border-color: var(--border-gold);
+}
+
+.tracking-table-container .MuiTableRow-root:last-child .MuiTableCell-root {
+  border-bottom: none;
+}
+
+/* =====================================
+   Table Cells
+===================================== */
+
+.tracking-item-cell,
+.tracking-phone-cell,
+.tracking-branch-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tracking-item-cell svg,
+.tracking-phone-cell svg,
+.tracking-branch-cell svg {
+  font-size: 19px;
+  color: var(--gold-primary);
+  flex-shrink: 0;
+}
+
+.tracking-item-cell p,
+.tracking-branch-cell p {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.tracking-barcode {
+  font-family: "Courier New", monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  direction: ltr;
+}
+
+.tracking-price {
+  color: #8b6914 !important;
+  font-weight: 800 !important;
+  white-space: nowrap;
+}
+
+/* =====================================
+   Empty / Error
+===================================== */
+
+.tracking-result-card {
+  width: 100%;
+  border-radius: 16px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-medium) !important;
 }
 
 .tracking-error {
-  padding: 32px !important;
+  padding: 28px !important;
   border-color: rgba(211, 47, 47, 0.3) !important;
 }
 
 .tracking-error-text {
   font-family: "Cairo", sans-serif !important;
-  font-size: 0.95rem !important;
   color: #d32f2f !important;
   text-align: center;
 }
 
-/* Status Highlight */
-.tracking-status-highlight {
+.tracking-empty {
+  margin-top: 30px;
+  padding: 45px 20px !important;
+  text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
   gap: 12px;
-  padding: 32px 20px;
 }
 
-.tracking-ready {
-  background: linear-gradient(135deg, #2e7d32 0%, #43a047 100%);
-  color: #fff;
-}
-
-.tracking-not-ready {
-  background: linear-gradient(135deg, #b8860b 0%, #d4af6a 100%);
-  color: #fff;
-}
-
-.tracking-status-text {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 1.2rem !important;
-  font-weight: 700 !important;
-  color: #fff !important;
-}
-
-/* Details */
-.tracking-details {
-  padding: 8px 24px 24px;
-}
-
-.tracking-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 8px;
-  gap: 16px;
-}
-
-.tracking-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--text-secondary);
-}
-
-.tracking-label span {
-  font-family: "Cairo", sans-serif;
-  font-size: 0.88rem;
-}
-
-.tracking-label svg {
+.tracking-empty > svg {
+  font-size: 48px;
   color: var(--gold-primary);
 }
 
-.tracking-value {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.95rem !important;
-  font-weight: 700 !important;
-  color: #2b6cb0 !important;
-  text-align: right;
-  flex: 1;
+.tracking-empty .MuiTypography-root {
+  font-family: "Cairo", sans-serif;
 }
 
-[data-theme="dark"] .tracking-value {
-  color: #e6c878 !important;
+/* =====================================
+   Back Button
+===================================== */
+
+.tracking-back {
+  margin-top: 30px;
+  text-align: center;
 }
 
-.tracking-value-mono {
-  font-family: "Courier New", monospace !important;
-  font-size: 0.95rem !important;
-  letter-spacing: 1px;
+.tracking-back .MuiButton-root {
+  font-family: "Cairo", sans-serif;
+  font-weight: 700;
+  color: var(--gold-primary);
 }
 
-.tracking-value-date {
-  font-size: 0.9rem !important;
-}
-
-.tracking-status-chip {
-  font-family: "Cairo", sans-serif !important;
-  font-size: 0.8rem !important;
-  font-weight: 700 !important;
-  border-radius: 6px !important;
-  background-color: rgba(184, 134, 11, 0.15) !important;
-  color: #b8860b !important;
-}
-
-.tracking-divider {
-  border-color: var(--border-gold) !important;
-  opacity: 0.6;
-}
-
-/* ===============================
+/* =====================================
    Responsive
-   =============================== */
+===================================== */
+
 @media (max-width: 600px) {
   .tracking-container {
-    padding: 24px 12px;
+    padding: 25px 12px;
   }
 
   .tracking-title {
-    font-size: 1.5rem !important;
+    font-size: 1.6rem !important;
   }
 
   .tracking-form-card {
     padding: 16px !important;
   }
 
-  .tracking-form-actions {
+  .tracking-results-header {
+    align-items: flex-start;
     flex-direction: column;
   }
 
-  .tracking-form-actions > * {
-    width: 100% !important;
-    justify-content: center !important;
+  .tracking-table-container {
+    border-radius: 12px !important;
   }
 
-  .tracking-row {
-    flex-direction: column-reverse;
-    align-items: flex-end;
-    gap: 4px;
-  }
-
-  .tracking-value {
-    width: 100%;
-    text-align: right;
-  }
-.ss{
-  
-}
-  .tracking-label {
-    align-self: flex-start;
+  .tracking-empty {
+    padding: 30px 16px !important;
   }
 }

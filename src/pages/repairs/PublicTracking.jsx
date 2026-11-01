@@ -1,5 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { useSearchParams, Link } from "react-router-dom";
+
 import {
   Box,
   Button,
@@ -7,91 +9,233 @@ import {
   Paper,
   TextField,
   Typography,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
   Chip,
 } from "@mui/material";
+
 import SearchIcon from "@mui/icons-material/Search";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import HourglassEmptyIcon from "@mui/icons-material/HourglassEmpty";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import StorefrontIcon from "@mui/icons-material/Storefront";
-import { useTrackRepairOrder } from "../../hooks/usePublicTracking.js";
+import PhoneIcon from "@mui/icons-material/Phone";
+
+import {
+  useTrackRepairOrder,
+  useTrackRepairOrdersByPhone,
+} from "../../hooks/usePublicTracking.js";
+
 import "../../styles/public-tracking.css";
 
-// ===============================
-// ✅ خريطة الحالات
-// ===============================
-const STATUS_INFO = {
-  1: { name: "جديدة", color: "default" },
-  2: { name: "مع المندوب", color: "info" },
-  3: { name: "في المشغل", color: "warning" },
-  4: { name: "تم التصليح", color: "info" },
-  5: { name: "مع المندوب بعد التصليح", color: "info" },
-  6: { name: "جاهزة للاستلام", color: "success" },
-  7: { name: "تم التسليم للعميل", color: "success" },
+// ======================================
+// تحديد نوع البحث
+// ======================================
+
+const isBarcode = (value) =>
+  /^[A-Za-z0-9]{2,10}-\d{4}-\d{6}$/.test(value);
+
+const isValidPhone = (value) =>
+  /^[0-9]{7,20}$/.test(value);
+
+// ======================================
+// تنسيق السعر
+// ======================================
+
+const formatPrice = (price) => {
+  if (price === null || price === undefined) return "—";
+
+  return `${Number(price).toFixed(2)} دينار`;
 };
 
-const getStatusInfo = (status) => {
-  const num = Number(status);
-  return (
-    STATUS_INFO[num] || {
-      name: "قيد التنفيذ",
-      color: "default",
-    }
-  );
+// ======================================
+// تحديد حالة التصليحة
+// ======================================
+
+const getOrderStatus = (status) => {
+  const normalizedStatus = String(status ?? "").toLowerCase();
+
+  if (normalizedStatus === "readyforpickup") {
+    return {
+      label: "جاهزة للاستلام",
+      color: "success",
+    };
+  }
+
+  return {
+    label: "قيد التصليح",
+    color: "warning",
+  };
 };
+
+// ======================================
+// الصفحة
+// ======================================
 
 export default function PublicTracking() {
   const [params, setParams] = useSearchParams();
-  const queryBarcode = params.get("barcode")?.trim() || "";
-  const [barcode, setBarcode] = useState(queryBarcode);
 
-  useEffect(() => setBarcode(queryBarcode), [queryBarcode]);
+  const queryValue =
+    params.get("value")?.trim() ||
+    params.get("barcode")?.trim() ||
+    params.get("phone")?.trim() ||
+    "";
+
+  const queryType =
+    params.get("type") ||
+    (params.get("barcode")
+      ? "barcode"
+      : params.get("phone")
+      ? "phone"
+      : "");
+
+  const [searchValue, setSearchValue] = useState(queryValue);
+
+  useEffect(() => {
+    setSearchValue(queryValue);
+  }, [queryValue]);
+
+  // ======================================
+  // البحث بالباركود
+  // ======================================
 
   const {
-    data: order,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useTrackRepairOrder(queryBarcode, !!queryBarcode);
+    data: barcodeOrder,
+    isLoading: barcodeLoading,
+    isError: barcodeIsError,
+    error: barcodeError,
+    refetch: refetchBarcode,
+  } = useTrackRepairOrder(
+    queryType === "barcode" ? queryValue : "",
+    queryType === "barcode" && !!queryValue
+  );
+
+  // ======================================
+  // البحث برقم الهاتف
+  // ======================================
+
+  const {
+    data: phoneOrders = [],
+    isLoading: phoneLoading,
+    isError: phoneIsError,
+    error: phoneError,
+    refetch: refetchPhone,
+  } = useTrackRepairOrdersByPhone(
+    queryType === "phone" ? queryValue : "",
+    queryType === "phone" && !!queryValue
+  );
+
+  const isLoading = barcodeLoading || phoneLoading;
+
+  const isError =
+    queryType === "barcode"
+      ? barcodeIsError
+      : queryType === "phone"
+      ? phoneIsError
+      : false;
+
+  const error =
+    queryType === "barcode"
+      ? barcodeError
+      : phoneError;
+
+  // ======================================
+  // تجهيز النتائج وإخفاء المستلمة
+  // ======================================
+
+  const orders = (
+    queryType === "barcode"
+      ? barcodeOrder
+        ? [barcodeOrder]
+        : []
+      : queryType === "phone"
+      ? phoneOrders
+      : []
+  ).filter(
+    (order) =>
+      String(order.status ?? "").toLowerCase() !==
+      "deliveredtocustomer"
+  );
+
+  // ======================================
+  // البحث
+  // ======================================
 
   const submit = (event) => {
     event.preventDefault();
-    const value = barcode.trim();
-    if (value === queryBarcode) refetch();
-    else if (value) setParams({ barcode: value });
+
+    const value = searchValue.trim();
+
+    if (!value) return;
+
+    let type;
+
+    if (isBarcode(value)) {
+      type = "barcode";
+    } else if (isValidPhone(value)) {
+      type = "phone";
+    } else {
+      return;
+    }
+
+    if (value === queryValue && type === queryType) {
+      if (type === "barcode") {
+        refetchBarcode();
+      } else {
+        refetchPhone();
+      }
+
+      return;
+    }
+
+    setParams({
+      type,
+      value,
+    });
   };
 
-  // ✅ الحالة
-  const statusNum = Number(order?.status);
-  const isReady = statusNum === 6;
-  const isDelivered = statusNum === 7;
-  const isInProgress = statusNum >= 1 && statusNum <= 5;
-  const statusInfo = getStatusInfo(statusNum);
+  // ======================================
+  // واجهة الصفحة
+  // ======================================
 
   return (
     <Box
       className="tracking-container"
       dir="rtl"
-      sx={{ minHeight: "100vh", py: { xs: 5, md: 9 }, px: 2 }}
+      sx={{
+        minHeight: "100vh",
+        py: { xs: 4, md: 8 },
+        px: 2,
+      }}
     >
-      <Box sx={{ maxWidth: 600, mx: "auto" }}>
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 1100,
+          mx: "auto",
+        }}
+      >
         {/* Header */}
-        <Box className="tracking-header" sx={{ textAlign: "center" }}>
-          <ReceiptLongIcon
-            sx={{ fontSize: 48, color: "var(--gold-primary)", mb: 1 }}
-          />
+
+        <Box className="tracking-header">
+          <Box className="tracking-header-icon">
+            <ReceiptLongIcon sx={{ fontSize: 38 }} />
+          </Box>
+
           <Typography variant="h4" className="tracking-title">
-            تتبع التصليحة
+            تتبع قطع الصيانة
           </Typography>
+
           <Typography className="tracking-subtitle">
-            أدخل رقم الباركود الموجود على إيصال التصليحة
+            أدخل رقم الهاتف أو رقم الباركود للاستعلام عن قطعك
           </Typography>
         </Box>
 
-        {/* Form */}
+        {/* Search Form */}
+
         <Paper
           component="form"
           onSubmit={submit}
@@ -99,251 +243,215 @@ export default function PublicTracking() {
           className="tracking-form-card"
           sx={{
             display: "flex",
-            flexDirection: { xs: "column", sm: "row" },
+            flexDirection: {
+              xs: "column",
+              sm: "row",
+            },
             gap: 2,
-            p: 3,
-            mt: 3,
+            alignItems: "stretch",
           }}
         >
           <TextField
             fullWidth
-            label="رقم الباركود"
-            value={barcode}
-            onChange={(event) => setBarcode(event.target.value)}
-            inputProps={{ dir: "ltr", "aria-label": "رقم الباركود" }}
+            label="رقم الهاتف أو رقم الباركود"
+            placeholder="0791234567 أو BN-2026-000001"
+            value={searchValue}
+            onChange={(event) =>
+              setSearchValue(event.target.value)
+            }
+            inputProps={{
+              dir: "ltr",
+              "aria-label": "رقم الهاتف أو رقم الباركود",
+            }}
           />
+
           <Button
             type="submit"
             variant="contained"
             startIcon={<SearchIcon />}
-            disabled={!barcode.trim() || isLoading}
-            sx={{ minWidth: 120 }}
+            disabled={!searchValue.trim() || isLoading}
+            className="tracking-search-btn"
+            sx={{
+              minWidth: {
+                xs: "100%",
+                sm: 130,
+              },
+            }}
           >
             بحث
           </Button>
         </Paper>
 
         {/* Loading */}
+
         {isLoading && (
-          <Box sx={{ textAlign: "center", my: 5 }}>
+          <Box className="tracking-loading">
             <CircularProgress />
           </Box>
         )}
 
         {/* Error */}
-        {isError && (
-          <Paper role="alert" sx={{ p: 3, mt: 3, textAlign: "center" }}>
-            {error?.response?.data?.message ||
-              "تعذر العثور على التصليحة. تحقق من رقم الباركود وحاول مرة أخرى."}
-          </Paper>
-        )}
 
-        {/* ✅ النتيجة — 3 أشياء فقط */}
-        {order && !isLoading && (
+        {isError && !isLoading && (
           <Paper
             elevation={0}
-            sx={{
-              p: 4,
-              mt: 3,
-              borderRadius: 3,
-              borderTop: isReady
-                ? "6px solid #2e7d32"
-                : isDelivered
-                ? "6px solid #1b5e20"
-                : "6px solid #f57c00",
-              boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
-            }}
+            className="tracking-result-card tracking-error"
+            role="alert"
           >
-            {/* ============================
-                1) حالة الجاهزية — الأبرز
-            ============================ */}
-            <Box
-              sx={{
-                textAlign: "center",
-                p: 3,
-                mb: 4,
-                borderRadius: 2,
-                bgcolor: isReady
-                  ? "#e8f5e9"
-                  : isDelivered
-                  ? "#e8f5e9"
-                  : "#fff8e1",
-                border: isReady
-                  ? "2px solid #4caf50"
-                  : isDelivered
-                  ? "2px solid #4caf50"
-                  : "2px solid #ffc107",
-              }}
-            >
-              {isReady ? (
-                <>
-                  <CheckCircleIcon
-                    sx={{ fontSize: 60, color: "#2e7d32", mb: 1 }}
-                  />
-                  <Typography
-                    sx={{
-                      color: "#1b5e20",
-                      fontWeight: 800,
-                      fontSize: "1.4rem",
-                    }}
-                  >
-                    ✅ التصليحة جاهزة للاستلام
-                  </Typography>
-                  <Typography
-                    sx={{
-                      color: "#2e7d32",
-                      fontSize: "0.95rem",
-                      mt: 1,
-                      fontWeight: 600,
-                    }}
-                  >
-                    يرجى الحضور إلى فرع التسليم لاستلام قطعتك
-                  </Typography>
-                </>
-              ) : isDelivered ? (
-                <>
-                  <CheckCircleIcon
-                    sx={{ fontSize: 60, color: "#1b5e20", mb: 1 }}
-                  />
-                  <Typography
-                    sx={{
-                      color: "#1b5e20",
-                      fontWeight: 800,
-                      fontSize: "1.4rem",
-                    }}
-                  >
-                    ✅ تم التسليم للعميل
-                  </Typography>
-                  <Typography
-                    sx={{ color: "#2e7d32", fontSize: "0.95rem", mt: 1 }}
-                  >
-                    شكراً لثقتك بنا
-                  </Typography>
-                </>
-              ) : (
-                <>
-                  <HourglassEmptyIcon
-                    sx={{ fontSize: 60, color: "#f57c00", mb: 1 }}
-                  />
-                  <Typography
-                    sx={{
-                      color: "#e65100",
-                      fontWeight: 800,
-                      fontSize: "1.4rem",
-                    }}
-                  >
-                    ⏳ التصليحة قيد التنفيذ
-                  </Typography>
-                  <Typography
-                    sx={{ color: "#f57c00", fontSize: "0.9rem", mt: 1 }}
-                  >
-                    الحالة الحالية: {order.statusName || statusInfo.name}
-                  </Typography>
-                </>
-              )}
-            </Box>
-
-            {/* ============================
-                2) رقم الباركود
-            ============================ */}
-            <Box
-              sx={{
-                textAlign: "center",
-                p: 2,
-                mb: 3,
-                bgcolor: "#faf6ee",
-                borderRadius: 2,
-                border: "1px solid #e0c88a",
-              }}
-            >
-              <Typography
-                sx={{
-                  fontSize: "0.85rem",
-                  color: "text.secondary",
-                  fontWeight: 600,
-                  mb: 1,
-                }}
-              >
-                رقم الباركود
-              </Typography>
-              <Typography
-                sx={{
-                  fontFamily: "'Courier New', monospace",
-                  fontSize: "1.5rem",
-                  fontWeight: 800,
-                  letterSpacing: 2,
-                  color: "#b8860b",
-                }}
-                dir="ltr"
-              >
-                {order.barcode || "—"}
-              </Typography>
-            </Box>
-
-            {/* ============================
-                3) فرع التسليم
-            ============================ */}
-            <Box
-              sx={{
-                textAlign: "center",
-                p: 3,
-                bgcolor: isReady ? "#e8f5e9" : "#f5f5f5",
-                borderRadius: 2,
-                border: isReady
-                  ? "2px solid #4caf50"
-                  : "1px solid #e0e0e0",
-              }}
-            >
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 1,
-                  mb: 1,
-                }}
-              >
-                <StorefrontIcon
-                  sx={{ color: isReady ? "#2e7d32" : "#b8860b", fontSize: 26 }}
-                />
-                <Typography
-                  sx={{
-                    fontSize: "0.9rem",
-                    color: isReady ? "#1b5e20" : "text.secondary",
-                    fontWeight: 700,
-                  }}
-                >
-                  فرع التسليم
-                </Typography>
-              </Box>
-              <Typography
-                sx={{
-                  fontSize: "1.3rem",
-                  fontWeight: 800,
-                  color: isReady ? "#1b5e20" : "#8b6914",
-                }}
-              >
-                {order.deliveryBranchName || "—"}
-              </Typography>
-              {isReady && (
-                <Typography
-                  sx={{
-                    fontSize: "0.85rem",
-                    color: "#2e7d32",
-                    mt: 1,
-                    fontWeight: 600,
-                  }}
-                >
-                  ← استلم قطعتك من هنا
-                </Typography>
-              )}
-            </Box>
+            <Typography className="tracking-error-text">
+              {error?.response?.data?.message ||
+                "تعذر إتمام البحث. يرجى التحقق من الرقم والمحاولة مرة أخرى."}
+            </Typography>
           </Paper>
         )}
 
+        {/* Results */}
+
+        {queryValue &&
+          queryType &&
+          !isLoading &&
+          !isError && (
+            <>
+              {orders.length > 0 ? (
+                <>
+                  <Box className="tracking-results-header">
+                    <Box>
+                      <Typography
+                        variant="h6"
+                        fontWeight={800}
+                      >
+                        قطع الصيانة غير المستلمة
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mt: 0.5 }}
+                      >
+                        {queryType === "phone"
+                          ? "جميع القطع المرتبطة برقم الهاتف"
+                          : "نتيجة البحث بالباركود"}
+                      </Typography>
+                    </Box>
+
+                    <Box className="tracking-count">
+                      {orders.length} قطعة
+                    </Box>
+                  </Box>
+
+                  <TableContainer
+                    component={Paper}
+                    elevation={0}
+                    className="tracking-table-container"
+                  >
+                    <Table>
+                      <TableHead>
+                        <TableRow>
+                          <TableCell align="center">
+                            رقم الباركود
+                          </TableCell>
+
+                          <TableCell align="center">
+                            رقم الهاتف
+                          </TableCell>
+
+                          <TableCell align="center">
+                            السعر
+                          </TableCell>
+
+                          <TableCell align="center">
+                            فرع الاستلام
+                          </TableCell>
+
+                          <TableCell align="center">
+                            الحالة
+                          </TableCell>
+                        </TableRow>
+                      </TableHead>
+
+                      <TableBody>
+                        {orders.map((order) => {
+                          const status = getOrderStatus(order.status);
+
+                          return (
+                            <TableRow key={order.barcode} hover>
+                              <TableCell
+                                align="center"
+                                dir="ltr"
+                                className="tracking-barcode"
+                              >
+                                {order.barcode || "—"}
+                              </TableCell>
+
+                              <TableCell align="center" dir="ltr">
+                                <Box className="tracking-phone-cell">
+                                  <PhoneIcon />
+                                  {order.customerPhone || "—"}
+                                </Box>
+                              </TableCell>
+
+                              <TableCell
+                                align="center"
+                                className="tracking-price"
+                              >
+                                {formatPrice(order.price)}
+                              </TableCell>
+
+                              <TableCell align="center">
+                                <Box className="tracking-branch-cell">
+                                  <StorefrontIcon />
+                                  <Typography>
+                                    {order.deliveryBranchName || "—"}
+                                  </Typography>
+                                </Box>
+                              </TableCell>
+
+                              <TableCell align="center">
+                                <Chip
+                                  label={status.label}
+                                  color={status.color}
+                                  size="small"
+                                  sx={{
+                                    fontFamily: "Cairo",
+                                    fontWeight: 700,
+                                    minWidth: 120,
+                                  }}
+                                />
+                              </TableCell>
+                            </TableRow>
+                          );
+                        })}
+                      </TableBody>
+                    </Table>
+                  </TableContainer>
+                </>
+              ) : (
+                <Paper
+                  elevation={0}
+                  className="tracking-result-card tracking-empty"
+                >
+                  <ReceiptLongIcon />
+
+                  <Typography variant="h6" fontWeight={800}>
+                    لا توجد قطع صيانة غير مستلمة
+                  </Typography>
+
+                  <Typography color="text.secondary">
+                    لا توجد قطع مرتبطة بالرقم المدخل أو أن جميع القطع تم تسليمها.
+                  </Typography>
+                </Paper>
+              )}
+            </>
+          )}
+
         {/* Back */}
-        <Box sx={{ mt: 3, textAlign: "center" }}>
-          <Button component={Link} to="/" startIcon={<ArrowBackIcon />}>
+
+        <Box className="tracking-back">
+          <Button
+            component={Link}
+            to="/"
+            startIcon={<ArrowBackIcon />}
+          >
             العودة للرئيسية
           </Button>
         </Box>

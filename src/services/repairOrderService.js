@@ -1,4 +1,3 @@
-
 import authAxiosInstance from "../api/axios.js";
 
 // إعداد الطلب حسب نوع البيانات
@@ -22,7 +21,7 @@ const getStaticBaseUrl = () => {
 };
 
 const repairOrderService = {
-  // قائمة التصاليح مع البحث والفلاتر وتقسيم الصفحات من السيرفر
+  // قائمة التصاليح مع البحث والفلاتر وتقسيم الصفحات
   getRepairOrders: async (params = {}) => {
     const response = await authAxiosInstance.get("/RepairOrders", {
       params: {
@@ -41,7 +40,7 @@ const repairOrderService = {
     return response.data;
   },
 
-  // البحث بالباركود
+  // البحث بالباركود داخل النظام
   getRepairOrderByBarcode: async (barcode) => {
     const response = await authAxiosInstance.get(
       `/RepairOrders/barcode/${encodeURIComponent(barcode)}`
@@ -88,7 +87,7 @@ const repairOrderService = {
     return response.data;
   },
 
-  // ملخص المندوبين - المسار المطابق للـ Controller
+  // ملخص المندوبين
   getRepresentativesSummary: async () => {
     const response = await authAxiosInstance.get(
       "/RepairOrders/representatives/summary"
@@ -156,11 +155,29 @@ const repairOrderService = {
     return `${base}/uploads/${trimmed}`;
   },
 
-  // تتبع التصليحة للزبون
+  // ======================================
+  // تتبع تصليحة واحدة بالباركود
+  // ======================================
+
   trackRepairOrder: async (barcode) => {
     const response = await authAxiosInstance.get("/RepairOrders/track", {
       params: { barcode },
     });
+
+    return response.data;
+  },
+
+  // ======================================
+  // تتبع جميع التصليحات برقم الهاتف
+  // ======================================
+
+  trackRepairOrdersByPhone: async (phone) => {
+    const response = await authAxiosInstance.get(
+      "/RepairOrders/track-by-phone",
+      {
+        params: { phone },
+      }
+    );
 
     return response.data;
   },

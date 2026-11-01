@@ -50,8 +50,31 @@ export default function PickupDelivery() {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(1);
 
-  const { data: orders = [], isLoading, refetch } = useRepairOrders({});
+const {
+  data: ordersResponse,
+  isLoading,
+  refetch,
+} = useRepairOrders({});
 
+const orders = useMemo(() => {
+  if (Array.isArray(ordersResponse)) {
+    return ordersResponse;
+  }
+
+  if (Array.isArray(ordersResponse?.data)) {
+    return ordersResponse.data;
+  }
+
+  if (Array.isArray(ordersResponse?.items)) {
+    return ordersResponse.items;
+  }
+
+  if (Array.isArray(ordersResponse?.data?.items)) {
+    return ordersResponse.data.items;
+  }
+
+  return [];
+}, [ordersResponse]);
   const filteredByTab = useMemo(() => {
     if (tab === 0) {
       return orders.filter((o) => DELIVER_TO_REP_STATUSES.includes(o.status));
