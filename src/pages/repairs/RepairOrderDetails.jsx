@@ -13,8 +13,12 @@ import {
   DialogContent,
   IconButton,
 } from "@mui/material";
-
-import { useParams, useNavigate } from "react-router-dom";
+import { formatJordanDateTime } from "../../utils/dateUtils";
+import {
+  useParams,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -85,6 +89,7 @@ export default function RepairOrderDetails() {
   const { id } = useParams();
 
   const navigate = useNavigate();
+  const location = useLocation();
 
   const currentUser = useAuthStore((state) => state.user);
 
@@ -626,16 +631,14 @@ export default function RepairOrderDetails() {
               التصليحة غير موجودة
             </Typography>
 
-            <Button
-              variant="contained"
-              startIcon={<ArrowBackIcon />}
-              onClick={() =>
-                navigate("/repairs/list")
-              }
-              className="repairs-details-back-btn"
-            >
-              العودة
-            </Button>
+           <Button
+  variant="contained"
+  startIcon={<ArrowBackIcon />}
+  onClick={() => navigate(-1)}
+  className="repairs-details-back-btn"
+>
+  العودة
+</Button>
 
           </Box>
 
@@ -784,7 +787,13 @@ export default function RepairOrderDetails() {
           variant="outlined"
           startIcon={<ArrowBackIcon />}
           onClick={() =>
-            navigate("/repairs/list")
+            navigate(
+              location.state?.from ||
+                (roles.includes("OperatorManager")
+                  ? "/repairs/operator"
+                  : "/repairs/list"),
+              { replace: true }
+            )
           }
           className="repairs-details-back-btn-outline"
         >
@@ -1045,27 +1054,14 @@ export default function RepairOrderDetails() {
 
                     {img.createdAt && (
                       <Typography className="repairs-image-card-meta">
+  <AccessTimeIcon
+    sx={{
+      fontSize: 14,
+    }}
+  />
 
-                        <AccessTimeIcon
-                          sx={{
-                            fontSize: 14,
-                          }}
-                        />
-
-                        {new Date(
-                          img.createdAt
-                        ).toLocaleString(
-                          "ar-JO",
-                          {
-                            year: "numeric",
-                            month: "2-digit",
-                            day: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          }
-                        )}
-
-                      </Typography>
+  {formatJordanDateTime(img.createdAt)}
+</Typography>
                     )}
 
                   </Box>
@@ -1153,16 +1149,11 @@ export default function RepairOrderDetails() {
 
               <div className="repairs-details-row">
 
-                <Typography className="repairs-details-value">
-
-                  {new Date(
-                    order.responsibilitySince
-                  ).toLocaleString(
-                    "ar-JO"
-                  )}
-
-                </Typography>
-
+              <Typography className="repairs-details-value">
+  {order.responsibilitySince
+    ? formatJordanDateTime(order.responsibilitySince)
+    : "—"}
+</Typography>
                 <div className="repairs-details-label">
 
                   <span className="repairs-details-label-text">
@@ -1282,20 +1273,7 @@ export default function RepairOrderDetails() {
 
                     <Typography className="repairs-timeline-date-text">
 
-                      {movement.createdAt
-                        ? new Date(
-                            movement.createdAt
-                          ).toLocaleString(
-                            "ar-JO",
-                            {
-                              year: "numeric",
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )
-                        : "—"}
+                    {formatJordanDateTime(movement.createdAt)}
 
                     </Typography>
 
@@ -1566,11 +1544,9 @@ export default function RepairOrderDetails() {
                       }}
                     />
 
-                    {new Date(
-                      selectedImage.createdAt
-                    ).toLocaleString(
-                      "ar-JO"
-                    )}
+                   {selectedImage.createdAt
+  ? formatJordanDateTime(selectedImage.createdAt)
+  : "—"}
 
                   </Typography>
                 )}

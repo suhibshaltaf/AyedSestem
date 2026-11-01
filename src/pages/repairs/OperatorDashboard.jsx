@@ -20,7 +20,7 @@ import {
   InputAdornment,
   Pagination,
 } from "@mui/material";
-
+import { formatJordanDateTime } from "../../utils/dateUtils";
 import BuildIcon from "@mui/icons-material/Build";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -356,19 +356,11 @@ export default function OperatorDashboard() {
                         />
                       </TableCell>
 
-                      <TableCell className="repairs-td repairs-td-date">
-                        {order.updatedAt
-                          ? new Date(order.updatedAt).toLocaleString(
-                              "ar-JO",
-                              {
-                                month: "2-digit",
-                                day: "2-digit",
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              }
-                            )
-                          : "—"}
-                      </TableCell>
+                   <TableCell className="repairs-td repairs-td-date">
+  {order.updatedAt
+    ? formatJordanDateTime(order.updatedAt)
+    : "—"}
+</TableCell>
 
                       <TableCell className="repairs-td" align="center">
                         <Tooltip title="عرض التفاصيل">
@@ -376,8 +368,10 @@ export default function OperatorDashboard() {
                             size="small"
                             className="repairs-action-btn repairs-view-btn"
                             onClick={() =>
-                              navigate(`/repairs/${order.id}`)
-                            }
+  navigate(`/repairs/${order.id}`, {
+    state: { from: "/repairs/operator" },
+  })
+}
                           >
                             <VisibilityIcon fontSize="small" />
                           </IconButton>

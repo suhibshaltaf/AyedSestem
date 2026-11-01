@@ -21,7 +21,7 @@ import {
   Grid,
   MenuItem,
 } from "@mui/material";
-
+import { formatJordanDateTime } from "../../utils/dateUtils";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import SearchIcon from "@mui/icons-material/Search";
 import AddIcon from "@mui/icons-material/Add";
@@ -278,13 +278,7 @@ export default function RepairOrdersList() {
 
     const phoneHeader = canViewPhone ? "<th>الهاتف</th>" : "";
 
-    const now = new Date().toLocaleString("ar-JO", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+   const now = formatJordanDateTime(new Date().toISOString());
 
     printWindow.document.write(`
       <!DOCTYPE html>

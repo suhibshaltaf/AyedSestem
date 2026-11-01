@@ -71,4 +71,4 @@ export default function ProtectedRoute({
 
   // 4) مسموح
   return <Outlet />;
-}
+} 

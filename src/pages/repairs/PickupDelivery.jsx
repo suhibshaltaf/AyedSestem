@@ -20,7 +20,7 @@ import {
   Tab,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
+import { formatJordanDateTime } from "../../utils/dateUtils";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
@@ -251,16 +251,11 @@ export default function PickupDelivery() {
                         />
                       </TableCell>
 
-                      <TableCell className="repairs-td repairs-td-date">
-                        {order.updatedAt
-                          ? new Date(order.updatedAt).toLocaleString("ar-JO", {
-                              month: "2-digit",
-                              day: "2-digit",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : "—"}
-                      </TableCell>
+                    <TableCell className="repairs-td repairs-td-date">
+  {order.updatedAt
+    ? formatJordanDateTime(order.updatedAt)
+    : "—"}
+</TableCell>
 
                       <TableCell className="repairs-td" align="center">
                         <Tooltip title="عرض التفاصيل">

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import {
   AppBar,
@@ -11,6 +12,7 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
+
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -40,40 +42,52 @@ export default function Header({ onMenuClick }) {
 
   const openMenu = Boolean(anchorEl);
 
-  // تحديث الوقت كل دقيقة
+  // تحديث الوقت كل ثانية
   useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 60000);
+    const t = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
     return () => clearInterval(t);
   }, []);
 
-  // تنسيقات
+  // تنسيق التاريخ: يوم عربي + تاريخ إنجليزي
   const formatDate = (d) => {
-    const days = [
-      "الأحد",
-      "الإثنين",
-      "الثلاثاء",
-      "الأربعاء",
-      "الخميس",
-      "الجمعة",
-      "السبت",
-    ];
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${days[d.getDay()]} ${y}/${m}/${day}`;
+    const day = new Intl.DateTimeFormat("ar-JO", {
+      timeZone: "Asia/Amman",
+      weekday: "long",
+    }).format(d);
+
+    const date = new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Amman",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d);
+
+    return `${day} ${date}`;
   };
 
+  // تنسيق الوقت بالإنجليزي ونظام 24 ساعة
   const formatTime = (d) => {
-    let h = d.getHours();
-    const min = String(d.getMinutes()).padStart(2, "0");
-    const period = h >= 12 ? "م" : "ص";
-    h = h % 12 || 12;
-    return `${h}:${min} ${period}`;
+    return new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Asia/Amman",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: false,
+    }).format(d);
   };
 
-  // فتح/إغلاق القائمة
-  const handleOpenMenu = (e) => setAnchorEl(e.currentTarget);
-  const handleCloseMenu = () => setAnchorEl(null);
+  // فتح القائمة
+  const handleOpenMenu = (e) => {
+    setAnchorEl(e.currentTarget);
+  };
+
+  // إغلاق القائمة
+  const handleCloseMenu = () => {
+    setAnchorEl(null);
+  };
 
   // تغيير كلمة المرور
   const handleChangePassword = () => {
@@ -92,9 +106,8 @@ export default function Header({ onMenuClick }) {
   return (
     <AppBar position="sticky" elevation={0} className="app-header">
       <Toolbar className="app-toolbar">
-        {/* ===============================
-            FIRST: User (أقصى اليمين)
-        =============================== */}
+
+        {/* FIRST: User */}
         <Box
           className="header-user"
           onClick={handleOpenMenu}
@@ -114,21 +127,22 @@ export default function Header({ onMenuClick }) {
           />
         </Box>
 
-        {/* ===============================
-            SECOND: Time + Divider + Date (الوسط)
-        =============================== */}
+        {/* SECOND: Time + Date */}
         <Box className="header-center">
-          <Typography className="header-time">{formatTime(time)}</Typography>
+          <Typography className="header-time">
+            {formatTime(time)}
+          </Typography>
 
           <div className="header-divider" />
 
-          <Typography className="header-date">{formatDate(time)}</Typography>
+          <Typography className="header-date">
+            {formatDate(time)}
+          </Typography>
         </Box>
 
-        {/* ===============================
-            THIRD: Theme + Mobile Menu (أقصى اليسار)
-        =============================== */}
+        {/* THIRD: Theme + Mobile Menu */}
         <Box className="header-theme">
+
           {/* Mobile menu */}
           <IconButton
             edge="start"
@@ -139,7 +153,7 @@ export default function Header({ onMenuClick }) {
             <MenuIcon />
           </IconButton>
 
-          {/* Sun */}
+          {/* Light Mode */}
           <button
             className={`theme-btn-sun ${mode === "light" ? "active" : ""}`}
             onClick={() => setMode("light")}
@@ -148,8 +162,7 @@ export default function Header({ onMenuClick }) {
             <LightModeIcon sx={{ fontSize: 18 }} />
           </button>
 
-          {/* Moon Circle */} 
-          
+          {/* Dark Mode */}
           <button
             className={`theme-btn-moon ${mode === "dark" ? "active" : ""}`}
             onClick={() => setMode("dark")}
@@ -157,11 +170,10 @@ export default function Header({ onMenuClick }) {
           >
             <DarkModeIcon sx={{ fontSize: 16 }} />
           </button>
+
         </Box>
 
-        {/* ===============================
-            Dropdown Menu
-        =============================== */}
+        {/* Dropdown Menu */}
         <Menu
           anchorEl={anchorEl}
           open={openMenu}
@@ -175,8 +187,12 @@ export default function Header({ onMenuClick }) {
             horizontal: "right",
           }}
           className="header-menu"
-          MenuListProps={{ className: "header-menu-list" }}
+          MenuListProps={{
+            className: "header-menu-list",
+          }}
         >
+
+          {/* Change Password */}
           <MenuItem
             onClick={handleChangePassword}
             className="header-menu-item"
@@ -184,6 +200,7 @@ export default function Header({ onMenuClick }) {
             <ListItemIcon className="header-menu-icon">
               <LockResetIcon fontSize="small" />
             </ListItemIcon>
+
             <ListItemText
               primary="تغيير كلمة المرور"
               primaryTypographyProps={{
@@ -195,10 +212,15 @@ export default function Header({ onMenuClick }) {
 
           <Divider className="header-menu-divider" />
 
-          <MenuItem onClick={handleLogout} className="header-menu-item logout">
+          {/* Logout */}
+          <MenuItem
+            onClick={handleLogout}
+            className="header-menu-item logout"
+          >
             <ListItemIcon className="header-menu-icon logout">
               <LogoutIcon fontSize="small" />
             </ListItemIcon>
+
             <ListItemText
               primary="تسجيل الخروج"
               primaryTypographyProps={{
@@ -207,6 +229,7 @@ export default function Header({ onMenuClick }) {
               }}
             />
           </MenuItem>
+
         </Menu>
       </Toolbar>
     </AppBar>

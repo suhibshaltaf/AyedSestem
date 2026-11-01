@@ -16,7 +16,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import StorefrontIcon from "@mui/icons-material/Storefront";
 import BuildIcon from "@mui/icons-material/Build";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
-
+import { formatJordanDateTime } from "../../utils/dateUtils";
 // عرض صف واحد (label + value)
 function ResultRow({ label, value, icon, ltr = false }) {
   if (!value) return null;
@@ -73,15 +73,9 @@ export default function ScanResultDialog({
 }) {
   if (!data) return null;
 
-  const scannedAt = data.scannedAt
-    ? new Date(data.scannedAt).toLocaleString("ar-JO", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "—";
+ const scannedAt = data.scannedAt
+  ? formatJordanDateTime(data.scannedAt)
+  : "—";
 
   return (
     <Dialog
