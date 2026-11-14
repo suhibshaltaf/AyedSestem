@@ -16,7 +16,7 @@ import PersonIcon from "@mui/icons-material/Person";
 
 import useAuthStore from "../../store/useAuthStore.js";
 import { useRepairOrders } from "../../hooks/useRepairOrders.js";
-import "../../styles/dashboard.css";
+import styles from "../../styles/Dashboard/Dashboard.module.css";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -221,13 +221,13 @@ export default function Dashboard() {
   const cards = allCards.filter((c) => c.show);
 
   return (
-    <div className="dashboard-container">
-      <div className="dashboard-welcome">
-        <Typography className="dashboard-welcome-sub">
+    <div className={styles.dashboardContainer}>
+      <div className={styles.dashboardWelcome}>
+        <Typography className={styles.dashboardWelcomeSub}>
           مرحباً بك في
         </Typography>
 
-        <Typography className="dashboard-welcome-title">
+        <Typography className={styles.dashboardWelcomeTitle}>
           مجموعة عايد دعنا
         </Typography>
 
@@ -302,20 +302,20 @@ export default function Dashboard() {
       <Grid
         container
         spacing={{ xs: 2, sm: 3 }}
-        className="dashboard-grid"
+        className={styles.dashboardGrid}
       >
         {cards.map((card) => (
           <Grid item xs={12} sm={6} md={4} key={card.title}>
             <Paper
               elevation={0}
               onClick={() => navigate(card.path)}
-              className="dashboard-card"
+              className={styles.dashboardCard}
             >
-              <div className="dashboard-card-circle">
+              <div className={styles.dashboardCardCircle}>
                 {card.icon}
               </div>
 
-              <Typography className="dashboard-card-title">
+              <Typography className={styles.dashboardCardTitle}>
                 {card.title}
               </Typography>
             </Paper>

@@ -1,0 +1,657 @@
+
+/* =========================================
+   GOLD SYSTEM — LOGIN PAGE
+   Independent CSS Module
+   Light / Dark Mode
+   Responsive RTL Design
+   ========================================= */
+
+/* =========================================
+   1. Main Page
+   ========================================= */
+
+.loginPage {
+  --login-bg: #faf6ee;
+  --login-card: rgba(255, 255, 255, 0.88);
+  --login-text: #2b2b2b;
+  --login-muted: #858585;
+  --login-gold: #b8860b;
+  --login-gold-dark: #8b6914;
+  --login-border: rgba(184, 134, 11, 0.2);
+  --login-input-bg: #ffffff;
+  --login-input-border: rgba(184, 134, 11, 0.25);
+  --login-shadow: 0 20px 60px rgba(93, 67, 15, 0.09);
+
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+
+  padding: 45px 20px;
+  overflow: hidden;
+
+  direction: rtl;
+  background: var(--login-bg);
+  color: var(--login-text);
+
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+
+/* =========================================
+   2. Dark Mode
+   ========================================= */
+
+.darkMode {
+  --login-bg: #1a1510;
+  --login-card: rgba(43, 33, 19, 0.94);
+  --login-text: #f1e8d7;
+  --login-muted: #aaa18f;
+  --login-gold: #d4af6a;
+  --login-gold-dark: #e6c878;
+  --login-border: rgba(212, 175, 106, 0.22);
+  --login-input-bg: rgba(255, 255, 255, 0.045);
+  --login-input-border: rgba(212, 175, 106, 0.22);
+  --login-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================
+   3. Background Decorations
+   ========================================= */
+
+.backgroundDecoration {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.backgroundDecoration::before {
+  content: "";
+  position: absolute;
+  width: 480px;
+  height: 480px;
+  top: -300px;
+  right: -180px;
+  border-radius: 50%;
+  border: 1px solid rgba(184, 134, 11, 0.16);
+  box-shadow:
+    0 0 0 35px rgba(184, 134, 11, 0.025),
+    0 0 0 70px rgba(184, 134, 11, 0.02);
+}
+
+.backgroundDecoration::after {
+  content: "";
+  position: absolute;
+  width: 550px;
+  height: 550px;
+  bottom: -390px;
+  left: -200px;
+  border-radius: 50%;
+  border: 1px solid rgba(184, 134, 11, 0.18);
+  box-shadow:
+    0 0 0 35px rgba(184, 134, 11, 0.025),
+    0 0 0 70px rgba(184, 134, 11, 0.02);
+}
+
+.darkMode .backgroundDecoration::before,
+.darkMode .backgroundDecoration::after {
+  border-color: rgba(212, 175, 106, 0.17);
+  box-shadow:
+    0 0 0 35px rgba(212, 175, 106, 0.025),
+    0 0 0 70px rgba(212, 175, 106, 0.015);
+}
+
+.circleTop,
+.circleBottom,
+.circleBottomInner {
+  position: absolute;
+  display: block;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.circleTop {
+  width: 220px;
+  height: 220px;
+  top: -130px;
+  right: -70px;
+  border: 1px solid rgba(184, 134, 11, 0.15);
+}
+
+.circleBottom {
+  width: 300px;
+  height: 300px;
+  bottom: -200px;
+  left: -100px;
+  border: 1px solid rgba(184, 134, 11, 0.14);
+}
+
+.circleBottomInner {
+  width: 230px;
+  height: 230px;
+  bottom: -165px;
+  left: -65px;
+  border: 1px solid rgba(184, 134, 11, 0.11);
+}
+
+.darkMode .circleTop,
+.darkMode .circleBottom,
+.darkMode .circleBottomInner {
+  border-color: rgba(212, 175, 106, 0.15);
+}
+
+/* =========================================
+   4. Theme Switcher
+   ========================================= */
+
+.themeSwitcher {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  z-index: 5;
+
+  display: flex;
+  align-items: center;
+  gap: 7px;
+
+  padding: 5px;
+  border: 1px solid var(--login-border);
+  border-radius: 30px;
+
+  background: var(--login-card);
+  box-shadow: 0 3px 12px rgba(0, 0, 0, 0.035);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+}
+
+.themeButton {
+  width: 36px;
+  height: 36px;
+  color: var(--login-muted) !important;
+  transition: all 0.25s ease !important;
+}
+
+.themeButton:hover {
+  color: var(--login-gold) !important;
+  background: rgba(184, 134, 11, 0.08) !important;
+}
+
+.activeTheme {
+  color: #fff !important;
+  background: var(--login-gold) !important;
+}
+
+.activeTheme:hover {
+  color: #fff !important;
+  background: var(--login-gold-dark) !important;
+}
+
+/* =========================================
+   5. Main Content
+   ========================================= */
+
+.loginContent {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  max-width: 430px;
+  margin: auto;
+}
+
+/* =========================================
+   6. Company Branding
+   ========================================= */
+
+.brandSection {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  width: 100%;
+  margin-bottom: 25px;
+  text-align: center;
+}
+
+.logoWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 88px;
+  height: 88px;
+  margin-bottom: 12px;
+
+  border-radius: 24px;
+  border: 1px solid var(--login-border);
+
+  background: var(--login-card);
+  box-shadow: var(--login-shadow);
+
+  transition: transform 0.3s ease;
+}
+
+.logoWrapper:hover {
+  transform: translateY(-3px);
+}
+
+.companyLogo {
+  display: block;
+  width: 68px;
+  height: 68px;
+  object-fit: contain;
+}
+
+.companyName {
+  color: var(--login-gold-dark) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.45rem !important;
+  font-weight: 800 !important;
+  line-height: 1.7 !important;
+}
+
+.companySubtitle {
+  margin-top: 2px !important;
+  color: var(--login-muted) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 500 !important;
+}
+
+/* =========================================
+   7. Login Card
+   ========================================= */
+
+.loginCard {
+  width: 100%;
+  padding: 34px 32px 25px;
+
+  border: 1px solid var(--login-border);
+  border-radius: 22px !important;
+
+  background: var(--login-card) !important;
+  box-shadow: var(--login-shadow) !important;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* =========================================
+   8. Card Header
+   ========================================= */
+
+.cardHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+
+  margin-bottom: 30px;
+}
+
+.loginIconWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 54px;
+  height: 54px;
+  margin-bottom: 15px;
+
+  border-radius: 17px;
+  color: #fff;
+
+  background: linear-gradient(
+    135deg,
+    #c9a44c,
+    #98701c
+  );
+
+  box-shadow: 0 6px 16px rgba(184, 134, 11, 0.2);
+}
+
+.loginIconWrapper svg {
+  font-size: 27px;
+}
+
+.cardTitle {
+  color: var(--login-text) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+}
+
+.cardSubtitle {
+  margin-top: 6px !important;
+  color: var(--login-muted) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.82rem !important;
+}
+
+/* =========================================
+   9. Login Form
+   ========================================= */
+
+.loginForm {
+  display: flex;
+  flex-direction: column;
+  gap: 19px;
+  width: 100%;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.fieldLabel {
+  color: var(--login-text) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.83rem !important;
+  font-weight: 700 !important;
+}
+
+/* =========================================
+   10. Text Fields
+   ========================================= */
+
+.loginInput {
+  width: 100%;
+}
+
+.loginInput :global(.MuiOutlinedInput-root) {
+  min-height: 51px;
+  border-radius: 11px;
+
+  background: var(--login-input-bg);
+  color: var(--login-text);
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.87rem;
+
+  transition: all 0.25s ease;
+}
+
+.loginInput :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--login-input-border);
+}
+
+.loginInput :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--login-gold);
+}
+
+.loginInput :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--login-gold);
+  border-width: 1.5px;
+}
+
+.loginInput :global(.MuiInputBase-input) {
+  padding: 13px 10px;
+  color: var(--login-text);
+  font-family: "Cairo", sans-serif;
+}
+
+.loginInput :global(.MuiInputBase-input::placeholder) {
+  color: var(--login-muted);
+  opacity: 0.8;
+  font-size: 0.82rem;
+}
+
+.loginInput :global(.MuiInputAdornment-root) {
+  color: var(--login-gold);
+}
+
+.loginInput :global(.MuiInputAdornment-root svg) {
+  font-size: 20px;
+}
+
+.loginInput :global(.MuiIconButton-root) {
+  color: var(--login-muted);
+}
+
+.loginInput :global(.MuiIconButton-root:hover) {
+  color: var(--login-gold);
+  background: rgba(184, 134, 11, 0.07);
+}
+
+.loginInput :global(.MuiFormHelperText-root) {
+  margin: 5px 4px 0;
+  color: #d32f2f;
+  font-family: "Cairo", sans-serif;
+  font-size: 0.72rem;
+  text-align: right;
+}
+
+.darkMode .loginInput :global(.MuiFormHelperText-root) {
+  color: #ff8585;
+}
+
+/* =========================================
+   11. Login Button
+   ========================================= */
+
+.loginButton {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+
+  min-height: 51px !important;
+  margin-top: 8px !important;
+
+  border-radius: 11px !important;
+
+  color: #fff !important;
+  background: linear-gradient(
+    110deg,
+    #b8860b,
+    #8b6914
+  ) !important;
+
+  box-shadow: 0 5px 15px rgba(139, 105, 20, 0.2) !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+
+  text-transform: none !important;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease !important;
+}
+
+.loginButton:hover {
+  background: linear-gradient(
+    110deg,
+    #a67c2e,
+    #72540e
+  ) !important;
+
+  box-shadow: 0 7px 20px rgba(139, 105, 20, 0.28) !important;
+  transform: translateY(-2px);
+}
+
+.loginButton:active {
+  transform: translateY(0);
+}
+
+.loginButton:global(.Mui-disabled) {
+  color: #fff !important;
+  background: #b9a16e !important;
+  box-shadow: none !important;
+  cursor: not-allowed;
+}
+
+.loginButton svg {
+  font-size: 20px;
+}
+
+.loadingIcon {
+  color: #fff !important;
+}
+
+/* =========================================
+   12. Card Footer
+   ========================================= */
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 11px;
+
+  margin-top: 27px;
+}
+
+.footerLine {
+  flex: 1;
+  height: 1px;
+  background: var(--login-border);
+}
+
+.footerText {
+  color: var(--login-muted) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.7rem !important;
+  white-space: nowrap;
+}
+
+/* =========================================
+   13. Page Footer
+   ========================================= */
+
+.pageFooter {
+  margin-top: 23px !important;
+  color: var(--login-muted) !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+  text-align: center;
+}
+
+/* =========================================
+   14. Responsive
+   ========================================= */
+
+@media (max-width: 600px) {
+  .loginPage {
+    padding: 75px 16px 30px;
+  }
+
+  .themeSwitcher {
+    top: 14px;
+    right: 14px;
+  }
+
+  .loginContent {
+    max-width: 390px;
+  }
+
+  .brandSection {
+    margin-bottom: 20px;
+  }
+
+  .logoWrapper {
+    width: 76px;
+    height: 76px;
+    border-radius: 20px;
+  }
+
+  .companyLogo {
+    width: 59px;
+    height: 59px;
+  }
+
+  .companyName {
+    font-size: 1.25rem !important;
+  }
+
+  .companySubtitle {
+    font-size: 0.75rem !important;
+  }
+
+  .loginCard {
+    padding: 27px 21px 22px;
+    border-radius: 18px !important;
+  }
+
+  .cardHeader {
+    margin-bottom: 25px;
+  }
+
+  .loginIconWrapper {
+    width: 49px;
+    height: 49px;
+    border-radius: 15px;
+  }
+
+  .cardTitle {
+    font-size: 1.2rem !important;
+  }
+
+  .loginForm {
+    gap: 17px;
+  }
+
+  .loginInput :global(.MuiOutlinedInput-root) {
+    min-height: 49px;
+  }
+
+  .loginButton {
+    min-height: 49px !important;
+  }
+
+  .pageFooter {
+    font-size: 0.66rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .loginPage {
+    padding-right: 12px;
+    padding-left: 12px;
+  }
+
+  .loginCard {
+    padding: 24px 16px 20px;
+  }
+
+  .companyName {
+    font-size: 1.15rem !important;
+  }
+
+  .cardTitle {
+    font-size: 1.1rem !important;
+  }
+}
+
+/* =========================================
+   15. Reduced Motion
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .loginPage,
+  .logoWrapper,
+  .themeButton,
+  .loginButton {
+    transition: none !important;
+  }
+}

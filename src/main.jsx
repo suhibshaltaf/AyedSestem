@@ -10,7 +10,7 @@ import { getTheme } from "./theme/theme.js";
 import useThemeStore from "./store/useThemeStore.js";
 import AuthInitializer from "./components/auth/AuthInitializer.jsx";
 import ErrorBoundary from "./components/common/ErrorBoundary.jsx";
-
+import "./styles/repair-status.css";
 import "./styles/global.css";
 
 const queryClient = new QueryClient({

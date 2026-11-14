@@ -1,0 +1,124 @@
+/* Public Tracking — CSS Module */
+.trackingContainer {
+  min-height: 100vh;
+  width: 100%;
+  padding: 40px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: var(--bg-default);
+  direction: rtl;
+  box-sizing: border-box;
+}
+.trackingContent { width: 100%; max-width: 1100px; margin: 0 auto; }
+.trackingHeader { text-align: center; margin-bottom: 28px; }
+.trackingHeaderIcon {
+  width: 70px; height: 70px; border-radius: 50%;
+  border: 2px solid var(--gold-primary); color: var(--gold-primary);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 14px;
+}
+.trackingTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 2rem !important; font-weight: 700 !important;
+  color: #8b6914 !important; margin-bottom: 6px !important;
+}
+:global([data-theme="dark"]) .trackingTitle { color: #e6c878 !important; }
+.trackingSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: .9rem !important; color: var(--text-muted) !important;
+}
+.trackingFormCard {
+  width: 100%; max-width: 750px; margin: 0 auto 30px;
+  padding: 24px !important; border-radius: 16px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-medium) !important;
+  display: flex; flex-direction: row; gap: 16px; align-items: stretch;
+  box-sizing: border-box;
+}
+.trackingFormCard :global(.MuiOutlinedInput-root) {
+  border-radius: 10px !important; background-color: var(--bg-paper) !important;
+}
+.trackingFormCard :global(.MuiOutlinedInput-notchedOutline) { border-color: var(--border-gold-strong) !important; }
+.trackingFormCard :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline),
+.trackingFormCard :global(.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--gold-primary) !important;
+}
+.trackingFormCard :global(.MuiInputLabel-root) { font-family: "Cairo", sans-serif !important; }
+.trackingSearchBtn {
+  min-width: 130px !important; min-height: 56px !important;
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important; border-radius: 10px !important;
+  text-transform: none !important; font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important; padding: 10px 28px !important;
+  white-space: nowrap; box-shadow: 0 3px 10px rgba(184,134,11,.25) !important;
+}
+.trackingSearchBtn:hover { background: linear-gradient(90deg,#b8860b,#8b6914) !important; }
+.trackingSearchBtn:global(.Mui-disabled) { background: #c0a068 !important; color: #fff !important; }
+.trackingLoading { display: flex; justify-content: center; padding: 40px; }
+.trackingResultsHeader {
+  display: flex; justify-content: space-between; align-items: center;
+  gap: 12px; margin: 30px 0 18px; flex-wrap: wrap;
+}
+.trackingCount {
+  padding: 8px 18px; border-radius: 10px; color: #8b6914;
+  background: rgba(184,134,11,.12); border: 1px solid var(--border-gold-strong);
+  font-family: "Cairo", sans-serif; font-weight: 700;
+}
+.trackingTableContainer {
+  width: 100%; border-radius: 16px !important; overflow-x: auto;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+.trackingTableContainer table { min-width: 750px; }
+.trackingTableContainer :global(.MuiTableHead-root) { background-color: #faf6ee; }
+.trackingTableContainer :global(.MuiTableHead-root .MuiTableCell-root) {
+  color: #8b6914; font-family: "Cairo",sans-serif !important;
+  font-weight: 800 !important; white-space: nowrap; padding: 18px 14px;
+}
+:global([data-theme="dark"]) .trackingTableContainer :global(.MuiTableHead-root) { background-color: #34302a; }
+:global([data-theme="dark"]) .trackingTableContainer :global(.MuiTableHead-root .MuiTableCell-root) { color: #e6c878; }
+.trackingTableContainer :global(.MuiTableBody-root .MuiTableCell-root) {
+  font-family: "Cairo",sans-serif !important; color: var(--text-primary);
+  padding: 18px 14px; border-color: var(--border-gold);
+}
+.trackingTableContainer :global(.MuiTableRow-root:last-child .MuiTableCell-root) { border-bottom: none; }
+.trackingPhoneCell, .trackingBranchCell {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.trackingPhoneCell svg, .trackingBranchCell svg { font-size: 19px; color: var(--gold-primary); flex-shrink: 0; }
+.trackingBranchCell p { font-family: "Cairo",sans-serif; font-size: .9rem; font-weight: 600; }
+.trackingBarcode {
+  font-family: "Courier New",monospace !important; font-weight: 700 !important;
+  letter-spacing: .5px; white-space: nowrap; direction: ltr;
+}
+.trackingPrice { color: #8b6914 !important; font-weight: 800 !important; white-space: nowrap; }
+.trackingResultCard {
+  width: 100%; border-radius: 16px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-medium) !important;
+}
+.trackingError { padding: 28px !important; border-color: rgba(211,47,47,.3) !important; }
+.trackingErrorText { font-family: "Cairo",sans-serif !important; color: #d32f2f !important; text-align: center; }
+.trackingEmpty {
+  margin-top: 30px; padding: 45px 20px !important; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 12px;
+}
+.trackingEmpty > svg { font-size: 48px; color: var(--gold-primary); }
+.trackingEmpty :global(.MuiTypography-root) { font-family: "Cairo",sans-serif; }
+.trackingBack { margin-top: 30px; text-align: center; }
+.trackingBack :global(.MuiButton-root) {
+  font-family: "Cairo",sans-serif; font-weight: 700; color: var(--gold-primary);
+}
+@media (max-width: 600px) {
+  .trackingContainer { padding: 25px 12px; }
+  .trackingTitle { font-size: 1.6rem !important; }
+  .trackingFormCard { padding: 16px !important; flex-direction: column; }
+  .trackingSearchBtn { width: 100%; }
+  .trackingResultsHeader { align-items: flex-start; flex-direction: column; }
+  .trackingTableContainer { border-radius: 12px !important; }
+  .trackingEmpty { padding: 30px 16px !important; }
+}

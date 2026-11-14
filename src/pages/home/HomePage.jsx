@@ -36,7 +36,7 @@ import {
 } from "../../hooks/usePublicTracking.js";
 
 import useAuthStore from "../../store/useAuthStore.js";
-import "../../styles/home.css";
+import styles from "../../styles/Home/Home.module.css";
 
 // ======================================
 // التحقق من نوع الرقم
@@ -53,19 +53,29 @@ const isValidPhone = (value) =>
 // ======================================
 
 const formatPrice = (price) => {
-  if (price === null || price === undefined) return "—";
+  if (price === null || price === undefined || price === "") {
+    return "—";
+  }
 
-  return `${Number(price).toFixed(2)} دينار`;
+  const numericPrice = Number(price);
+
+  if (Number.isNaN(numericPrice)) {
+    return "—";
+  }
+
+  return `${numericPrice.toFixed(2)} دينار`;
 };
 
 // ======================================
 // تحديد حالة التصليحة
 // ======================================
 
-const getOrderStatus = (status) => {
-  const normalizedStatus = String(status ?? "").toLowerCase();
+const getOrderStatus = (status, statusName) => {
+  const isReadyForPickup =
+    String(status ?? "").trim() === "6" ||
+    String(statusName ?? "").trim() === "جاهزة للتسليم للزبون";
 
-  if (normalizedStatus === "readyforpickup") {
+  if (isReadyForPickup) {
     return {
       label: "جاهزة للاستلام",
       color: "success",
@@ -128,8 +138,8 @@ export default function HomePage() {
     searchType === "barcode"
       ? barcodeIsError
       : searchType === "phone"
-      ? phoneIsError
-      : false;
+        ? phoneIsError
+        : false;
 
   const error =
     searchType === "barcode"
@@ -146,8 +156,10 @@ export default function HomePage() {
         ? [barcodeOrder]
         : []
       : searchType === "phone"
-      ? phoneOrders
-      : []
+        ? Array.isArray(phoneOrders)
+          ? phoneOrders
+          : []
+        : []
   ).filter(
     (order) =>
       String(order.status ?? "").toLowerCase() !==
@@ -228,15 +240,15 @@ export default function HomePage() {
   // ======================================
 
   return (
-    <Box className="home-container" dir="rtl">
+    <Box className={styles.homeContainer} dir="rtl">
       {/* زر تسجيل الدخول / لوحة التحكم */}
 
-      <Box className="home-login-btn-wrapper">
+      <Box className={styles.homeLoginBtnWrapper}>
         {token ? (
           <Button
             variant="contained"
             onClick={() => navigate("/dashboard")}
-            className="home-login-btn home-login-btn-dashboard"
+            className={`${styles.homeLoginBtn} ${styles.homeLoginBtnDashboard}`}
             startIcon={<DashboardIcon />}
           >
             لوحة التحكم
@@ -246,7 +258,7 @@ export default function HomePage() {
             variant="outlined"
             startIcon={<LoginIcon />}
             onClick={() => navigate("/login")}
-            className="home-login-btn"
+            className={styles.homeLoginBtn}
           >
             تسجيل الدخول
           </Button>
@@ -255,38 +267,38 @@ export default function HomePage() {
 
       {/* Header */}
 
-      <div className="home-header">
-        <div className="home-header-icon">
+      <div className={styles.homeHeader}>
+        <div className={styles.homeHeaderIcon}>
           <ReceiptLongIcon sx={{ fontSize: 40 }} />
         </div>
 
-        <Typography className="home-title">
+        <Typography className={styles.homeTitle}>
           مجموعة عايد دعنا
         </Typography>
 
-        <Typography className="home-subtitle">
+        <Typography className={styles.homeSubtitle}>
           أهلاً بكم — تتبع قطع الصيانة بسهولة
         </Typography>
 
-        <div className="home-title-decor">
-          <span className="home-title-line" />
+        <div className={styles.homeTitleDecor}>
+          <span className={styles.homeTitleLine} />
 
-          <Typography className="home-title-decor-text">
+          <Typography className={styles.homeTitleDecorText}>
             تتبع التصليحة
           </Typography>
 
-          <span className="home-title-line" />
+          <span className={styles.homeTitleLine} />
         </div>
       </div>
 
       {/* Search Form */}
 
-      <Paper elevation={0} className="home-form-card">
-        <Typography className="home-form-title">
+      <Paper elevation={0} className={styles.homeFormCard}>
+        <Typography className={styles.homeFormTitle}>
           أدخل رقم الهاتف أو رقم الباركود للبحث
         </Typography>
 
-        <div className="home-form-grid-single">
+        <div className={styles.homeFormGridSingle}>
           <TextField
             fullWidth
             label="رقم الهاتف أو رقم الباركود"
@@ -307,7 +319,7 @@ export default function HomePage() {
             }}
             error={!!formError}
             helperText={formError}
-            className="home-field"
+            className={styles.homeField}
             inputProps={{
               dir: "ltr",
               "aria-label": "رقم الهاتف أو رقم الباركود",
@@ -328,7 +340,7 @@ export default function HomePage() {
           />
         </div>
 
-        <div className="home-form-actions">
+        <div className={styles.homeFormActions}>
           <Button
             variant="contained"
             startIcon={
@@ -343,7 +355,7 @@ export default function HomePage() {
             }
             onClick={handleSearch}
             disabled={loadingOrder}
-            className="home-search-btn"
+            className={styles.homeSearchBtn}
           >
             {loadingOrder ? "جاري البحث..." : "بحث"}
           </Button>
@@ -353,7 +365,7 @@ export default function HomePage() {
               variant="outlined"
               onClick={handleReset}
               disabled={loadingOrder}
-              className="home-reset-btn"
+              className={styles.homeResetBtn}
             >
               بحث جديد
             </Button>
@@ -366,10 +378,10 @@ export default function HomePage() {
       {isError && searchTriggered && !loadingOrder && (
         <Paper
           elevation={0}
-          className="home-result-card home-error"
+          className={`${styles.homeResultCard} ${styles.homeError}`}
           role="alert"
         >
-          <Typography className="home-error-text">
+          <Typography className={styles.homeErrorText}>
             {error?.response?.data?.message ||
               "تعذر إتمام البحث. يرجى التحقق من الرقم والمحاولة مرة أخرى."}
           </Typography>
@@ -383,9 +395,9 @@ export default function HomePage() {
           {orders.length > 0 ? (
             <Paper
               elevation={0}
-              className="home-result-card home-tracking-results"
+              className={`${styles.homeResultCard} ${styles.homeTrackingResults}`}
             >
-              <Box className="home-results-header">
+              <Box className={styles.homeResultsHeader}>
                 <Box>
                   <Typography variant="h6" fontWeight={800}>
                     قطع الصيانة غير المستلمة
@@ -402,12 +414,12 @@ export default function HomePage() {
                   </Typography>
                 </Box>
 
-                <Box className="home-results-count">
+                <Box className={styles.homeResultsCount}>
                   {orders.length} قطعة
                 </Box>
               </Box>
 
-              <TableContainer className="home-tracking-table">
+              <TableContainer className={styles.homeTrackingTable}>
                 <Table>
                   <TableHead>
                     <TableRow>
@@ -435,7 +447,10 @@ export default function HomePage() {
 
                   <TableBody>
                     {orders.map((order) => {
-                      const status = getOrderStatus(order.status);
+                      const status = getOrderStatus(
+                        order.status,
+                        order.statusName
+                      );
 
                       return (
                         <TableRow key={order.barcode} hover>
@@ -444,7 +459,7 @@ export default function HomePage() {
                           <TableCell
                             align="center"
                             dir="ltr"
-                            className="home-tracking-barcode"
+                            className={styles.homeTrackingBarcode}
                           >
                             {order.barcode || "—"}
                           </TableCell>
@@ -452,7 +467,7 @@ export default function HomePage() {
                           {/* الهاتف */}
 
                           <TableCell align="center">
-                            <Box className="home-tracking-cell">
+                            <Box className={styles.homeTrackingCell}>
                               <PhoneIcon />
 
                               <Typography dir="ltr">
@@ -465,9 +480,9 @@ export default function HomePage() {
 
                           <TableCell
                             align="center"
-                            className="home-tracking-price"
+                            className={styles.homeTrackingPrice}
                           >
-                            <Box className="home-tracking-cell">
+                            <Box className={styles.homeTrackingCell}>
                               <AttachMoneyIcon />
 
                               <Typography>
@@ -479,7 +494,7 @@ export default function HomePage() {
                           {/* فرع الاستلام */}
 
                           <TableCell align="center">
-                            <Box className="home-tracking-cell">
+                            <Box className={styles.homeTrackingCell}>
                               <StorefrontIcon />
 
                               <Typography>
@@ -511,12 +526,12 @@ export default function HomePage() {
 
               {/* Refresh */}
 
-              <div className="home-result-actions">
+              <div className={styles.homeResultActions}>
                 <Tooltip title="تحديث النتائج">
                   <span>
                     <IconButton
                       onClick={handleRefresh}
-                      className="home-refresh-btn"
+                      className={styles.homeRefreshBtn}
                       disabled={loadingOrder}
                     >
                       <RefreshIcon />
@@ -528,7 +543,7 @@ export default function HomePage() {
           ) : (
             <Paper
               elevation={0}
-              className="home-result-card home-empty-result"
+              className={`${styles.homeResultCard} ${styles.homeEmptyResult}`}
             >
               <ReceiptLongIcon sx={{ fontSize: 45 }} />
 
@@ -546,7 +561,7 @@ export default function HomePage() {
 
       {/* Footer */}
 
-      <Typography className="home-footer">
+      <Typography className={styles.homeFooter}>
         © 2026 مجموعة عايد دعنا — جميع الحقوق محفوظة
       </Typography>
     </Box>

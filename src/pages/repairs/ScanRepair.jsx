@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -18,11 +19,15 @@ import ScannerIcon from "@mui/icons-material/DocumentScanner";
 import QrScannerDialog from "../../components/scanner/QrScannerDialog.jsx";
 import ScanResultDialog from "../../components/scanner/ScanResultDialog.jsx";
 import { useScanRepairOrder } from "../../hooks/useRepairOrders.js";
+import useThemeStore from "../../store/useThemeStore.js";
 
-import "../../styles/scan.css";
+import styles from "../../styles/Repairs/ScanRepair.module.css";
 
 export default function ScanRepair() {
   const navigate = useNavigate();
+
+  const mode = useThemeStore((state) => state.mode);
+  const isDark = mode === "dark";
 
   const [cameraOpen, setCameraOpen] = useState(false);
   const [barcode, setBarcode] = useState("");
@@ -33,15 +38,12 @@ export default function ScanRepair() {
   const scanMutation = useScanRepairOrder();
   const busy = scanMutation.isPending;
 
-  // للقارئ
   const inputRef = useRef(null);
   const bufferRef = useRef("");
   const lastKeyTimeRef = useRef(0);
   const timerRef = useRef(null);
 
-  // ===============================
   // تنفيذ المسح
-  // ===============================
   const performScan = async (value) => {
     const code = String(value || "").trim();
 
@@ -64,9 +66,7 @@ export default function ScanRepair() {
         return;
       }
 
-      // =====================================
       // المسح الثاني للمشغل: فتح صفحة التعديل
-      // =====================================
       if (data.shouldOpenEdit) {
         setBarcode("");
         bufferRef.current = "";
@@ -74,13 +74,10 @@ export default function ScanRepair() {
         setResultOpen(false);
 
         navigate(`/repairs/${data.repairOrderId}/edit`);
-
         return;
       }
 
-      // =====================================
       // الحركات العادية: عرض نتيجة المسح
-      // =====================================
       setScanResult(data);
       setResultOpen(true);
       setBarcode("");
@@ -96,16 +93,11 @@ export default function ScanRepair() {
     }
   };
 
-  // ===============================
-  // التقاط إدخال القارئ (USB Barcode Scanner)
-  // القارئ يكتب بسرعة + Enter
-  // ===============================
+  // التقاط إدخال قارئ الباركود USB
   useEffect(() => {
     const handleKeyDown = (e) => {
-      // نتجاهل لو الـ Dialog مفتوح
       if (cameraOpen || resultOpen) return;
 
-      // نتجاهل لو المستخدم يكتب يدوياً
       if (
         document.activeElement?.tagName === "INPUT" ||
         document.activeElement?.tagName === "TEXTAREA"
@@ -118,12 +110,10 @@ export default function ScanRepair() {
 
       lastKeyTimeRef.current = now;
 
-      // إذا الفرق بين الأحرف كبير، بداية باركود جديد
       if (diff > 100) {
         bufferRef.current = "";
       }
 
-      // Enter: تنفيذ المسح
       if (e.key === "Enter") {
         const code = bufferRef.current.trim();
 
@@ -137,12 +127,10 @@ export default function ScanRepair() {
         return;
       }
 
-      // حرف عادي
       if (e.key.length === 1) {
         bufferRef.current += e.key;
       }
 
-      // إذا مرت 500ms بدون Enter، تصفير الباركود
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
@@ -163,24 +151,18 @@ export default function ScanRepair() {
     };
   }, [cameraOpen, resultOpen, busy]);
 
-  // ===============================
   // من الكاميرا
-  // ===============================
   const handleCameraScan = (decodedText) => {
     performScan(decodedText);
   };
 
-  // ===============================
   // من الإدخال اليدوي
-  // ===============================
   const handleManualSubmit = (event) => {
     event.preventDefault();
     performScan(barcode);
   };
 
-  // ===============================
   // إغلاق النتيجة
-  // ===============================
   const handleCloseResult = () => {
     setResultOpen(false);
     setScanResult(null);
@@ -188,9 +170,7 @@ export default function ScanRepair() {
     setBarcode("");
   };
 
-  // ===============================
   // مسح قطعة أخرى
-  // ===============================
   const handleScanAnother = () => {
     setResultOpen(false);
     setScanResult(null);
@@ -199,16 +179,23 @@ export default function ScanRepair() {
   };
 
   return (
-    <Box className="scan-repair-page" dir="rtl">
-      <Paper elevation={0} className="scan-repair-card">
-        <Box className="scan-repair-header">
-          <QrCodeScannerIcon sx={{ fontSize: 56 }} />
+    <Box
+      className={`${styles.scanRepairPage} ${
+        isDark ? styles.darkMode : styles.lightMode
+      }`}
+      dir="rtl"
+    >
+      <Paper elevation={0} className={styles.scanRepairCard}>
+        <Box className={styles.scanRepairHeader}>
+          <Box className={styles.headerIcon}>
+            <QrCodeScannerIcon />
+          </Box>
 
-          <Typography className="scan-repair-title">
+          <Typography className={styles.scanRepairTitle}>
             مسح قطعة
           </Typography>
 
-          <Typography className="scan-repair-subtitle">
+          <Typography className={styles.scanRepairSubtitle}>
             استخدم قارئ الباركود مباشرة، أو امسح بالكاميرا، أو أدخل الرقم يدويًا.
             <br />
             سيقوم النظام تلقائيًا بتنفيذ الحركة المناسبة.
@@ -216,8 +203,8 @@ export default function ScanRepair() {
         </Box>
 
         {/* تنبيه القارئ */}
-        <Box className="scan-repair-reader-hint">
-          <ScannerIcon sx={{ fontSize: 20 }} />
+        <Box className={styles.scanReaderHint}>
+          <ScannerIcon />
 
           <span>
             القارئ جاهز — وجّه القارئ نحو الباركود وسيتم المسح تلقائياً
@@ -235,17 +222,21 @@ export default function ScanRepair() {
             setCameraOpen(true);
           }}
           disabled={busy}
-          className="scan-repair-camera-btn"
+          className={styles.scanCameraButton}
         >
           مسح QR بالكاميرا
         </Button>
 
-        <Box className="scan-repair-divider">
+        <Box className={styles.scanDivider}>
           <span>أو أدخل الرقم يدويًا</span>
         </Box>
 
         {/* الإدخال اليدوي */}
-        <Box component="form" onSubmit={handleManualSubmit}>
+        <Box
+          component="form"
+          onSubmit={handleManualSubmit}
+          className={styles.scanForm}
+        >
           <TextField
             fullWidth
             label="رقم الباركود"
@@ -255,17 +246,11 @@ export default function ScanRepair() {
             disabled={busy}
             inputRef={inputRef}
             inputProps={{ dir: "ltr" }}
-            className="scan-repair-input"
+            className={styles.scanInput}
             slotProps={{
               input: {
                 startAdornment: (
-                  <KeyboardIcon
-                    sx={{
-                      color: "#c9a44c",
-                      mr: 1,
-                      fontSize: 20,
-                    }}
-                  />
+                  <KeyboardIcon className={styles.keyboardIcon} />
                 ),
               },
             }}
@@ -276,13 +261,12 @@ export default function ScanRepair() {
             variant="outlined"
             type="submit"
             disabled={busy || !barcode.trim()}
-            className="scan-repair-submit-btn"
-            sx={{ mt: 2 }}
+            className={styles.scanSubmitButton}
           >
             {busy ? (
               <CircularProgress
                 size={22}
-                sx={{ color: "#b8860b" }}
+                className={styles.loadingIcon}
               />
             ) : (
               "تنفيذ المسح"
@@ -291,7 +275,7 @@ export default function ScanRepair() {
         </Box>
 
         {error && (
-          <Alert severity="error" className="scan-repair-alert">
+          <Alert severity="error" className={styles.scanAlert}>
             {error}
           </Alert>
         )}

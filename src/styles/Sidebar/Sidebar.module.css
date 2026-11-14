@@ -1,0 +1,222 @@
+
+/* =========================================
+   SIDEBAR MODULE
+   GoldSystem
+   RTL - Light / Dark Theme
+   ========================================= */
+
+/* ===============================
+   Desktop Layout
+   =============================== */
+
+.sidebarDesktop {
+  min-height: 100vh;
+  height: 100vh;
+  background-color: var(--bg-sidebar);
+  border-left: 1px solid var(--border-gold);
+  position: sticky;
+  top: 0;
+  align-self: flex-start;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-gold) transparent;
+}
+
+/* ===============================
+   Sidebar Content
+   =============================== */
+
+.sidebarContent {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  padding: 20px 12px;
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+/* ===============================
+   Header
+   =============================== */
+
+.sidebarHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border-gold);
+}
+
+.sidebarLogo {
+  width: 50%;
+  max-width: 110px;
+  height: auto;
+  max-height: 85px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin-bottom: 6px;
+}
+
+.sidebarTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--gold-primary) !important;
+  text-align: center;
+  margin-top: 6px !important;
+  line-height: 1.5 !important;
+}
+
+/* ===============================
+   Menu List
+   =============================== */
+
+.sidebarList {
+  flex-grow: 1;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+/* ===============================
+   Menu Items
+   =============================== */
+
+.sidebarItem {
+  border-radius: 9px !important;
+  margin-bottom: 5px !important;
+  padding: 9px 12px !important;
+  min-height: 42px;
+  color: var(--text-primary) !important;
+  direction: rtl;
+  text-align: right;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.sidebarItem:hover {
+  background-color: rgba(184, 134, 11, 0.09) !important;
+  transform: translateX(-2px);
+}
+
+/* ===============================
+   Active Item
+   =============================== */
+
+.sidebarItemActive {
+  background-color: var(--gold-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 3px 9px rgba(184, 134, 11, 0.18);
+}
+
+.sidebarItemActive:hover {
+  background-color: var(--gold-dark) !important;
+}
+
+/* ===============================
+   Icons
+   =============================== */
+
+.sidebarIcon {
+  min-width: 34px !important;
+  color: var(--gold-primary) !important;
+  justify-content: center;
+  transition: color 0.2s ease;
+}
+
+.sidebarIconActive {
+  color: #ffffff !important;
+}
+
+/* ===============================
+   Divider
+   =============================== */
+
+.sidebarDivider {
+  border-color: var(--border-gold) !important;
+  margin: 10px 0 !important;
+}
+
+/* ===============================
+   Section Title
+   =============================== */
+
+.sidebarSectionTitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+  font-weight: 700 !important;
+  color: var(--text-muted) !important;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px 5px !important;
+  display: flex !important;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.75;
+}
+
+/* ===============================
+   Disabled Items
+   =============================== */
+
+.sidebarItemDisabled {
+  opacity: 0.5 !important;
+  cursor: not-allowed !important;
+}
+
+.sidebarItemDisabled:hover {
+  background-color: transparent !important;
+  transform: none;
+}
+
+.sidebarIconDisabled {
+  color: var(--text-muted) !important;
+}
+
+.sidebarItemDisabled :global(.MuiListItemText-primary) {
+  color: var(--text-muted) !important;
+}
+
+/* ===============================
+   MUI Typography
+   =============================== */
+
+.sidebarItem :global(.MuiListItemText-primary) {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+
+/* ===============================
+   Scrollbar
+   =============================== */
+
+.sidebarDesktop::-webkit-scrollbar {
+  width: 5px;
+}
+
+.sidebarDesktop::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebarDesktop::-webkit-scrollbar-thumb {
+  background-color: var(--border-gold);
+  border-radius: 10px;
+}
+
+.sidebarDesktop::-webkit-scrollbar-thumb:hover {
+  background-color: var(--gold-primary);
+}
+
+/* ===============================
+   Responsive
+   =============================== */
+
+@media (max-width: 899px) {
+  .sidebarContent {
+    padding: 20px 12px;
+  }
+}

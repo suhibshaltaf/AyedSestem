@@ -1,0 +1,490 @@
+
+/* =========================================
+   OLD MAINTENANCE ORDER DETAILS
+   GoldSystem - RTL
+   Same Repair Details Design
+   ========================================= */
+
+.archive-details-container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px 16px 45px;
+  direction: rtl;
+  box-sizing: border-box;
+  font-family: "Cairo", sans-serif;
+  overflow-x: hidden;
+}
+
+.archive-details-container *,
+.archive-details-container *::before,
+.archive-details-container *::after {
+  box-sizing: border-box;
+}
+
+/* Loading / Empty */
+
+.archive-details-loading,
+.archive-details-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 60vh;
+  padding: 40px 20px;
+  color: var(--text-muted);
+  font-family: "Cairo", sans-serif;
+}
+
+.archive-details-empty :global(.MuiTypography-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+}
+
+/* Header */
+
+.archive-details-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 26px;
+}
+
+.archive-details-header-icon {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  border: 1px solid var(--border-gold-strong);
+  background: rgba(184, 134, 11, 0.07);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.archive-details-header-icon svg {
+  font-size: 32px;
+}
+
+.archive-details-title {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.85rem !important;
+  font-weight: 700 !important;
+  color: #8b6914 !important;
+  text-align: center;
+}
+
+:global([data-theme="dark"]) .archive-details-title {
+  color: #e6c878 !important;
+}
+
+.archive-details-title-decor {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  max-width: 440px;
+}
+
+.archive-details-title-line {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-primary),
+    transparent
+  );
+  opacity: 0.5;
+}
+
+.archive-details-receipt-chip {
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  background-color: rgba(184, 134, 11, 0.13) !important;
+  color: #b8860b !important;
+  max-width: 100%;
+}
+
+:global([data-theme="dark"]) .archive-details-receipt-chip {
+  color: #e6c878 !important;
+  background-color: rgba(230, 200, 120, 0.12) !important;
+}
+
+/* Actions */
+
+.archive-details-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 17px 0;
+  border-top: 1px solid var(--border-gold);
+  margin-bottom: 20px;
+}
+
+.archive-details-actions :global(.MuiButton-root) {
+  min-height: 40px;
+  border-radius: 9px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  padding: 7px 20px !important;
+  gap: 8px;
+}
+
+.archive-details-actions :global(.MuiButton-startIcon) {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.archive-details-back-btn {
+  color: var(--text-secondary) !important;
+  border-color: var(--border-gold-strong) !important;
+}
+
+.archive-details-back-btn:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+  border-color: var(--gold-primary) !important;
+}
+
+.archive-details-delivered-btn {
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.2) !important;
+}
+
+.archive-details-delivered-btn:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+/* Card */
+
+.archive-details-card {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 25px !important;
+  margin-bottom: 22px;
+  border-radius: 14px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+/* Section Titles */
+
+.archive-details-section-title {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 700 !important;
+  color: var(--gold-primary) !important;
+  margin-bottom: 12px !important;
+}
+
+.archive-details-section-title svg {
+  font-size: 21px;
+}
+
+:global([data-theme="dark"]) .archive-details-section-title {
+  color: #e6c878 !important;
+}
+
+.archive-details-divider {
+  border-color: var(--border-gold) !important;
+  margin: 12px 0 16px !important;
+}
+
+/* Status */
+
+.archive-details-status-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-wrap: wrap;
+  gap: 14px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-gold);
+  border-radius: 12px;
+  background: rgba(184, 134, 11, 0.06);
+  direction: rtl;
+}
+
+:global([data-theme="dark"]) .archive-details-status-row {
+  background: rgba(230, 200, 120, 0.06);
+}
+
+.archive-details-status-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-primary);
+  font-family: "Cairo", sans-serif;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.archive-details-status-label p {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--text-primary) !important;
+}
+
+.archive-details-status-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: rgba(184, 134, 11, 0.13);
+  color: var(--gold-primary);
+}
+
+.archive-details-status-icon svg {
+  font-size: 20px;
+}
+
+.archive-details-status-chip {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  min-height: 32px;
+  padding: 0 10px;
+}
+
+.archive-details-status-ready {
+  background: rgba(237, 167, 42, 0.15) !important;
+  color: #a66b00 !important;
+}
+
+.archive-details-status-delivered {
+  background: rgba(46, 125, 50, 0.13) !important;
+  color: #2e7d32 !important;
+}
+
+:global([data-theme="dark"]) .archive-details-status-ready {
+  color: #ffcc70 !important;
+}
+
+:global([data-theme="dark"]) .archive-details-status-delivered {
+  color: #81c784 !important;
+}
+
+/* Information Grid */
+
+.archive-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  direction: rtl;
+}
+
+.archive-details-row {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+  min-height: 86px;
+  padding: 14px 16px;
+  border: 1px solid var(--border-gold);
+  border-radius: 12px;
+  background: rgba(184, 134, 11, 0.035);
+  direction: rtl;
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+:global([data-theme="dark"]) .archive-details-row {
+  background: rgba(230, 200, 120, 0.04);
+}
+
+.archive-details-row:hover {
+  background-color: rgba(184, 134, 11, 0.075);
+  border-color: var(--border-gold-strong);
+}
+
+.archive-details-row-full {
+  grid-column: 1 / -1;
+}
+
+.archive-details-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  color: var(--text-secondary);
+  direction: rtl;
+}
+
+.archive-details-label-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: rgba(184, 134, 11, 0.12);
+  color: var(--gold-primary);
+}
+
+.archive-details-label-icon svg {
+  font-size: 18px !important;
+}
+
+:global([data-theme="dark"]) .archive-details-label-icon {
+  background: rgba(230, 200, 120, 0.12);
+  color: #e6c878;
+}
+
+.archive-details-label-text {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  line-height: 1.5;
+}
+
+.archive-details-value {
+  display: block;
+  min-width: 0;
+  padding-inline: 2px;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.98rem !important;
+  font-weight: 600 !important;
+  color: var(--text-primary) !important;
+  text-align: right;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  line-height: 1.8 !important;
+}
+
+:global([data-theme="dark"]) .archive-details-value {
+  color: #f0dca0 !important;
+}
+
+.archive-details-value-ltr {
+  direction: ltr;
+  text-align: right;
+  unicode-bidi: plaintext;
+}
+
+/* Tablet */
+
+@media (max-width: 900px) {
+  .archive-details-container {
+    padding: 18px 12px 35px;
+  }
+
+  .archive-details-card {
+    padding: 20px !important;
+  }
+
+  .archive-details-title {
+    font-size: 1.65rem !important;
+  }
+}
+
+/* Mobile */
+
+@media (max-width: 600px) {
+  .archive-details-container {
+    padding: 12px 8px 30px;
+  }
+
+  .archive-details-header {
+    margin-bottom: 20px;
+  }
+
+  .archive-details-header-icon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .archive-details-title {
+    font-size: 1.5rem !important;
+  }
+
+  .archive-details-card {
+    padding: 15px !important;
+    margin-bottom: 15px;
+    border-radius: 11px !important;
+  }
+
+  .archive-details-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .archive-details-actions :global(.MuiButton-root) {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 7px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .archive-details-status-row {
+    gap: 10px;
+    padding: 12px;
+  }
+
+  .archive-details-status-label,
+  .archive-details-status-label p {
+    font-size: 0.88rem !important;
+  }
+
+  .archive-details-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .archive-details-row {
+    min-height: 0;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .archive-details-label-icon {
+    width: 28px;
+    height: 28px;
+  }
+
+  .archive-details-label-text {
+    font-size: 0.8rem;
+  }
+
+  .archive-details-value {
+    font-size: 0.92rem !important;
+  }
+
+  .archive-details-section-title {
+    font-size: 0.95rem !important;
+  }
+}
+
+@media (max-width: 360px) {
+  .archive-details-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .archive-details-label-text {
+    font-size: 0.75rem;
+  }
+
+  .archive-details-value {
+    font-size: 0.86rem !important;
+  }
+}

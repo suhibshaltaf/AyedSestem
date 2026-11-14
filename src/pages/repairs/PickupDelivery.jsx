@@ -33,7 +33,7 @@ import {
   getStatusName,
   getStatusColor,
 } from "../../utils/repairConstants.js";
-import "../../styles/repairs.css";
+import styles from "../../styles/Repairs/PickupDelivery.module.css";
 
 const PAGE_SIZE = 10;
 
@@ -121,40 +121,40 @@ const orders = useMemo(() => {
   ).length;
 
   return (
-    <div className="repairs-list-container">
+    <div className={styles.pageContainer}>
       {/* Header */}
-      <div className="repairs-list-header">
-        <div className="repairs-list-header-icon">
+      <div className={styles.pageHeader}>
+        <div className={styles.pageHeaderIcon}>
           <LocalShippingIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="repairs-list-title">
+        <Typography className={styles.pageTitle}>
           الاستلام والتسليم
         </Typography>
 
-        <Typography className="repairs-list-subtitle">
+        <Typography className={styles.pageSubtitle}>
           إدارة تسليم واستلام التصاليح
         </Typography>
       </div>
 
       {/* Tabs */}
-      <Paper elevation={0} className="pickup-delivery-tabs-paper">
+      <Paper elevation={0} className={styles.tabsPaper}>
         <Tabs
           value={tab}
           onChange={handleTabChange}
           variant="fullWidth"
-          className="pickup-delivery-tabs"
+          className={styles.tabs}
         >
           <Tab
             icon={<UploadIcon />}
             iconPosition="start"
             label={
-              <div className="pickup-delivery-tab-label">
+              <div className={styles.tabLabel}>
                 <span>تسليم للمندوب</span>
                 <Chip
                   label={deliverCount}
                   size="small"
-                  className="pickup-delivery-tab-count"
+                  className={styles.tabCount}
                 />
               </div>
             }
@@ -163,12 +163,12 @@ const orders = useMemo(() => {
             icon={<DownloadIcon />}
             iconPosition="start"
             label={
-              <div className="pickup-delivery-tab-label">
+              <div className={styles.tabLabel}>
                 <span>استلام من المندوب</span>
                 <Chip
                   label={receiveCount}
                   size="small"
-                  className="pickup-delivery-tab-count"
+                  className={styles.tabCount}
                 />
               </div>
             }
@@ -177,13 +177,13 @@ const orders = useMemo(() => {
       </Paper>
 
       {/* Toolbar */}
-      <div className="repairs-toolbar-simple">
+      <div className={styles.toolbar}>
         <TextField
           placeholder="بحث بالباركود أو اسم العميل..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
-          className="repairs-search"
+          className={styles.searchField}
           slotProps={{
             input: {
               startAdornment: (
@@ -196,20 +196,20 @@ const orders = useMemo(() => {
         />
 
         <Tooltip title="تحديث">
-          <IconButton onClick={() => refetch()} className="repairs-refresh-btn">
+          <IconButton onClick={() => refetch()} className={styles.refreshButton}>
             <RefreshIcon />
           </IconButton>
         </Tooltip>
       </div>
 
       {/* Table */}
-      <Paper elevation={0} className="repairs-table-paper">
+      <Paper elevation={0} className={styles.tablePaper}>
         {isLoading ? (
-          <Box className="repairs-loading">
+          <Box className={styles.loading}>
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
         ) : filteredOrders.length === 0 ? (
-          <Box className="repairs-empty">
+          <Box className={styles.empty}>
             <Typography>
               {tab === 0
                 ? "لا توجد تصاليح جاهزة للتسليم للمندوب"
@@ -221,15 +221,15 @@ const orders = useMemo(() => {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow className="repairs-table-head-row">
-                    <TableCell className="repairs-th">#</TableCell>
-                    <TableCell className="repairs-th">الباركود</TableCell>
-                    <TableCell className="repairs-th">العميل</TableCell>
-                    <TableCell className="repairs-th">الهاتف</TableCell>
-                    <TableCell className="repairs-th">الوصف</TableCell>
-                    <TableCell className="repairs-th">الحالة</TableCell>
-                    <TableCell className="repairs-th">التاريخ</TableCell>
-                    <TableCell className="repairs-th" align="center">
+                  <TableRow className={styles.tableHeadRow}>
+                    <TableCell className={styles.tableHeadCell}>#</TableCell>
+                    <TableCell className={styles.tableHeadCell}>الباركود</TableCell>
+                    <TableCell className={styles.tableHeadCell}>العميل</TableCell>
+                    <TableCell className={styles.tableHeadCell}>الهاتف</TableCell>
+                    <TableCell className={styles.tableHeadCell}>الوصف</TableCell>
+                    <TableCell className={styles.tableHeadCell}>الحالة</TableCell>
+                    <TableCell className={styles.tableHeadCell}>التاريخ</TableCell>
+                    <TableCell className={styles.tableHeadCell} align="center">
                       الإجراءات
                     </TableCell>
                   </TableRow>
@@ -237,54 +237,52 @@ const orders = useMemo(() => {
 
                 <TableBody>
                   {paginatedOrders.map((order, index) => (
-                    <TableRow key={order.id} className="repairs-table-row">
-                      <TableCell className="repairs-td">
+                    <TableRow key={order.id} className={styles.tableRow}>
+                      <TableCell className={styles.tableCell}>
                         {(page - 1) * PAGE_SIZE + index + 1}
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      <TableCell className={styles.tableCell}>
                         <Chip
                           label={order.barcode || "—"}
                           size="small"
-                          className="repairs-barcode-chip"
+                          className={styles.barcodeChip}
                         />
                       </TableCell>
 
-                      <TableCell className="repairs-td repairs-td-name">
+                      <TableCell className={`${styles.tableCell} ${styles.nameCell}`}>
                         {order.customerName || "—"}
                       </TableCell>
 
-                      <TableCell className="repairs-td repairs-td-phone">
+                      <TableCell className={`${styles.tableCell} ${styles.phoneCell}`}>
                         {order.customerPhone || "—"}
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      <TableCell className={styles.tableCell}>
                         {order.description || "—"}
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      <TableCell className={styles.tableCell}>
                         <Chip
                           label={
                             order.statusName || getStatusName(order.status)
                           }
                           size="small"
-                          className={`repairs-status-chip repairs-status-${getStatusColor(
-                            order.status
-                          )}`}
+                          className={`${styles.statusChip} ${styles[`status${getStatusColor(order.status)}`] || ""}`}
                         />
                       </TableCell>
 
-                    <TableCell className="repairs-td repairs-td-date">
+                    <TableCell className={`${styles.tableCell} ${styles.dateCell}`}>
   {order.updatedAt
     ? formatJordanDateTime(order.updatedAt)
     : "—"}
 </TableCell>
 
-                      <TableCell className="repairs-td" align="center">
+                      <TableCell className={styles.tableCell} align="center">
                         <Tooltip title="عرض التفاصيل">
                           <IconButton
                             size="small"
-                            className="repairs-action-btn repairs-view-btn"
+                            className={`${styles.actionButton} ${styles.viewButton}`}
                             onClick={() => navigate(`/repairs/${order.id}`)}
                           >
                             <VisibilityIcon fontSize="small" />
@@ -297,8 +295,8 @@ const orders = useMemo(() => {
               </Table>
             </TableContainer>
 
-            <div className="repairs-pagination">
-              <div className="repairs-pagination-info">
+            <div className={styles.pagination}>
+              <div className={styles.paginationInfo}>
                 عرض {startItem} - {endItem} من {filteredOrders.length} تصليحة
               </div>
 
@@ -307,7 +305,7 @@ const orders = useMemo(() => {
                 page={page}
                 onChange={(e, value) => setPage(value)}
                 shape="rounded"
-                className="repairs-pagination-control"
+                className={styles.paginationControl}
                 dir="ltr"
               />
             </div>

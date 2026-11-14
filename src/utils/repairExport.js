@@ -1,66 +1,77 @@
+
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import { getStatusName } from "./repairConstants.js";
 
 // ===============================
-// ✅ أدوات مساعدة
+// تجهيز البيانات
 // ===============================
-const formatDate = (date) => {
-  if (!date) return "—";
-  try {
-    return new Date(date).toLocaleDateString("ar-JO", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    });
-  } catch {
-    return "—";
-  }
-};
+const buildRows = (orders, canViewPhone = false) =>
+  orders.map((order) => {
+    const row = {
+      "رقم الباركود": order.barcode || "—",
 
-const buildRows = (orders) =>
-  orders.map((order, index) => ({
-    "#": index + 1,
-    "الباركود": order.barcode || "—",
-    "العميل": order.customerName || "—",
-    "الهاتف": order.customerPhone || "—",
-    "الوصف": order.description || "—",
-    "الفرع": order.pickupBranchName || "—",
-    "الحالة": getStatusName(order.status),
-    "الموقع الحالي": order.currentLocationName || "—",
-    "المسؤول": order.currentHolderName || "—",
-    "تاريخ الإنشاء": formatDate(order.createdAt),
-  }));
+      "اسم العميل": order.customerName || "—",
 
-// ===============================
-// ✅ تصدير Excel
-// ===============================
-export function exportRepairsToExcel(orders, filename = "repairs") {
-  if (!orders || orders.length === 0) return;
+      "الحالة":
+        order.statusName ||
+        getStatusName(order.status) ||
+        "—",
 
-  const rows = buildRows(orders);
-  const worksheet = XLSX.utils.json_to_sheet(rows, {
-    header: Object.keys(rows[0]),
+      "الفرع": order.pickupBranchName || "—",
+
+      "الوصف": order.description || "—",
+    };
+
+    if (canViewPhone) {
+      row["رقم الهاتف"] = order.customerPhone || order.phoneNumber || order.phone || "—";
+    }
+
+    return row;
   });
 
+// ===============================
+// تصدير Excel
+// ===============================
+export function exportRepairsToExcel(
+  orders,
+  filename = "repairs",
+  canViewPhone = false
+) {
+  if (!Array.isArray(orders) || orders.length === 0) {
+    return;
+  }
+
+  const rows = buildRows(orders, canViewPhone);
+
+  const worksheet = XLSX.utils.json_to_sheet(rows);
+
+  // عرض الأعمدة
   worksheet["!cols"] = [
-    { wch: 5 },
-    { wch: 18 },
+    { wch: 23 },
+    { wch: 25 },
     { wch: 22 },
-    { wch: 16 },
-    { wch: 35 },
-    { wch: 22 },
-    { wch: 20 },
-    { wch: 22 },
-    { wch: 20 },
-    { wch: 16 },
+    { wch: 25 },
+    { wch: 45 },
+    ...(canViewPhone ? [{ wch: 20 }] : []),
   ];
 
+  // اتجاه الورقة
   worksheet["!dir"] = "rtl";
-  worksheet["!freeze"] = { xSplit: 0, ySplit: 1 };
+
+  // تثبيت الصف الأول
+  worksheet["!freeze"] = {
+    xSplit: 0,
+    ySplit: 1,
+  };
 
   const workbook = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(workbook, worksheet, "التصاليح");
+
+  XLSX.utils.book_append_sheet(
+    workbook,
+    worksheet,
+    "التصاليح"
+  );
 
   const excelBuffer = XLSX.write(workbook, {
     bookType: "xlsx",
@@ -71,5 +82,8 @@ export function exportRepairsToExcel(orders, filename = "repairs") {
     type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   });
 
-  saveAs(blob, `${filename}_${Date.now()}.xlsx`);
+  saveAs(
+    blob,
+    `${filename}_${Date.now()}.xlsx`
+  );
 }

@@ -1,5 +1,5 @@
-
 import { useMemo, useState } from "react";
+
 import {
   Box,
   Typography,
@@ -20,7 +20,9 @@ import {
   InputAdornment,
   Pagination,
 } from "@mui/material";
+
 import { formatJordanDateTime } from "../../utils/dateUtils";
+
 import BuildIcon from "@mui/icons-material/Build";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -38,12 +40,9 @@ import {
   useOperatorOrders,
 } from "../../hooks/useRepairOrders.js";
 
-import {
-  getStatusName,
-  getStatusColor,
-} from "../../utils/repairConstants.js";
+import { getStatusName } from "../../utils/repairConstants.js";
 
-import "../../styles/repairs.css";
+import style from "../../styles/Repairs/OperatorDashboard.module.css";
 
 const PAGE_SIZE = 10;
 
@@ -66,6 +65,7 @@ export default function OperatorDashboard() {
     refetch: refetchOrders,
   } = useOperatorOrders();
 
+  // البحث
   const filteredOrders = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase();
 
@@ -85,8 +85,10 @@ export default function OperatorDashboard() {
     );
   }, [orders, searchQuery]);
 
+  // عدد الصفحات
   const pageCount = Math.ceil(filteredOrders.length / PAGE_SIZE);
 
+  // تقسيم النتائج حسب الصفحة
   const paginatedOrders = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
     return filteredOrders.slice(start, start + PAGE_SIZE);
@@ -100,6 +102,7 @@ export default function OperatorDashboard() {
     filteredOrders.length
   );
 
+  // إحصائيات لوحة المشغل
   const stats = useMemo(
     () => [
       {
@@ -130,6 +133,7 @@ export default function OperatorDashboard() {
     [dashboard]
   );
 
+  // تحديث البيانات
   const handleRefresh = () => {
     refetchStats();
     refetchOrders();
@@ -137,22 +141,35 @@ export default function OperatorDashboard() {
 
   const loading = loadingStats || loadingOrders;
 
+  // كلاس لون الحالة من ملف CSS العام
+  const getStatusClass = (status) => {
+    const statusNumber = Number(status);
+
+    const supportedStatuses = [1, 2, 3, 4, 6, 7];
+
+    return supportedStatuses.includes(statusNumber)
+      ? `repairs-status-${statusNumber}`
+      : "repairs-status-unknown";
+  };
+
   return (
-    <div className="repairs-list-container">
-      <div className="repairs-list-header">
-        <div className="repairs-list-header-icon">
+    <div className={style.pageContainer}>
+      {/* Header */}
+      <div className={style.pageHeader}>
+        <div className={style.pageHeaderIcon}>
           <BuildIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="repairs-list-title">
+        <Typography className={style.pageTitle}>
           لوحة المشغّل
         </Typography>
 
-        <Typography className="repairs-list-subtitle">
+        <Typography className={style.pageSubtitle}>
           القطع الموجودة حالياً في المشغل
         </Typography>
       </div>
 
+      {/* Actions */}
       <Box
         sx={{
           display: "flex",
@@ -188,7 +205,7 @@ export default function OperatorDashboard() {
             <IconButton
               onClick={handleRefresh}
               disabled={isFetching}
-              className="repairs-refresh-btn"
+              className={style.refreshButton}
               sx={{ width: 52, height: 52 }}
             >
               <RefreshIcon />
@@ -197,6 +214,7 @@ export default function OperatorDashboard() {
         </Tooltip>
       </Box>
 
+      {/* Statistics */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {stats.map((stat) => (
           <Grid item xs={6} md={3} key={stat.title}>
@@ -240,9 +258,10 @@ export default function OperatorDashboard() {
         ))}
       </Grid>
 
+      {/* Search */}
       <Paper
         elevation={0}
-        className="repairs-filters-paper"
+        className={style.filtersPaper}
         sx={{ mb: 2 }}
       >
         <TextField
@@ -254,7 +273,7 @@ export default function OperatorDashboard() {
             setSearchQuery(event.target.value);
             setPage(1);
           }}
-          className="repairs-search"
+          className={style.searchField}
           slotProps={{
             input: {
               startAdornment: (
@@ -267,13 +286,14 @@ export default function OperatorDashboard() {
         />
       </Paper>
 
-      <Paper elevation={0} className="repairs-table-paper">
+      {/* Orders Table */}
+      <Paper elevation={0} className={style.tablePaper}>
         {loading ? (
-          <Box className="repairs-loading">
+          <Box className={style.loading}>
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
         ) : filteredOrders.length === 0 ? (
-          <Box className="repairs-empty">
+          <Box className={style.empty}>
             <Typography>
               {searchQuery.trim()
                 ? "لا توجد نتائج مطابقة للبحث"
@@ -285,15 +305,39 @@ export default function OperatorDashboard() {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow className="repairs-table-head-row">
-                    <TableCell className="repairs-th">#</TableCell>
-                    <TableCell className="repairs-th">الباركود</TableCell>
-                    <TableCell className="repairs-th">العميل</TableCell>
-                    <TableCell className="repairs-th">الوصف</TableCell>
-                    <TableCell className="repairs-th">الفرع الداخل</TableCell>
-                    <TableCell className="repairs-th">الحالة</TableCell>
-                    <TableCell className="repairs-th">آخر تحديث</TableCell>
-                    <TableCell className="repairs-th" align="center">
+                  <TableRow className={style.tableHeadRow}>
+                    <TableCell className={style.tableHeadCell}>
+                      #
+                    </TableCell>
+
+                    <TableCell className={style.tableHeadCell}>
+                      الباركود
+                    </TableCell>
+
+                    <TableCell className={style.tableHeadCell}>
+                      العميل
+                    </TableCell>
+
+                    <TableCell className={style.tableHeadCell}>
+                      الوصف
+                    </TableCell>
+
+                    <TableCell className={style.tableHeadCell}>
+                      الفرع الداخل
+                    </TableCell>
+
+                    <TableCell className={style.tableHeadCell}>
+                      الحالة
+                    </TableCell>
+
+                    <TableCell className={style.tableHeadCell}>
+                      آخر تحديث
+                    </TableCell>
+
+                    <TableCell
+                      className={style.tableHeadCell}
+                      align="center"
+                    >
                       الإجراءات
                     </TableCell>
                   </TableRow>
@@ -303,29 +347,31 @@ export default function OperatorDashboard() {
                   {paginatedOrders.map((order, index) => (
                     <TableRow
                       key={order.id}
-                      className="repairs-table-row"
+                      className={style.tableRow}
                     >
-                      <TableCell className="repairs-td">
+                      <TableCell className={style.tableCell}>
                         {(page - 1) * PAGE_SIZE + index + 1}
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      <TableCell className={style.tableCell}>
                         <Chip
                           label={order.barcode || "—"}
                           size="small"
-                          className="repairs-barcode-chip"
+                          className={style.barcodeChip}
                         />
                       </TableCell>
 
-                      <TableCell className="repairs-td repairs-td-name">
+                      <TableCell
+                        className={`${style.tableCell} ${style.nameCell}`}
+                      >
                         {order.customerName || "—"}
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      <TableCell className={style.tableCell}>
                         {order.description || "—"}
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      <TableCell className={style.tableCell}>
                         <Box
                           sx={{
                             display: "flex",
@@ -339,39 +385,50 @@ export default function OperatorDashboard() {
                               color: "var(--gold-primary)",
                             }}
                           />
-                          <span>{order.pickupBranchName || "—"}</span>
+
+                          <span>
+                            {order.pickupBranchName || "—"}
+                          </span>
                         </Box>
                       </TableCell>
 
-                      <TableCell className="repairs-td">
+                      {/* Status - Global CSS */}
+                      <TableCell className={style.tableCell}>
                         <Chip
                           label={
                             order.statusName ||
                             getStatusName(order.status)
                           }
                           size="small"
-                          className={`repairs-status-chip repairs-status-${getStatusColor(
+                          className={`repairs-status-chip ${getStatusClass(
                             order.status
                           )}`}
                         />
                       </TableCell>
 
-                   <TableCell className="repairs-td repairs-td-date">
-  {order.updatedAt
-    ? formatJordanDateTime(order.updatedAt)
-    : "—"}
-</TableCell>
+                      <TableCell
+                        className={`${style.tableCell} ${style.dateCell}`}
+                      >
+                        {order.updatedAt
+                          ? formatJordanDateTime(order.updatedAt)
+                          : "—"}
+                      </TableCell>
 
-                      <TableCell className="repairs-td" align="center">
+                      <TableCell
+                        className={style.tableCell}
+                        align="center"
+                      >
                         <Tooltip title="عرض التفاصيل">
                           <IconButton
                             size="small"
-                            className="repairs-action-btn repairs-view-btn"
+                            className={`${style.actionButton} ${style.viewButton}`}
                             onClick={() =>
-  navigate(`/repairs/${order.id}`, {
-    state: { from: "/repairs/operator" },
-  })
-}
+                              navigate(`/repairs/${order.id}`, {
+                                state: {
+                                  from: "/repairs/operator",
+                                },
+                              })
+                            }
                           >
                             <VisibilityIcon fontSize="small" />
                           </IconButton>
@@ -383,8 +440,9 @@ export default function OperatorDashboard() {
               </Table>
             </TableContainer>
 
-            <div className="repairs-pagination">
-              <div className="repairs-pagination-info">
+            {/* Pagination */}
+            <div className={style.pagination}>
+              <div className={style.paginationInfo}>
                 عرض {startItem} - {endItem} من{" "}
                 {filteredOrders.length} تصليحة
               </div>
@@ -394,7 +452,7 @@ export default function OperatorDashboard() {
                 page={Math.min(page, Math.max(pageCount, 1))}
                 onChange={(_, value) => setPage(value)}
                 shape="rounded"
-                className="repairs-pagination-control"
+                className={style.paginationControl}
                 dir="ltr"
               />
             </div>

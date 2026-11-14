@@ -1,4 +1,6 @@
+
 import { useEffect, useState, useMemo } from "react";
+
 import {
   Box,
   Typography,
@@ -24,6 +26,7 @@ import {
   MenuItem,
   Pagination,
 } from "@mui/material";
+
 import { toast } from "react-toastify";
 
 import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
@@ -41,7 +44,8 @@ import authService from "../../services/authService.js";
 import { useBranches } from "../../hooks/useBranches.js";
 import { useWorkshops } from "../../hooks/useWorkshops.js";
 import useAuthStore from "../../store/useAuthStore.js";
-import "../../styles/accounts.css";
+
+import styles from "../../styles/Accounts/Accounts.module.css";
 
 // ===============================
 // القيم الافتراضية للنموذج
@@ -68,7 +72,7 @@ const ADMIN_ROLES = ["SuperAdmin", "Admin"];
 // ===============================
 const PAGE_SIZE = 10;
 
-// ✅ إعدادات موحدة للتوستات المهمة
+// إعدادات موحدة للتوستات المهمة
 const PERSISTENT_TOAST_OPTIONS = {
   containerId: "persistent",
   position: "top-center",
@@ -82,13 +86,12 @@ const PERSISTENT_TOAST_OPTIONS = {
 export default function AccountsManagement() {
   const currentUser = useAuthStore((state) => state.user);
 
-  // ✅ State — كل المستخدمين
   const [allUsers, setAllUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
 
-  // ✅ Pagination (client-side)
+  // Pagination
   const [page, setPage] = useState(1);
   const [pageSize] = useState(PAGE_SIZE);
 
@@ -109,7 +112,7 @@ export default function AccountsManagement() {
   const [passwordErrors, setPasswordErrors] = useState({});
   const [savingPassword, setSavingPassword] = useState(false);
 
-  // Dialog الإضافة/التعديل
+  // Dialog الإضافة والتعديل
   const [formDialog, setFormDialog] = useState({
     open: false,
     mode: "add",
@@ -119,42 +122,50 @@ export default function AccountsManagement() {
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // ✅ خطأ الـ Backend (يظهر داخل الـ Dialog)
+  // خطأ Backend
   const [backendError, setBackendError] = useState("");
 
   // جلب الفروع والورش
   const { data: branches = [] } = useBranches();
   const { data: workshops = [] } = useWorkshops();
 
-  // هل المستخدم الحالي Admin/SuperAdmin؟
+  // هل المستخدم الحالي Admin أو SuperAdmin؟
   const isCurrentUserAdmin = useMemo(() => {
     if (!currentUser?.roles) return false;
+
     const roleNames = currentUser.roles.map((r) => r.name);
     return roleNames.some((name) => ADMIN_ROLES.includes(name));
   }, [currentUser]);
 
-  // Helper: عرض اسم الفرع/الورشة
+  // عرض اسم الفرع أو الورشة
   const getBranchOrWorkshopName = (user) => {
     if (user?.branchName) {
       return `فرع ${user.branchName}`;
     }
+
     if (user?.workshopName) {
       return user.workshopName;
     }
+
     return "—";
   };
 
-  // Helper: تنسيق التاريخ (UTC → Local)
+  // تنسيق التاريخ UTC إلى Local
   const formatDateTime = (value) => {
     if (!value) return "—";
+
     try {
       let isoValue = String(value);
 
-      if (!isoValue.endsWith("Z") && !isoValue.match(/[+-]\d{2}:\d{2}$/)) {
-        isoValue = isoValue + "Z";
+      if (
+        !isoValue.endsWith("Z") &&
+        !isoValue.match(/[+-]\d{2}:\d{2}$/)
+      ) {
+        isoValue += "Z";
       }
 
       const d = new Date(isoValue);
+
       if (isNaN(d.getTime())) return "—";
 
       const y = d.getFullYear();
@@ -164,6 +175,7 @@ export default function AccountsManagement() {
       let h = d.getHours();
       const min = String(d.getMinutes()).padStart(2, "0");
       const period = h >= 12 ? "م" : "ص";
+
       h = h % 12 || 12;
 
       return `${y}/${m}/${day} ${String(h).padStart(2, "0")}:${min} ${period}`;
@@ -172,7 +184,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // Helper: حالة الحساب
+  // حالة الحساب
   const getAccountStatus = (user) => {
     if (user?.isActive === false) {
       return { label: "غير نشط", type: "inactive" };
@@ -180,14 +192,21 @@ export default function AccountsManagement() {
 
     const isReallyOnline = () => {
       if (!user?.lastActivityAt) return false;
+
       try {
         let isoValue = String(user.lastActivityAt);
-        if (!isoValue.endsWith("Z") && !isoValue.match(/[+-]\d{2}:\d{2}$/)) {
-          isoValue = isoValue + "Z";
+
+        if (
+          !isoValue.endsWith("Z") &&
+          !isoValue.match(/[+-]\d{2}:\d{2}$/)
+        ) {
+          isoValue += "Z";
         }
+
         const lastActivity = new Date(isoValue);
         const now = new Date();
         const diffMinutes = (now - lastActivity) / 1000 / 60;
+
         return diffMinutes < 5;
       } catch {
         return false;
@@ -201,12 +220,12 @@ export default function AccountsManagement() {
     return { label: "نشط", type: "active" };
   };
 
-  // هل نحتاج dropdown الفرع/الورشة؟
+  // هل نحتاج dropdown الفرع أو الورشة؟
   const needsBranch = BRANCH_ROLES.includes(formData.role);
   const needsWorkshop = WORKSHOP_ROLES.includes(formData.role);
 
   // ===============================
-  // ✅ جلب كل المستخدمين مرة وحدة
+  // جلب كل المستخدمين
   // ===============================
   const fetchAllUsers = async () => {
     try {
@@ -232,6 +251,7 @@ export default function AccountsManagement() {
     } catch (error) {
       console.error("Fetch Users Error:", error);
       setAllUsers([]);
+
       toast.error(
         error?.response?.data?.message || "حدث خطأ أثناء جلب المستخدمين",
         PERSISTENT_TOAST_OPTIONS
@@ -245,6 +265,7 @@ export default function AccountsManagement() {
   const fetchRoles = async () => {
     try {
       const result = await authService.getAvailableRoles();
+
       if (result?.success && Array.isArray(result.data)) {
         setRoles(result.data);
       } else if (Array.isArray(result)) {
@@ -257,7 +278,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // تحميل أولي
+  // التحميل الأولي
   useEffect(() => {
     fetchAllUsers();
     fetchRoles();
@@ -265,10 +286,11 @@ export default function AccountsManagement() {
   }, []);
 
   // ===============================
-  // ✅ فلترة client-side — على كل المستخدمين
+  // فلترة المستخدمين
   // ===============================
   const filteredUsers = useMemo(() => {
     if (!searchQuery.trim()) return allUsers;
+
     const q = searchQuery.toLowerCase().trim();
 
     return allUsers.filter((u) => {
@@ -277,6 +299,7 @@ export default function AccountsManagement() {
       const email = (u.email || "").toLowerCase();
       const branchName = (u.branchName || "").toLowerCase();
       const workshopName = (u.workshopName || "").toLowerCase();
+
       const userRoles = (u.roles || [])
         .map((r) => (r.displayName || r.name || "").toLowerCase())
         .join(" ");
@@ -293,7 +316,7 @@ export default function AccountsManagement() {
   }, [allUsers, searchQuery]);
 
   // ===============================
-  // ✅ Pagination على النتائج المفلترة
+  // Pagination
   // ===============================
   const totalCount = filteredUsers.length;
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
@@ -306,7 +329,6 @@ export default function AccountsManagement() {
   const startItem = totalCount === 0 ? 0 : (page - 1) * pageSize + 1;
   const endItem = Math.min(page * pageSize, totalCount);
 
-  // ✅ رجّع للصفحة 1 عند البحث
   useEffect(() => {
     setPage(1);
   }, [searchQuery]);
@@ -330,12 +352,13 @@ export default function AccountsManagement() {
       branchId: user.branchId || "",
       workshopId: user.workshopId || "",
     });
+
     setFormErrors({});
     setBackendError("");
     setFormDialog({ open: true, mode: "edit", user });
   };
 
-  // إغلاق Dialog
+  // إغلاق Dialog النموذج
   const handleCloseFormDialog = () => {
     if (!saving) {
       setFormDialog({ open: false, mode: "add", user: null });
@@ -349,10 +372,12 @@ export default function AccountsManagement() {
   const handleFormChange = (field, value) => {
     setFormData((prev) => {
       const updated = { ...prev, [field]: value };
+
       if (field === "role") {
         if (!BRANCH_ROLES.includes(value)) updated.branchId = "";
         if (!WORKSHOP_ROLES.includes(value)) updated.workshopId = "";
       }
+
       return updated;
     });
 
@@ -365,11 +390,13 @@ export default function AccountsManagement() {
     }
   };
 
-  // التحقق
+  // التحقق من النموذج
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.userName.trim()) errors.userName = "اسم المستخدم مطلوب";
+    if (!formData.userName.trim()) {
+      errors.userName = "اسم المستخدم مطلوب";
+    }
 
     if (!formData.email.trim()) {
       errors.email = "البريد الإلكتروني مطلوب";
@@ -377,7 +404,9 @@ export default function AccountsManagement() {
       errors.email = "البريد الإلكتروني غير صحيح";
     }
 
-    if (!formData.fullName.trim()) errors.fullName = "اسم الموظف مطلوب";
+    if (!formData.fullName.trim()) {
+      errors.fullName = "اسم الموظف مطلوب";
+    }
 
     if (formDialog.mode === "add") {
       if (!formData.password) {
@@ -387,7 +416,9 @@ export default function AccountsManagement() {
       }
     }
 
-    if (!formData.role) errors.role = "الصلاحية مطلوبة";
+    if (!formData.role) {
+      errors.role = "الصلاحية مطلوبة";
+    }
 
     if (BRANCH_ROLES.includes(formData.role) && !formData.branchId) {
       errors.branchId = "الفرع مطلوب لهذه الصلاحية";
@@ -402,7 +433,7 @@ export default function AccountsManagement() {
   };
 
   // ===============================
-  // ✅ حفظ
+  // حفظ المستخدم
   // ===============================
   const handleSave = async () => {
     if (!validateForm()) return;
@@ -433,11 +464,13 @@ export default function AccountsManagement() {
             ...PERSISTENT_TOAST_OPTIONS,
             toastId: "create-employee-success",
           });
+
           handleCloseFormDialog();
           fetchAllUsers();
         } else {
           const errorMsg = result?.message || "فشل إضافة الموظف";
           setBackendError(errorMsg);
+
           toast.error(errorMsg, {
             ...PERSISTENT_TOAST_OPTIONS,
             toastId: "save-user-error",
@@ -459,11 +492,13 @@ export default function AccountsManagement() {
             ...PERSISTENT_TOAST_OPTIONS,
             toastId: "update-employee-success",
           });
+
           handleCloseFormDialog();
           fetchAllUsers();
         } else {
           const errorMsg = result?.message || "فشل تعديل الموظف";
           setBackendError(errorMsg);
+
           toast.error(errorMsg, {
             ...PERSISTENT_TOAST_OPTIONS,
             toastId: "save-user-error",
@@ -493,7 +528,7 @@ export default function AccountsManagement() {
     }
   };
 
-  // حذف
+  // حذف المستخدم
   const handleDeleteClick = (user) => {
     if (user.id === currentUser?.id) {
       toast.warning("لا يمكنك حذف حسابك الحالي", {
@@ -502,6 +537,7 @@ export default function AccountsManagement() {
       });
       return;
     }
+
     setDeleteDialog({ open: true, user });
   };
 
@@ -511,6 +547,7 @@ export default function AccountsManagement() {
 
     try {
       setDeleting(true);
+
       const result = await authService.deleteUser(user.id);
 
       if (result?.success) {
@@ -518,6 +555,7 @@ export default function AccountsManagement() {
           ...PERSISTENT_TOAST_OPTIONS,
           toastId: "delete-user-success",
         });
+
         setDeleteDialog({ open: false, user: null });
         fetchAllUsers();
       } else {
@@ -528,6 +566,7 @@ export default function AccountsManagement() {
       }
     } catch (error) {
       console.error("Delete User Error:", error);
+
       toast.error(
         error?.response?.data?.message || "حدث خطأ أثناء حذف المستخدم",
         {
@@ -554,6 +593,7 @@ export default function AccountsManagement() {
       newPassword: "",
       confirmPassword: "",
     });
+
     setPasswordErrors({});
   };
 
@@ -565,13 +605,13 @@ export default function AccountsManagement() {
         newPassword: "",
         confirmPassword: "",
       });
+
       setPasswordErrors({});
     }
   };
 
   const handleSavePassword = async () => {
     const { newPassword, confirmPassword, user } = passwordDialog;
-
     const errors = {};
 
     if (!newPassword) {
@@ -598,7 +638,7 @@ export default function AccountsManagement() {
       setSavingPassword(true);
 
       const result = await authService.resetUserPassword(user.id, {
-        newPassword: newPassword,
+        newPassword,
         confirmNewPassword: confirmPassword,
       });
 
@@ -607,6 +647,7 @@ export default function AccountsManagement() {
           ...PERSISTENT_TOAST_OPTIONS,
           toastId: "password-success",
         });
+
         handleClosePasswordDialog();
       } else {
         toast.error(result?.message || "فشل تغيير كلمة المرور", {
@@ -616,6 +657,7 @@ export default function AccountsManagement() {
       }
     } catch (error) {
       console.error("Change Password Error:", error);
+
       toast.error(
         error?.response?.data?.message || "حدث خطأ أثناء تغيير كلمة المرور",
         {
@@ -631,40 +673,47 @@ export default function AccountsManagement() {
   // مساعدات
   const getRoleName = (user) => {
     if (!user?.roles || user.roles.length === 0) return "—";
+
     return user.roles[0]?.displayName || user.roles[0]?.name || "—";
   };
 
   const isAdminUser = (user) => {
     const userRoles = user?.roles?.map((r) => r.name) || [];
-    return userRoles.includes("SuperAdmin") || userRoles.includes("Admin");
+
+    return (
+      userRoles.includes("SuperAdmin") ||
+      userRoles.includes("Admin")
+    );
   };
 
   // ===============================
   // Render
   // ===============================
   return (
-    <div className="accounts-container">
+    <div className={styles.accountsContainer}>
       {/* Header */}
-      <div className="accounts-header">
-        <div className="accounts-header-icon">
+      <div className={styles.accountsHeader}>
+        <div className={styles.accountsHeaderIcon}>
           <ManageAccountsIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="accounts-title">إدارة الحسابات</Typography>
+        <Typography className={styles.accountsTitle}>
+          إدارة الحسابات
+        </Typography>
 
-        <Typography className="accounts-subtitle">
+        <Typography className={styles.accountsSubtitle}>
           إدارة مستخدمي النظام والصلاحيات
         </Typography>
       </div>
 
       {/* Toolbar */}
-      <div className="accounts-toolbar">
+      <div className={styles.accountsToolbar}>
         <TextField
           placeholder="البحث عن مستخدم..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
-          className="accounts-search"
+          className={styles.accountsSearch}
           slotProps={{
             input: {
               startAdornment: (
@@ -676,11 +725,11 @@ export default function AccountsManagement() {
           }}
         />
 
-        <div className="accounts-actions">
+        <div className={styles.accountsActions}>
           <Tooltip title="تحديث">
             <IconButton
               onClick={fetchAllUsers}
-              className="accounts-refresh-btn"
+              className={styles.accountsRefreshBtn}
             >
               <RefreshIcon />
             </IconButton>
@@ -689,7 +738,7 @@ export default function AccountsManagement() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            className="accounts-add-btn"
+            className={styles.accountsAddBtn}
             onClick={handleAddClick}
           >
             إضافة مستخدم جديد
@@ -698,13 +747,13 @@ export default function AccountsManagement() {
       </div>
 
       {/* Table */}
-      <Paper elevation={0} className="accounts-table-paper">
+      <Paper elevation={0} className={styles.accountsTablePaper}>
         {loading ? (
-          <Box className="accounts-loading">
+          <Box className={styles.accountsLoading}>
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
         ) : paginatedUsers.length === 0 ? (
-          <Box className="accounts-empty">
+          <Box className={styles.accountsEmpty}>
             <Typography>
               {searchQuery
                 ? "لا توجد نتائج مطابقة للبحث"
@@ -716,17 +765,30 @@ export default function AccountsManagement() {
             <TableContainer>
               <Table>
                 <TableHead>
-                  <TableRow className="accounts-table-head-row">
-                    <TableCell className="accounts-th">#</TableCell>
-                    <TableCell className="accounts-th">اسم المستخدم</TableCell>
-                    <TableCell className="accounts-th">اسم الموظف</TableCell>
-                    <TableCell className="accounts-th">الصلاحيات</TableCell>
-                    <TableCell className="accounts-th">الفرع / الورشة</TableCell>
-                    <TableCell className="accounts-th">حالة الحساب</TableCell>
-                    <TableCell className="accounts-th">
+                  <TableRow className={styles.accountsTableHeadRow}>
+                    <TableCell className={styles.accountsTh}>#</TableCell>
+                    <TableCell className={styles.accountsTh}>
+                      اسم المستخدم
+                    </TableCell>
+                    <TableCell className={styles.accountsTh}>
+                      اسم الموظف
+                    </TableCell>
+                    <TableCell className={styles.accountsTh}>
+                      الصلاحيات
+                    </TableCell>
+                    <TableCell className={styles.accountsTh}>
+                      الفرع / الورشة
+                    </TableCell>
+                    <TableCell className={styles.accountsTh}>
+                      حالة الحساب
+                    </TableCell>
+                    <TableCell className={styles.accountsTh}>
                       آخر تسجيل دخول
                     </TableCell>
-                    <TableCell className="accounts-th" align="center">
+                    <TableCell
+                      className={styles.accountsTh}
+                      align="center"
+                    >
                       الإجراءات
                     </TableCell>
                   </TableRow>
@@ -735,55 +797,72 @@ export default function AccountsManagement() {
                 <TableBody>
                   {paginatedUsers.map((user, index) => {
                     const status = getAccountStatus(user);
+
                     return (
-                      <TableRow key={user.id} className="accounts-table-row">
-                        <TableCell className="accounts-td">
+                      <TableRow
+                        key={user.id}
+                        className={styles.accountsTableRow}
+                      >
+                        <TableCell className={styles.accountsTd}>
                           {(page - 1) * pageSize + index + 1}
                         </TableCell>
 
-                        <TableCell className="accounts-td accounts-td-username">
+                        <TableCell
+                          className={`${styles.accountsTd} ${styles.accountsTdUsername}`}
+                        >
                           {user.userName || "—"}
                         </TableCell>
 
-                        <TableCell className="accounts-td accounts-td-name">
+                        <TableCell
+                          className={`${styles.accountsTd} ${styles.accountsTdName}`}
+                        >
                           {user.fullName || "—"}
                         </TableCell>
 
-                        <TableCell className="accounts-td">
+                        <TableCell className={styles.accountsTd}>
                           <Chip
                             label={getRoleName(user)}
                             size="small"
-                            className={`accounts-role-chip ${
+                            className={`${styles.accountsRoleChip} ${
                               isAdminUser(user)
-                                ? "accounts-role-chip-admin"
-                                : "accounts-role-chip-user"
+                                ? styles.accountsRoleChipAdmin
+                                : styles.accountsRoleChipUser
                             }`}
                           />
                         </TableCell>
 
-                        <TableCell className="accounts-td accounts-td-branch">
+                        <TableCell
+                          className={`${styles.accountsTd} ${styles.accountsTdBranch}`}
+                        >
                           {getBranchOrWorkshopName(user)}
                         </TableCell>
 
-                        <TableCell className="accounts-td">
+                        <TableCell className={styles.accountsTd}>
                           <Chip
                             label={status.label}
                             size="small"
-                            className={`accounts-status-chip accounts-status-chip-${status.type}`}
+                            className={`${styles.accountsStatusChip} ${
+                              styles[`accountsStatusChip${status.type.charAt(0).toUpperCase()}${status.type.slice(1)}`]
+                            }`}
                           />
                         </TableCell>
 
-                        <TableCell className="accounts-td accounts-td-date">
+                        <TableCell
+                          className={`${styles.accountsTd} ${styles.accountsTdDate}`}
+                        >
                           {user.lastLoginAt
                             ? formatDateTime(user.lastLoginAt)
                             : "—"}
                         </TableCell>
 
-                        <TableCell className="accounts-td" align="center">
+                        <TableCell
+                          className={styles.accountsTd}
+                          align="center"
+                        >
                           <Tooltip title="تعديل">
                             <IconButton
                               size="small"
-                              className="accounts-action-btn accounts-edit-btn"
+                              className={`${styles.accountsActionBtn} ${styles.accountsEditBtn}`}
                               onClick={() => handleEditClick(user)}
                             >
                               <EditIcon fontSize="small" />
@@ -794,7 +873,7 @@ export default function AccountsManagement() {
                             <Tooltip title="تغيير كلمة المرور">
                               <IconButton
                                 size="small"
-                                className="accounts-action-btn accounts-password-btn"
+                                className={`${styles.accountsActionBtn} ${styles.accountsPasswordBtn}`}
                                 onClick={() => handlePasswordClick(user)}
                               >
                                 <LockResetIcon fontSize="small" />
@@ -805,7 +884,7 @@ export default function AccountsManagement() {
                           <Tooltip title="حذف">
                             <IconButton
                               size="small"
-                              className="accounts-action-btn accounts-delete-btn"
+                              className={`${styles.accountsActionBtn} ${styles.accountsDeleteBtn}`}
                               onClick={() => handleDeleteClick(user)}
                             >
                               <DeleteIcon fontSize="small" />
@@ -821,8 +900,8 @@ export default function AccountsManagement() {
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="accounts-pagination">
-                <div className="accounts-pagination-info">
+              <div className={styles.accountsPagination}>
+                <div className={styles.accountsPaginationInfo}>
                   عرض {startItem} - {endItem} من {totalCount} مستخدمين
                 </div>
 
@@ -831,7 +910,7 @@ export default function AccountsManagement() {
                   page={page}
                   onChange={(e, value) => setPage(value)}
                   shape="rounded"
-                  className="accounts-pagination-control"
+                  className={styles.accountsPaginationControl}
                   dir="ltr"
                 />
               </div>
@@ -844,17 +923,17 @@ export default function AccountsManagement() {
       <Dialog
         open={formDialog.open}
         onClose={handleCloseFormDialog}
-        PaperProps={{ className: "accounts-form-dialog" }}
+        PaperProps={{ className: styles.accountsFormDialog }}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="accounts-form-title">
+        <DialogTitle className={styles.accountsFormTitle}>
           {formDialog.mode === "add"
             ? "إضافة موظف جديد"
             : "تعديل بيانات الموظف"}
         </DialogTitle>
 
-        <DialogContent className="accounts-form-content">
+        <DialogContent className={styles.accountsFormContent}>
           {backendError && (
             <Box
               sx={{
@@ -876,6 +955,7 @@ export default function AccountsManagement() {
                   flexShrink: 0,
                 }}
               />
+
               <Typography
                 sx={{
                   color: "#c62828",
@@ -898,7 +978,7 @@ export default function AccountsManagement() {
             error={!!formErrors.fullName}
             helperText={formErrors.fullName}
             margin="dense"
-            className="accounts-form-field"
+            className={styles.accountsFormField}
           />
 
           <TextField
@@ -910,7 +990,7 @@ export default function AccountsManagement() {
             helperText={formErrors.userName}
             margin="dense"
             disabled={formDialog.mode === "edit"}
-            className="accounts-form-field"
+            className={styles.accountsFormField}
           />
 
           <TextField
@@ -922,7 +1002,7 @@ export default function AccountsManagement() {
             error={!!formErrors.email}
             helperText={formErrors.email}
             margin="dense"
-            className="accounts-form-field"
+            className={styles.accountsFormField}
           />
 
           {formDialog.mode === "add" && (
@@ -935,7 +1015,7 @@ export default function AccountsManagement() {
               error={!!formErrors.password}
               helperText={formErrors.password}
               margin="dense"
-              className="accounts-form-field"
+              className={styles.accountsFormField}
             />
           )}
 
@@ -948,7 +1028,7 @@ export default function AccountsManagement() {
             error={!!formErrors.role}
             helperText={formErrors.role}
             margin="dense"
-            className="accounts-form-field"
+            className={styles.accountsFormField}
             disabled={formDialog.mode === "edit"}
           >
             {roles.length === 0 ? (
@@ -957,7 +1037,10 @@ export default function AccountsManagement() {
               </MenuItem>
             ) : (
               roles.map((role) => (
-                <MenuItem key={role.name || role} value={role.name || role}>
+                <MenuItem
+                  key={role.name || role}
+                  value={role.name || role}
+                >
                   {role.displayName || role.name || role}
                 </MenuItem>
               ))
@@ -974,7 +1057,7 @@ export default function AccountsManagement() {
               error={!!formErrors.branchId}
               helperText={formErrors.branchId}
               margin="dense"
-              className="accounts-form-field"
+              className={styles.accountsFormField}
             >
               {branches.length === 0 ? (
                 <MenuItem value="" disabled>
@@ -1000,7 +1083,7 @@ export default function AccountsManagement() {
               error={!!formErrors.workshopId}
               helperText={formErrors.workshopId}
               margin="dense"
-              className="accounts-form-field"
+              className={styles.accountsFormField}
             >
               {workshops.length === 0 ? (
                 <MenuItem value="" disabled>
@@ -1017,11 +1100,11 @@ export default function AccountsManagement() {
           )}
         </DialogContent>
 
-        <DialogActions className="accounts-form-actions">
+        <DialogActions className={styles.accountsFormActions}>
           <Button
             onClick={handleCloseFormDialog}
             disabled={saving}
-            className="accounts-form-cancel"
+            className={styles.accountsFormCancel}
             startIcon={<CloseIcon />}
           >
             إلغاء
@@ -1031,7 +1114,7 @@ export default function AccountsManagement() {
             onClick={handleSave}
             disabled={saving}
             variant="contained"
-            className="accounts-form-save"
+            className={styles.accountsFormSave}
             startIcon={
               saving ? (
                 <CircularProgress size={16} sx={{ color: "#fff" }} />
@@ -1053,15 +1136,15 @@ export default function AccountsManagement() {
       <Dialog
         open={passwordDialog.open}
         onClose={handleClosePasswordDialog}
-        PaperProps={{ className: "accounts-form-dialog" }}
+        PaperProps={{ className: styles.accountsFormDialog }}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="accounts-form-title">
+        <DialogTitle className={styles.accountsFormTitle}>
           تغيير كلمة مرور الموظف
         </DialogTitle>
 
-        <DialogContent className="accounts-form-content">
+        <DialogContent className={styles.accountsFormContent}>
           <Typography
             sx={{
               fontFamily: "'Cairo', sans-serif",
@@ -1090,7 +1173,7 @@ export default function AccountsManagement() {
               "يجب أن تحتوي على حرف كبير وحرف صغير ورقم (6+ أحرف)"
             }
             margin="dense"
-            className="accounts-form-field"
+            className={styles.accountsFormField}
           />
 
           <TextField
@@ -1107,15 +1190,15 @@ export default function AccountsManagement() {
             error={!!passwordErrors.confirmPassword}
             helperText={passwordErrors.confirmPassword}
             margin="dense"
-            className="accounts-form-field"
+            className={styles.accountsFormField}
           />
         </DialogContent>
 
-        <DialogActions className="accounts-form-actions">
+        <DialogActions className={styles.accountsFormActions}>
           <Button
             onClick={handleClosePasswordDialog}
             disabled={savingPassword}
-            className="accounts-form-cancel"
+            className={styles.accountsFormCancel}
             startIcon={<CloseIcon />}
           >
             إلغاء
@@ -1125,7 +1208,7 @@ export default function AccountsManagement() {
             onClick={handleSavePassword}
             disabled={savingPassword}
             variant="contained"
-            className="accounts-form-save"
+            className={styles.accountsFormSave}
             startIcon={
               savingPassword ? (
                 <CircularProgress size={16} sx={{ color: "#fff" }} />
@@ -1143,12 +1226,14 @@ export default function AccountsManagement() {
       <Dialog
         open={deleteDialog.open}
         onClose={handleCloseDeleteDialog}
-        PaperProps={{ className: "accounts-dialog" }}
+        PaperProps={{ className: styles.accountsDialog }}
       >
-        <DialogTitle className="accounts-dialog-title">تأكيد الحذف</DialogTitle>
+        <DialogTitle className={styles.accountsDialogTitle}>
+          تأكيد الحذف
+        </DialogTitle>
 
         <DialogContent>
-          <DialogContentText className="accounts-dialog-text">
+          <DialogContentText className={styles.accountsDialogText}>
             هل أنت متأكد من حذف المستخدم{" "}
             <strong>{deleteDialog.user?.fullName}</strong>؟
             <br />
@@ -1156,11 +1241,11 @@ export default function AccountsManagement() {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions className="accounts-dialog-actions">
+        <DialogActions className={styles.accountsDialogActions}>
           <Button
             onClick={handleCloseDeleteDialog}
             disabled={deleting}
-            className="accounts-dialog-cancel"
+            className={styles.accountsDialogCancel}
           >
             إلغاء
           </Button>
@@ -1169,7 +1254,7 @@ export default function AccountsManagement() {
             onClick={handleConfirmDelete}
             disabled={deleting}
             variant="contained"
-            className="accounts-dialog-confirm"
+            className={styles.accountsDialogConfirm}
           >
             {deleting ? (
               <CircularProgress size={18} sx={{ color: "#fff" }} />

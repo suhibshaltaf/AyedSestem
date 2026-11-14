@@ -1,0 +1,550 @@
+
+/* =========================================================
+   PROFILE PAGE
+   GoldSystem — Modern Profile Design
+   CSS Modules | RTL | Light / Dark Theme
+   ========================================================= */
+
+
+/* =========================================================
+   1. Main Container
+   ========================================================= */
+
+.profileContainer {
+  width: 100%;
+  max-width: 850px;
+  min-height: calc(100vh - 70px);
+
+  margin: 0 auto;
+  padding: 35px 20px 45px;
+
+  box-sizing: border-box;
+  direction: rtl;
+}
+
+
+/* =========================================================
+   2. Loading
+   ========================================================= */
+
+.profileLoading {
+  min-height: 60vh;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 15px;
+
+  color: var(--text-secondary);
+
+  font-family: "Cairo", sans-serif;
+}
+
+.profileLoading :global(.MuiCircularProgress-root) {
+  color: var(--gold-primary) !important;
+}
+
+.profileLoading :global(.MuiTypography-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+}
+
+
+/* =========================================================
+   3. Header
+   ========================================================= */
+
+.profileHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.profileHeaderIcon {
+  width: 76px;
+  height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 14px;
+
+  border-radius: 23px;
+
+  color: var(--gold-primary);
+
+  background: rgba(184, 134, 11, 0.08);
+
+  border: 1px solid var(--border-gold-strong);
+
+  box-shadow: 0 5px 18px rgba(184, 134, 11, 0.08);
+}
+
+.profileHeaderIcon svg {
+  font-size: 39px !important;
+}
+
+.profileTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 2rem !important;
+  font-weight: 800 !important;
+
+  line-height: 1.5 !important;
+
+  color: #8b6914 !important;
+}
+
+:global([data-theme="dark"]) .profileTitle {
+  color: #e6c878 !important;
+}
+
+.profileDescription {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.87rem !important;
+  font-weight: 500 !important;
+
+  color: var(--text-secondary) !important;
+
+  margin-top: 4px !important;
+  margin-bottom: 17px !important;
+}
+
+.profileTitleDecor {
+  width: 100%;
+  max-width: 360px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+}
+
+.profileTitleLine {
+  flex: 1;
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-primary),
+    transparent
+  );
+
+  opacity: 0.55;
+}
+
+.profileSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.82rem !important;
+  font-weight: 700 !important;
+
+  color: var(--gold-primary) !important;
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   4. Profile Card
+   ========================================================= */
+
+.profileCard {
+  width: 100%;
+
+  padding: 25px 28px !important;
+
+  box-sizing: border-box;
+
+  background: var(--bg-paper) !important;
+
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 17px !important;
+
+  box-shadow: var(--shadow-medium, var(--shadow-soft)) !important;
+
+  overflow: hidden;
+
+  position: relative;
+}
+
+.profileCard::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+
+  height: 3px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--gold-primary),
+    #d7bb79,
+    var(--gold-primary),
+    transparent
+  );
+}
+
+
+/* =========================================================
+   5. Card Header
+   ========================================================= */
+
+.profileCardHeader {
+  display: flex;
+  align-items: center;
+
+  gap: 13px;
+
+  margin-bottom: 20px;
+}
+
+.profileCardHeaderIcon {
+  width: 43px;
+  height: 43px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background: rgba(184, 134, 11, 0.09);
+
+  color: var(--gold-primary);
+}
+
+.profileCardHeaderIcon svg {
+  font-size: 23px;
+}
+
+.profileCardTitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.98rem !important;
+  font-weight: 800 !important;
+
+  color: var(--text-primary) !important;
+}
+
+.profileCardSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+
+  color: var(--text-muted) !important;
+
+  margin-top: 3px !important;
+}
+
+.profileMainDivider {
+  border-color: var(--border-gold) !important;
+  opacity: 0.75;
+}
+
+
+/* =========================================================
+   6. Profile Information List
+   ========================================================= */
+
+.profileDataList {
+  width: 100%;
+  padding-top: 5px;
+}
+
+.profileRow {
+  min-height: 76px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 25px;
+
+  padding: 15px 10px;
+
+  box-sizing: border-box;
+
+  transition: background 0.2s ease;
+}
+
+.profileRow:hover {
+  background: rgba(184, 134, 11, 0.035);
+}
+
+
+/* =========================================================
+   7. Labels
+   ========================================================= */
+
+.profileLabel {
+  min-width: 155px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 11px;
+}
+
+.profileLabelIcon {
+  width: 36px;
+  height: 36px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 10px;
+
+  background: rgba(184, 134, 11, 0.075);
+
+  color: var(--gold-primary);
+}
+
+.profileLabelIcon svg {
+  font-size: 19px;
+}
+
+.profileLabelText {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.87rem;
+  font-weight: 700;
+
+  color: var(--text-secondary);
+
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   8. Values
+   ========================================================= */
+
+.profileValue {
+  flex: 1;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.93rem !important;
+  font-weight: 800 !important;
+
+  color: var(--text-primary) !important;
+
+  text-align: left;
+
+  overflow-wrap: anywhere;
+  line-height: 1.8 !important;
+}
+
+.profileValueId {
+  font-family: "Courier New", monospace !important;
+  font-size: 0.87rem !important;
+  font-weight: 600 !important;
+
+  letter-spacing: 0.3px;
+
+  color: var(--gold-primary) !important;
+}
+
+
+/* =========================================================
+   9. Divider
+   ========================================================= */
+
+.profileDivider {
+  border-color: var(--border-gold) !important;
+  opacity: 0.55;
+}
+
+
+/* =========================================================
+   10. Dark Theme
+   ========================================================= */
+
+:global([data-theme="dark"]) .profileCardHeaderIcon,
+:global([data-theme="dark"]) .profileLabelIcon {
+  background: rgba(201, 164, 76, 0.12);
+}
+
+:global([data-theme="dark"]) .profileRow:hover {
+  background: rgba(201, 164, 76, 0.045);
+}
+
+
+/* =========================================================
+   11. Tablet
+   ========================================================= */
+
+@media (max-width: 768px) {
+  .profileContainer {
+    max-width: 680px;
+    padding: 28px 16px 35px;
+  }
+
+  .profileCard {
+    padding: 22px !important;
+  }
+
+  .profileRow {
+    gap: 15px;
+  }
+
+  .profileLabel {
+    min-width: 140px;
+  }
+}
+
+
+/* =========================================================
+   12. Mobile
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .profileContainer {
+    padding: 23px 12px 30px;
+  }
+
+  .profileHeader {
+    margin-bottom: 23px;
+  }
+
+  .profileHeaderIcon {
+    width: 65px;
+    height: 65px;
+
+    border-radius: 19px;
+
+    margin-bottom: 11px;
+  }
+
+  .profileHeaderIcon svg {
+    font-size: 34px !important;
+  }
+
+  .profileTitle {
+    font-size: 1.65rem !important;
+  }
+
+  .profileDescription {
+    font-size: 0.79rem !important;
+  }
+
+  .profileTitleDecor {
+    max-width: 290px;
+  }
+
+  .profileSubtitle {
+    font-size: 0.75rem !important;
+  }
+
+  .profileCard {
+    padding: 19px 15px !important;
+    border-radius: 14px !important;
+  }
+
+  .profileCardHeader {
+    gap: 10px;
+    margin-bottom: 15px;
+  }
+
+  .profileCardHeaderIcon {
+    width: 39px;
+    height: 39px;
+  }
+
+  .profileCardTitle {
+    font-size: 0.9rem !important;
+  }
+
+  .profileRow {
+    min-height: auto;
+
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 9px;
+
+    padding: 15px 4px;
+  }
+
+  .profileLabel {
+    min-width: 0;
+    gap: 9px;
+  }
+
+  .profileLabelIcon {
+    width: 31px;
+    height: 31px;
+    border-radius: 9px;
+  }
+
+  .profileLabelIcon svg {
+    font-size: 17px;
+  }
+
+  .profileLabelText {
+    font-size: 0.81rem;
+  }
+
+  .profileValue {
+    width: 100%;
+    padding-right: 40px;
+
+    box-sizing: border-box;
+
+    font-size: 0.88rem !important;
+
+    text-align: right;
+  }
+
+  .profileValueId {
+    font-size: 0.82rem !important;
+  }
+}
+
+
+/* =========================================================
+   13. Small Mobile
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .profileContainer {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .profileCard {
+    padding: 16px 11px !important;
+  }
+
+  .profileTitle {
+    font-size: 1.5rem !important;
+  }
+
+  .profileValue {
+    font-size: 0.82rem !important;
+  }
+}
+
+
+/* =========================================================
+   14. Reduced Motion
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .profileRow {
+    transition: none;
+  }
+}

@@ -1,0 +1,1013 @@
+
+/* =========================================================
+   HOME PAGE — GOLDSYSTEM
+   Modern Public Tracking Page
+   RTL | CSS Modules | MUI | Light / Dark Theme
+   ========================================================= */
+
+
+/* =========================================================
+   1. Main Container
+   ========================================================= */
+
+.homeContainer {
+  --home-gold: var(--gold-primary, #b8860b);
+  --home-gold-light: #c9a44c;
+  --home-gold-dark: #8b6914;
+  --home-gold-soft: rgba(184, 134, 11, 0.09);
+  --home-radius: 16px;
+
+  min-height: 100vh;
+  width: 100%;
+  padding: 100px 20px 35px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  position: relative;
+  box-sizing: border-box;
+
+  background: var(--bg-default);
+  direction: rtl;
+}
+
+
+/* =========================================================
+   2. Login / Dashboard Button
+   ========================================================= */
+
+.homeLoginBtnWrapper {
+  position: absolute;
+  top: 22px;
+  left: 24px;
+  z-index: 10;
+}
+
+.homeLoginBtn {
+  min-height: 42px !important;
+  padding: 7px 20px !important;
+
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 10px !important;
+
+  background: var(--bg-paper) !important;
+  color: var(--home-gold) !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+  font-size: 0.86rem !important;
+
+  text-transform: none !important;
+  transition: all 0.25s ease !important;
+}
+
+.homeLoginBtn:hover {
+  background: var(--home-gold-soft) !important;
+  border-color: var(--home-gold) !important;
+  transform: translateY(-2px);
+}
+
+.homeLoginBtnDashboard {
+  color: #fff !important;
+  background: linear-gradient(
+    135deg,
+    #c9a44c,
+    #a67c2e
+  ) !important;
+
+  border: none !important;
+
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.2) !important;
+}
+
+.homeLoginBtnDashboard:hover {
+  background: linear-gradient(
+    135deg,
+    #b8860b,
+    #8b6914
+  ) !important;
+
+  box-shadow: 0 6px 16px rgba(184, 134, 11, 0.28) !important;
+}
+
+
+/* =========================================================
+   3. Header
+   ========================================================= */
+
+.homeHeader {
+  width: 100%;
+  max-width: 750px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  text-align: center;
+  margin-bottom: 34px;
+}
+
+.homeHeaderIcon {
+  width: 82px;
+  height: 82px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  margin-bottom: 17px;
+
+  border-radius: 24px;
+
+  color: var(--home-gold);
+
+  background: linear-gradient(
+    145deg,
+    rgba(184, 134, 11, 0.13),
+    rgba(184, 134, 11, 0.035)
+  );
+
+  border: 1px solid var(--border-gold-strong);
+
+  box-shadow:
+    0 5px 18px rgba(184, 134, 11, 0.09),
+    inset 0 0 12px rgba(184, 134, 11, 0.035);
+}
+
+.homeHeaderIcon svg {
+  font-size: 42px !important;
+}
+
+.homeTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 2.25rem !important;
+  font-weight: 800 !important;
+
+  line-height: 1.5 !important;
+
+  color: var(--home-gold-dark) !important;
+
+  margin-bottom: 5px !important;
+}
+
+:global([data-theme="dark"]) .homeTitle {
+  color: #e6c878 !important;
+}
+
+.homeSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.98rem !important;
+  font-weight: 500 !important;
+
+  color: var(--text-secondary) !important;
+
+  line-height: 1.8 !important;
+  margin-bottom: 19px !important;
+}
+
+.homeTitleDecor {
+  width: 100%;
+  max-width: 340px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 13px;
+}
+
+.homeTitleLine {
+  flex: 1;
+  height: 1px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--home-gold)
+  );
+
+  opacity: 0.55;
+}
+
+.homeTitleLine:last-child {
+  background: linear-gradient(
+    90deg,
+    var(--home-gold),
+    transparent
+  );
+}
+
+.homeTitleDecorText {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.83rem !important;
+  font-weight: 800 !important;
+
+  color: var(--home-gold) !important;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   4. Search Form Card
+   ========================================================= */
+
+.homeFormCard {
+  width: 100%;
+  max-width: 850px;
+
+  padding: 28px 30px !important;
+  margin-bottom: 25px;
+
+  box-sizing: border-box;
+
+  background: var(--bg-paper) !important;
+
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 18px !important;
+
+  box-shadow: var(--shadow-medium) !important;
+
+  position: relative;
+  overflow: hidden;
+}
+
+.homeFormCard::before {
+  content: "";
+
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+
+  height: 3px;
+
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--home-gold),
+    #d7bb79,
+    var(--home-gold),
+    transparent
+  );
+}
+
+.homeFormTitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+
+  color: var(--text-primary) !important;
+
+  text-align: center;
+  line-height: 1.8 !important;
+
+  margin-bottom: 23px !important;
+}
+
+
+/* Search Field */
+
+.homeFormGrid,
+.homeFormGridSingle {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 14px;
+
+  margin-bottom: 21px;
+}
+
+.homeField {
+  width: 100%;
+}
+
+.homeField :global(.MuiOutlinedInput-root) {
+  min-height: 58px;
+
+  border-radius: 12px !important;
+
+  background: var(--bg-default) !important;
+
+  color: var(--text-primary) !important;
+
+  transition: all 0.2s ease;
+}
+
+.homeField :global(.MuiOutlinedInput-root fieldset) {
+  border-color: var(--border-gold-strong) !important;
+  border-width: 1px !important;
+}
+
+.homeField :global(.MuiOutlinedInput-root:hover fieldset) {
+  border-color: var(--home-gold-light) !important;
+}
+
+.homeField :global(.MuiOutlinedInput-root.Mui-focused) {
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.08);
+}
+
+.homeField :global(.MuiOutlinedInput-root.Mui-focused fieldset) {
+  border-color: var(--home-gold) !important;
+  border-width: 1.5px !important;
+}
+
+.homeField :global(.MuiInputBase-input) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+}
+
+.homeField :global(.MuiInputLabel-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--text-secondary) !important;
+}
+
+.homeField :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--home-gold) !important;
+}
+
+.homeField :global(.MuiFormHelperText-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.76rem !important;
+  font-weight: 600 !important;
+  margin-top: 7px;
+}
+
+
+/* =========================================================
+   5. Form Actions
+   ========================================================= */
+
+.homeFormActions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.homeSearchBtn {
+  min-width: 155px !important;
+  min-height: 46px !important;
+
+  padding: 9px 30px !important;
+
+  border-radius: 11px !important;
+  border: none !important;
+
+  background: linear-gradient(
+    135deg,
+    #c9a44c,
+    #a67c2e
+  ) !important;
+
+  color: #fff !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+
+  text-transform: none !important;
+
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.2) !important;
+
+  transition: all 0.25s ease !important;
+}
+
+.homeSearchBtn:hover {
+  background: linear-gradient(
+    135deg,
+    #b8860b,
+    #8b6914
+  ) !important;
+
+  transform: translateY(-2px);
+
+  box-shadow: 0 6px 16px rgba(184, 134, 11, 0.27) !important;
+}
+
+.homeSearchBtn:global(.Mui-disabled) {
+  background: #bba77b !important;
+  color: #fff !important;
+  opacity: 0.75;
+}
+
+.homeResetBtn {
+  min-height: 46px !important;
+
+  padding: 8px 24px !important;
+
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 11px !important;
+
+  color: var(--text-secondary) !important;
+  background: var(--bg-paper) !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.87rem !important;
+  font-weight: 700 !important;
+
+  text-transform: none !important;
+
+  transition: all 0.2s ease !important;
+}
+
+.homeResetBtn:hover {
+  background: var(--home-gold-soft) !important;
+  border-color: var(--home-gold) !important;
+  color: var(--home-gold) !important;
+}
+
+
+/* =========================================================
+   6. Result Card
+   ========================================================= */
+
+.homeResultCard {
+  width: 100%;
+  max-width: 1100px;
+
+  padding: 23px !important;
+  margin-bottom: 25px;
+
+  box-sizing: border-box;
+
+  background: var(--bg-paper) !important;
+
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 17px !important;
+
+  box-shadow: var(--shadow-medium) !important;
+
+  animation: homeFadeIn 0.35s ease both;
+}
+
+@keyframes homeFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(9px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* =========================================================
+   7. Results Header
+   ========================================================= */
+
+.homeResultsHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 15px;
+  flex-wrap: wrap;
+
+  margin-bottom: 20px;
+  padding-bottom: 17px;
+
+  border-bottom: 1px solid var(--border-gold);
+}
+
+.homeResultsHeader :global(.MuiTypography-h6) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+
+  color: var(--text-primary);
+}
+
+.homeResultsHeader :global(.MuiTypography-body2) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.82rem !important;
+  line-height: 1.8 !important;
+}
+
+.homeResultsCount {
+  min-width: 75px;
+  min-height: 34px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 4px 13px;
+
+  box-sizing: border-box;
+
+  border-radius: 9px;
+
+  background: var(--home-gold-soft);
+
+  border: 1px solid var(--border-gold);
+
+  color: var(--home-gold);
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+
+/* =========================================================
+   8. Tracking Table
+   ========================================================= */
+
+.homeTrackingTable {
+  width: 100%;
+
+  overflow-x: auto;
+
+  border: 1px solid var(--border-gold);
+  border-radius: 12px;
+
+  background: var(--bg-paper);
+}
+
+.homeTrackingTable :global(.MuiTable-root) {
+  width: 100%;
+  min-width: 700px;
+
+  border-collapse: separate;
+  border-spacing: 0;
+
+  background: var(--bg-paper);
+}
+
+.homeTrackingTable :global(.MuiTableCell-root) {
+  padding: 15px 13px;
+
+  text-align: center;
+  vertical-align: middle;
+
+  border-bottom: 1px solid var(--border-gold);
+
+  color: var(--text-primary);
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.86rem !important;
+  font-weight: 600 !important;
+
+  white-space: nowrap;
+}
+
+.homeTrackingTable :global(.MuiTableHead-root .MuiTableCell-root) {
+  padding: 15px 12px;
+
+  background: rgba(184, 134, 11, 0.09);
+
+  color: var(--home-gold-dark);
+
+  font-size: 0.85rem !important;
+  font-weight: 800 !important;
+
+  white-space: nowrap;
+}
+
+:global([data-theme="dark"]) .homeTrackingTable :global(.MuiTableHead-root .MuiTableCell-root) {
+  background: rgba(201, 164, 76, 0.13);
+  color: #e6c878;
+}
+
+.homeTrackingTable :global(.MuiTableBody-root .MuiTableRow-root) {
+  transition: background 0.2s ease;
+}
+
+.homeTrackingTable :global(.MuiTableBody-root .MuiTableRow-root:hover) {
+  background: var(--home-gold-soft);
+}
+
+.homeTrackingTable :global(.MuiTableBody-root .MuiTableRow-root:last-child .MuiTableCell-root) {
+  border-bottom: none;
+}
+
+
+/* Barcode */
+
+.homeTrackingBarcode {
+  direction: ltr;
+
+  font-family: "Courier New", monospace !important;
+  font-size: 0.88rem !important;
+  font-weight: 800 !important;
+
+  letter-spacing: 0.5px;
+
+  color: var(--home-gold-dark) !important;
+}
+
+
+/* Cell Content */
+
+.homeTrackingCell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 7px;
+  min-height: 26px;
+}
+
+.homeTrackingCell svg {
+  flex-shrink: 0;
+
+  font-size: 18px;
+
+  color: var(--home-gold);
+}
+
+.homeTrackingCell :global(.MuiTypography-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.84rem !important;
+  font-weight: 600 !important;
+
+  color: var(--text-primary);
+}
+
+
+/* Price */
+
+.homeTrackingPrice {
+  color: var(--home-gold) !important;
+  font-weight: 800 !important;
+  white-space: nowrap;
+}
+
+
+/* =========================================================
+   9. Result Actions
+   ========================================================= */
+
+.homeResultActions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  margin-top: 14px;
+}
+
+.homeRefreshBtn {
+  width: 38px;
+  height: 38px;
+
+  color: var(--home-gold) !important;
+
+  border: 1px solid var(--border-gold) !important;
+  border-radius: 10px !important;
+
+  transition: all 0.2s ease !important;
+}
+
+.homeRefreshBtn:hover {
+  background: var(--home-gold-soft) !important;
+  border-color: var(--home-gold) !important;
+  transform: rotate(20deg);
+}
+
+
+/* =========================================================
+   10. Empty Result
+   ========================================================= */
+
+.homeEmptyResult {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  gap: 11px;
+
+  min-height: 190px;
+
+  padding: 30px 20px !important;
+
+  text-align: center;
+
+  background: var(--bg-paper) !important;
+}
+
+.homeEmptyResult > svg {
+  width: 60px;
+  height: 60px;
+
+  padding: 12px;
+
+  box-sizing: border-box;
+
+  color: var(--home-gold);
+
+  background: var(--home-gold-soft);
+
+  border-radius: 17px;
+}
+
+.homeEmptyResult :global(.MuiTypography-h6) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 800 !important;
+
+  color: var(--text-primary);
+}
+
+.homeEmptyResult :global(.MuiTypography-root:not(.MuiTypography-h6)) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.85rem !important;
+
+  color: var(--text-secondary);
+  line-height: 1.9 !important;
+}
+
+
+/* =========================================================
+   11. Error State
+   ========================================================= */
+
+.homeError {
+  border: 1px solid rgba(211, 47, 47, 0.3) !important;
+
+  background: var(--bg-paper) !important;
+}
+
+.homeErrorText {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.92rem !important;
+  font-weight: 700 !important;
+
+  color: #d32f2f !important;
+
+  text-align: center;
+  line-height: 1.9 !important;
+}
+
+
+/* =========================================================
+   12. Loading
+   ========================================================= */
+
+.homeLoading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 12px;
+
+  padding: 30px 16px;
+
+  color: var(--home-gold);
+
+  font-family: "Cairo", sans-serif;
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   13. Footer
+   ========================================================= */
+
+.homeFooter {
+  width: 100%;
+
+  margin-top: auto !important;
+  padding-top: 22px;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.78rem !important;
+  font-weight: 500 !important;
+
+  color: var(--text-muted) !important;
+
+  text-align: center;
+  line-height: 1.8 !important;
+}
+
+
+/* =========================================================
+   14. Responsive — Tablets
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .homeContainer {
+    padding: 95px 16px 30px;
+  }
+
+  .homeFormCard {
+    max-width: 750px;
+    padding: 25px 22px !important;
+  }
+
+  .homeResultCard {
+    padding: 19px !important;
+  }
+}
+
+
+/* =========================================================
+   15. Responsive — Mobile
+   ========================================================= */
+
+@media (max-width: 600px) {
+  .homeContainer {
+    padding: 85px 12px 24px;
+  }
+
+  .homeLoginBtnWrapper {
+    top: 14px;
+    left: 12px;
+  }
+
+  .homeLoginBtn {
+    min-height: 38px !important;
+    padding: 6px 13px !important;
+    font-size: 0.77rem !important;
+  }
+
+  .homeHeader {
+    margin-bottom: 25px;
+  }
+
+  .homeHeaderIcon {
+    width: 68px;
+    height: 68px;
+
+    border-radius: 20px;
+
+    margin-bottom: 12px;
+  }
+
+  .homeHeaderIcon svg {
+    font-size: 35px !important;
+  }
+
+  .homeTitle {
+    font-size: 1.75rem !important;
+  }
+
+  .homeSubtitle {
+    font-size: 0.83rem !important;
+    margin-bottom: 15px !important;
+  }
+
+  .homeTitleDecor {
+    max-width: 280px;
+    gap: 9px;
+  }
+
+  .homeTitleDecorText {
+    font-size: 0.76rem !important;
+  }
+
+  .homeFormCard {
+    padding: 22px 15px !important;
+    border-radius: 15px !important;
+    margin-bottom: 19px;
+  }
+
+  .homeFormTitle {
+    font-size: 0.91rem !important;
+    margin-bottom: 18px !important;
+  }
+
+  .homeField :global(.MuiOutlinedInput-root) {
+    min-height: 54px;
+  }
+
+  .homeFormActions {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .homeFormActions > * {
+    width: 100%;
+  }
+
+  .homeSearchBtn,
+  .homeResetBtn {
+    width: 100% !important;
+    min-height: 44px !important;
+  }
+
+  .homeResultCard {
+    padding: 15px 12px !important;
+    border-radius: 14px !important;
+  }
+
+  .homeResultsHeader {
+    align-items: flex-start;
+    margin-bottom: 14px;
+    padding-bottom: 13px;
+  }
+
+  .homeResultsHeader :global(.MuiTypography-h6) {
+    font-size: 0.93rem !important;
+  }
+
+  .homeResultsCount {
+    min-width: 65px;
+    font-size: 0.75rem;
+  }
+
+  .homeTrackingTable {
+    border-radius: 9px;
+  }
+
+  .homeTrackingTable :global(.MuiTable-root) {
+    min-width: 700px;
+  }
+
+  .homeTrackingTable :global(.MuiTableCell-root) {
+    padding: 12px 10px;
+    font-size: 0.79rem !important;
+  }
+
+  .homeTrackingTable :global(.MuiTableHead-root .MuiTableCell-root) {
+    font-size: 0.78rem !important;
+  }
+
+  .homeTrackingCell {
+    gap: 5px;
+  }
+
+  .homeTrackingCell svg {
+    font-size: 16px;
+  }
+
+  .homeTrackingCell :global(.MuiTypography-root) {
+    font-size: 0.78rem !important;
+  }
+
+  .homeEmptyResult {
+    min-height: 175px;
+    padding: 24px 12px !important;
+  }
+
+  .homeEmptyResult :global(.MuiTypography-h6) {
+    font-size: 0.9rem !important;
+  }
+
+  .homeEmptyResult :global(.MuiTypography-root:not(.MuiTypography-h6)) {
+    font-size: 0.78rem !important;
+  }
+
+  .homeError {
+    padding: 17px !important;
+  }
+
+  .homeErrorText {
+    font-size: 0.83rem !important;
+  }
+
+  .homeFooter {
+    padding: 0 8px;
+    font-size: 0.72rem !important;
+  }
+}
+
+
+/* =========================================================
+   16. Small Mobile
+   ========================================================= */
+
+@media (max-width: 360px) {
+  .homeContainer {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+
+  .homeTitle {
+    font-size: 1.55rem !important;
+  }
+
+  .homeFormCard {
+    padding: 19px 11px !important;
+  }
+
+  .homeResultCard {
+    padding: 12px 9px !important;
+  }
+
+  .homeTitleDecor {
+    max-width: 240px;
+  }
+}
+
+
+/* =========================================================
+   17. Accessibility / Motion
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .homeResultCard,
+  .homeLoginBtn,
+  .homeSearchBtn,
+  .homeResetBtn,
+  .homeRefreshBtn {
+    animation: none !important;
+    transition: none !important;
+  }
+}

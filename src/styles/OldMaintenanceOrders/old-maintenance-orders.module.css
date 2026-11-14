@@ -1,0 +1,706 @@
+/* =========================================
+   OLD MAINTENANCE ORDERS
+   RTL - Arabic Layout
+   CSS Modules
+   ========================================= */
+
+.page {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 24px 16px 45px;
+  direction: rtl;
+  font-family: "Cairo", sans-serif;
+  overflow-x: hidden;
+}
+
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================
+   Header
+   ========================================= */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+  text-align: center;
+}
+
+.headerIcon {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  border: 1px solid var(--border-gold-strong);
+  background: rgba(184, 134, 11, 0.07);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.headerTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.85rem !important;
+  font-weight: 700 !important;
+  color: #8b6914 !important;
+}
+
+:global([data-theme="dark"]) .headerTitle {
+  color: #e6c878 !important;
+}
+
+.headerSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.92rem !important;
+  color: var(--text-secondary) !important;
+}
+
+/* =========================================
+   Statistics
+   ========================================= */
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.statCard {
+  min-width: 0;
+  border-radius: 13px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+}
+
+.statCard :global(.MuiCardContent-root) {
+  padding: 18px !important;
+}
+
+.statLabel {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 600 !important;
+  color: var(--text-secondary) !important;
+}
+
+.statValue {
+  margin-top: 8px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.65rem !important;
+  font-weight: 800 !important;
+  color: var(--gold-primary) !important;
+  direction: ltr;
+  text-align: right;
+}
+
+.statCaption {
+  margin-top: 4px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.72rem !important;
+  color: var(--text-muted) !important;
+}
+
+/* =========================================
+   Filters
+   ========================================= */
+
+.filtersPaper {
+  width: 100%;
+  padding: 20px !important;
+  margin-bottom: 20px;
+  border-radius: 14px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.filtersFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 14px;
+}
+
+.filterField {
+  min-width: 0;
+}
+
+.filterFieldWide {
+  grid-column: span 2;
+}
+
+.filtersPaper :global(.MuiOutlinedInput-root) {
+  border-radius: 10px;
+  font-family: "Cairo", sans-serif;
+  background-color: rgba(184, 134, 11, 0.03);
+}
+
+.filtersPaper :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--border-gold-strong);
+}
+
+.filtersPaper
+  :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--gold-primary);
+}
+
+.filtersPaper
+  :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--gold-primary);
+  border-width: 1.5px;
+}
+
+.filtersPaper :global(.MuiInputLabel-root) {
+  font-family: "Cairo", sans-serif;
+  color: var(--text-secondary);
+}
+
+.filtersPaper :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--gold-primary);
+}
+
+.filtersPaper :global(.MuiInputBase-input) {
+  font-family: "Cairo", sans-serif;
+  color: var(--text-primary);
+}
+
+.branchPlaceholder {
+  color: var(--text-secondary);
+}
+
+/* =========================================
+   Filter Actions
+   ========================================= */
+
+.filtersActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-gold);
+}
+
+.filtersActions :global(.MuiButton-root) {
+  min-height: 40px;
+  border-radius: 9px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  padding: 7px 18px !important;
+  gap: 8px;
+}
+
+.filtersActions :global(.MuiButton-startIcon) {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.refreshButton {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 9px !important;
+  color: var(--gold-primary) !important;
+}
+
+.refreshButton:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+}
+
+.clearButton {
+  color: var(--text-secondary) !important;
+  border-color: var(--border-gold-strong) !important;
+}
+
+.clearButton:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+  border-color: var(--gold-primary) !important;
+}
+
+.addButton {
+  margin-inline-start: auto;
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.2) !important;
+}
+
+.addButton:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+.errorAlert {
+  margin-bottom: 18px;
+  font-family: "Cairo", sans-serif !important;
+  border-radius: 10px !important;
+}
+
+/* =========================================
+   Table
+   ========================================= */
+
+.tablePaper {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.tableHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 17px 20px;
+  border-bottom: 1px solid var(--border-gold);
+}
+
+.tableHeaderTitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1.05rem !important;
+  font-weight: 800 !important;
+  color: var(--text-primary) !important;
+}
+
+.tableHeaderSubtitle {
+  margin-top: 3px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.8rem !important;
+  color: var(--text-secondary) !important;
+}
+
+.tableHeaderIcon {
+  font-size: 28px !important;
+  color: var(--gold-primary);
+}
+
+.tablePaper :global(.MuiTableContainer-root) {
+  overflow-x: auto;
+}
+
+.loading,
+.empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 260px;
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: "Cairo", sans-serif;
+}
+
+.empty :global(.MuiTypography-root),
+.loading :global(.MuiTypography-root) {
+  font-family: "Cairo", sans-serif !important;
+}
+
+/* =========================================
+   Table Head
+   ========================================= */
+
+.tableHeadRow {
+  background: rgba(184, 134, 11, 0.09);
+}
+
+:global([data-theme="dark"]) .tableHeadRow {
+  background: rgba(230, 200, 120, 0.08);
+}
+
+.tableTh {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.83rem !important;
+  font-weight: 700 !important;
+  color: #8b6914 !important;
+  text-align: right;
+  white-space: nowrap;
+  padding: 14px 12px !important;
+  border-bottom: 1px solid var(--border-gold-strong) !important;
+}
+
+:global([data-theme="dark"]) .tableTh {
+  color: #e6c878 !important;
+}
+
+/* =========================================
+   Table Body
+   ========================================= */
+
+.tableRow {
+  transition: background-color 0.2s ease;
+}
+
+.tableRow:hover {
+  background-color: rgba(184, 134, 11, 0.045) !important;
+}
+
+.tableTd {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.84rem !important;
+  color: var(--text-primary) !important;
+  text-align: right;
+  padding: 12px !important;
+  border-bottom: 1px solid var(--border-gold) !important;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+
+.tableTdName {
+  font-weight: 700 !important;
+}
+
+.phoneCell {
+  direction: ltr;
+  text-align: right;
+  unicode-bidi: plaintext;
+  white-space: nowrap;
+}
+
+/* =========================================
+   Receipt Number
+   ========================================= */
+
+.receiptNumber {
+  display: inline-block;
+  padding: 5px 9px;
+  border-radius: 7px;
+  background-color: rgba(184, 134, 11, 0.13);
+  color: #8b6914;
+  font-family: "Courier New", monospace;
+  font-size: 0.84rem;
+  font-weight: 700;
+  direction: ltr;
+  white-space: nowrap;
+}
+
+:global([data-theme="dark"]) .receiptNumber {
+  color: #e6c878;
+  background-color: rgba(230, 200, 120, 0.12);
+}
+
+/* =========================================
+   Status
+   ========================================= */
+
+.statusChip {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 700 !important;
+  border-radius: 7px !important;
+}
+
+.statusReady {
+  background-color: rgba(237, 166, 43, 0.15) !important;
+  color: #a66b00 !important;
+}
+
+.statusDelivered {
+  background-color: rgba(46, 125, 50, 0.13) !important;
+  color: #2e7d32 !important;
+}
+
+:global([data-theme="dark"]) .statusReady {
+  background-color: rgba(255, 193, 7, 0.14) !important;
+  color: #ffd36a !important;
+}
+
+:global([data-theme="dark"]) .statusDelivered {
+  background-color: rgba(129, 199, 132, 0.14) !important;
+  color: #81c784 !important;
+}
+
+/* =========================================
+   Actions
+   ========================================= */
+
+.actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.actionButton {
+  border-radius: 8px !important;
+}
+
+.viewButton {
+  color: var(--gold-primary) !important;
+  background: rgba(184, 134, 11, 0.09) !important;
+}
+
+.viewButton:hover {
+  background: rgba(184, 134, 11, 0.18) !important;
+}
+
+.editButton {
+  color: #1976d2 !important;
+  background: rgba(25, 118, 210, 0.08) !important;
+}
+
+.editButton:hover {
+  background: rgba(25, 118, 210, 0.16) !important;
+}
+
+.deleteButton {
+  color: #d32f2f !important;
+  background: rgba(211, 47, 47, 0.08) !important;
+}
+
+.deleteButton:hover {
+  background: rgba(211, 47, 47, 0.16) !important;
+}
+
+/* =========================================
+   Pagination
+   ========================================= */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border-gold);
+}
+
+.paginationInfo {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.84rem !important;
+  color: var(--text-secondary) !important;
+}
+
+.paginationControl :global(.MuiPaginationItem-root) {
+  font-family: "Cairo", sans-serif;
+  color: var(--text-secondary);
+}
+
+.paginationControl
+  :global(.MuiPaginationItem-root.Mui-selected) {
+  background-color: rgba(184, 134, 11, 0.18);
+  color: #8b6914;
+  font-weight: 700;
+}
+
+.paginationControl
+  :global(.MuiPaginationItem-root.Mui-selected:hover) {
+  background-color: rgba(184, 134, 11, 0.25);
+}
+
+:global([data-theme="dark"])
+  .paginationControl
+  :global(.MuiPaginationItem-root.Mui-selected) {
+  color: #e6c878;
+}
+
+/* =========================================
+   Tablet
+   ========================================= */
+
+@media (max-width: 900px) {
+  .page {
+    padding: 18px 12px 35px;
+  }
+
+  .headerTitle {
+    font-size: 1.65rem !important;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filterFieldWide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================
+   Mobile: Table Rows Become Cards
+   ========================================= */
+
+@media (max-width: 768px) {
+  .tablePaper :global(.MuiTable-root),
+  .tablePaper :global(.MuiTableBody-root) {
+    display: block;
+    width: 100%;
+  }
+
+  .tablePaper :global(.MuiTableHead-root) {
+    display: none;
+  }
+
+  .tablePaper :global(.MuiTableContainer-root) {
+    overflow-x: visible;
+  }
+
+  .tableRow {
+    display: block;
+    margin: 12px;
+    border: 1px solid var(--border-gold);
+    border-radius: 12px;
+    background: rgba(184, 134, 11, 0.03);
+    overflow: hidden;
+  }
+
+  .tableTd {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px !important;
+    text-align: right;
+  }
+
+  .tableTd::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+
+  .phoneCell {
+    text-align: left;
+  }
+
+  .actions {
+    justify-content: flex-start;
+  }
+
+  .tableRow .tableTd:last-child {
+    border-bottom: 0 !important;
+  }
+}
+
+/* =========================================
+   Mobile
+   ========================================= */
+
+@media (max-width: 600px) {
+  .page {
+    padding: 12px 8px 30px;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .headerIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .headerTitle {
+    font-size: 1.5rem !important;
+  }
+
+  .headerSubtitle {
+    font-size: 0.82rem !important;
+  }
+
+  .stats {
+    gap: 9px;
+  }
+
+  .statCard {
+    border-radius: 10px !important;
+  }
+
+  .statCard :global(.MuiCardContent-root) {
+    padding: 13px !important;
+  }
+
+  .statLabel {
+    font-size: 0.78rem !important;
+  }
+
+  .statValue {
+    font-size: 1.4rem !important;
+  }
+
+  .filtersPaper {
+    padding: 14px !important;
+    border-radius: 11px !important;
+  }
+
+  .filtersFields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .filterFieldWide {
+    grid-column: auto;
+  }
+
+  .filtersActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .filtersActions :global(.MuiButton-root) {
+    width: 100%;
+    min-width: 0;
+    padding: 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .refreshButton {
+    width: 100%;
+  }
+
+  .addButton {
+    grid-column: 1 / -1;
+    margin-inline-start: 0;
+  }
+
+  .tableHeader {
+    padding: 14px;
+  }
+
+  .tableHeaderTitle {
+    font-size: 0.95rem !important;
+  }
+
+  .pagination {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .filtersActions {
+    grid-template-columns: 1fr;
+  }
+
+  .stats {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,3 +1,4 @@
+
 import { useState, useMemo } from "react";
 import {
   Box,
@@ -46,7 +47,7 @@ import {
 } from "../../hooks/useBranches.js";
 import branchSchema from "./branchSchema.js";
 import useAuthStore from "../../store/useAuthStore.js";
-import "../../styles/branches.css";
+import styles from "../../styles/Branch/Branches.module.css";
 
 const emptyForm = {
   name: "",
@@ -63,25 +64,27 @@ export default function BranchesManagement() {
   const currentUser = useAuthStore((state) => state.user);
 
   const [searchQuery, setSearchQuery] = useState("");
+
   const [formDialog, setFormDialog] = useState({
     open: false,
     mode: "add",
     branch: null,
   });
+
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     branch: null,
   });
 
-  // ✅ الأدوار
   const isAdmin = useMemo(() => {
     if (!currentUser?.roles) return false;
     const roleNames = currentUser.roles.map((r) => r.name);
+
     return roleNames.some((name) => ADMIN_ROLES.includes(name));
   }, [currentUser]);
 
-  // React Query
   const { data: branches = [], isLoading, refetch } = useBranches();
+
   const createMutation = useCreateBranch();
   const updateMutation = useUpdateBranch();
   const deleteMutation = useDeleteBranch();
@@ -89,7 +92,6 @@ export default function BranchesManagement() {
   const saving = createMutation.isPending || updateMutation.isPending;
   const deleting = deleteMutation.isPending;
 
-  // RHF
   const {
     register,
     handleSubmit,
@@ -102,10 +104,11 @@ export default function BranchesManagement() {
     defaultValues: emptyForm,
   });
 
-  // فلترة
   const filteredBranches = useMemo(() => {
     if (!searchQuery.trim()) return branches;
+
     const q = searchQuery.toLowerCase();
+
     return branches.filter((b) => {
       return (
         (b.name || "").toLowerCase().includes(q) ||
@@ -131,6 +134,7 @@ export default function BranchesManagement() {
       phoneNumber: branch.phoneNumber || "",
       isActive: branch.isActive ?? true,
     });
+
     setFormDialog({ open: true, mode: "edit", branch });
   };
 
@@ -161,6 +165,7 @@ export default function BranchesManagement() {
         id: formDialog.branch.id,
         data: { ...payload, isActive: data.isActive },
       });
+
       if (result?.success) handleCloseFormDialog();
     }
   };
@@ -172,37 +177,43 @@ export default function BranchesManagement() {
   const handleConfirmDelete = async () => {
     const branch = deleteDialog.branch;
     if (!branch) return;
+
     const result = await deleteMutation.mutateAsync(branch.id);
-    if (result?.success) setDeleteDialog({ open: false, branch: null });
+
+    if (result?.success) {
+      setDeleteDialog({ open: false, branch: null });
+    }
   };
 
   const handleCloseDeleteDialog = () => {
-    if (!deleting) setDeleteDialog({ open: false, branch: null });
+    if (!deleting) {
+      setDeleteDialog({ open: false, branch: null });
+    }
   };
 
   return (
-    <div className="branches-container">
-      {/* Header */}
-      <div className="branches-header">
-        <div className="branches-header-icon">
+    <div className={styles.branchesContainer}>
+      <div className={styles.branchesHeader}>
+        <div className={styles.branchesHeaderIcon}>
           <StorefrontIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="branches-title">إدارة الفروع</Typography>
+        <Typography className={styles.branchesTitle}>
+          إدارة الفروع
+        </Typography>
 
-        <Typography className="branches-subtitle">
+        <Typography className={styles.branchesSubtitle}>
           إدارة فروع الشركة وبياناتها
         </Typography>
       </div>
 
-      {/* Toolbar */}
-      <div className="branches-toolbar">
+      <div className={styles.branchesToolbar}>
         <TextField
           placeholder="البحث عن فرع..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
-          className="branches-search"
+          className={styles.branchesSearch}
           slotProps={{
             input: {
               startAdornment: (
@@ -214,11 +225,11 @@ export default function BranchesManagement() {
           }}
         />
 
-        <div className="branches-actions">
+        <div className={styles.branchesActions}>
           <Tooltip title="تحديث">
             <IconButton
               onClick={() => refetch()}
-              className="branches-refresh-btn"
+              className={styles.branchesRefreshBtn}
             >
               <RefreshIcon />
             </IconButton>
@@ -227,7 +238,7 @@ export default function BranchesManagement() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            className="branches-add-btn"
+            className={styles.branchesAddBtn}
             onClick={handleAddClick}
           >
             إضافة فرع
@@ -235,14 +246,13 @@ export default function BranchesManagement() {
         </div>
       </div>
 
-      {/* Table */}
-      <Paper elevation={0} className="branches-table-paper">
+      <Paper elevation={0} className={styles.branchesTablePaper}>
         {isLoading ? (
-          <Box className="branches-loading">
+          <Box className={styles.branchesLoading}>
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
         ) : filteredBranches.length === 0 ? (
-          <Box className="branches-empty">
+          <Box className={styles.branchesEmpty}>
             <Typography>
               {searchQuery
                 ? "لا توجد نتائج مطابقة للبحث"
@@ -253,16 +263,27 @@ export default function BranchesManagement() {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow className="branches-table-head-row">
-                  <TableCell className="branches-th">#</TableCell>
-                  <TableCell className="branches-th">اسم الفرع</TableCell>
-                  <TableCell className="branches-th">الكود</TableCell>
-                  <TableCell className="branches-th">العنوان</TableCell>
-                  <TableCell className="branches-th">الهاتف</TableCell>
-                  <TableCell className="branches-th">المدير المسؤول</TableCell>
-                  <TableCell className="branches-th">المحاسب المسؤول</TableCell>
-                  <TableCell className="branches-th">الحالة</TableCell>
-                  <TableCell className="branches-th" align="center">
+                <TableRow className={styles.branchesTableHeadRow}>
+                  <TableCell className={styles.branchesTh}>#</TableCell>
+                  <TableCell className={styles.branchesTh}>
+                    اسم الفرع
+                  </TableCell>
+                  <TableCell className={styles.branchesTh}>الكود</TableCell>
+                  <TableCell className={styles.branchesTh}>
+                    العنوان
+                  </TableCell>
+                  <TableCell className={styles.branchesTh}>الهاتف</TableCell>
+                  <TableCell className={styles.branchesTh}>
+                    المدير المسؤول
+                  </TableCell>
+                  <TableCell className={styles.branchesTh}>
+                    المحاسب المسؤول
+                  </TableCell>
+                  <TableCell className={styles.branchesTh}>الحالة</TableCell>
+                  <TableCell
+                    className={styles.branchesTh}
+                    align="center"
+                  >
                     الإجراءات
                   </TableCell>
                 </TableRow>
@@ -270,72 +291,86 @@ export default function BranchesManagement() {
 
               <TableBody>
                 {filteredBranches.map((branch, index) => (
-                  <TableRow key={branch.id} className="branches-table-row">
-                    <TableCell className="branches-td">
+                  <TableRow
+                    key={branch.id}
+                    className={styles.branchesTableRow}
+                  >
+                    <TableCell className={styles.branchesTd}>
                       {index + 1}
                     </TableCell>
 
-                    <TableCell className="branches-td branches-td-name">
+                    <TableCell
+                      className={`${styles.branchesTd} ${styles.branchesTdName}`}
+                    >
                       {branch.name || "—"}
                     </TableCell>
 
-                    <TableCell className="branches-td">
+                    <TableCell className={styles.branchesTd}>
                       <Chip
                         label={branch.code || "—"}
                         size="small"
-                        className="branches-code-chip"
+                        className={styles.branchesCodeChip}
                       />
                     </TableCell>
 
-                    <TableCell className="branches-td">
+                    <TableCell className={styles.branchesTd}>
                       {branch.address || "—"}
                     </TableCell>
 
-                    <TableCell className="branches-td branches-td-phone">
+                    <TableCell
+                      className={`${styles.branchesTd} ${styles.branchesTdPhone}`}
+                    >
                       {branch.phoneNumber || "—"}
                     </TableCell>
 
-                    <TableCell className="branches-td branches-td-manager">
+                    <TableCell
+                      className={`${styles.branchesTd} ${styles.branchesTdManager}`}
+                    >
                       {branch.managerName ? (
                         <Chip
                           label={branch.managerName}
                           size="small"
-                          className="branches-manager-chip"
+                          className={styles.branchesManagerChip}
                         />
                       ) : (
-                        <span className="branches-td-empty">—</span>
+                        <span className={styles.branchesTdEmpty}>—</span>
                       )}
                     </TableCell>
 
-                    <TableCell className="branches-td branches-td-accountant">
+                    <TableCell
+                      className={`${styles.branchesTd} ${styles.branchesTdAccountant}`}
+                    >
                       {branch.accountantName ? (
                         <Chip
                           label={branch.accountantName}
                           size="small"
-                          className="branches-accountant-chip"
+                          className={styles.branchesAccountantChip}
                         />
                       ) : (
-                        <span className="branches-td-empty">—</span>
+                        <span className={styles.branchesTdEmpty}>—</span>
                       )}
                     </TableCell>
 
-                    <TableCell className="branches-td">
+                    <TableCell className={styles.branchesTd}>
                       <Chip
                         label={branch.isActive ? "نشط" : "معطل"}
                         size="small"
-                        className={`branches-status-chip ${
+                        className={`${styles.branchesStatusChip} ${
                           branch.isActive
-                            ? "branches-status-chip-active"
-                            : "branches-status-chip-inactive"
+                            ? styles.branchesStatusChipActive
+                            : styles.branchesStatusChipInactive
                         }`}
                       />
                     </TableCell>
 
-                    <TableCell className="branches-td" align="center">
+                    <TableCell
+                      className={styles.branchesTd}
+                      align="center"
+                    >
                       <Tooltip title="عرض التفاصيل">
                         <IconButton
                           size="small"
-                          className="branches-action-btn branches-view-btn"
+                          className={`${styles.branchesActionBtn} ${styles.branchesViewBtn}`}
                           onClick={() => handleViewClick(branch)}
                         >
                           <VisibilityIcon fontSize="small" />
@@ -345,7 +380,7 @@ export default function BranchesManagement() {
                       <Tooltip title="تعديل">
                         <IconButton
                           size="small"
-                          className="branches-action-btn branches-edit-btn"
+                          className={`${styles.branchesActionBtn} ${styles.branchesEditBtn}`}
                           onClick={() => handleEditClick(branch)}
                         >
                           <EditIcon fontSize="small" />
@@ -355,7 +390,7 @@ export default function BranchesManagement() {
                       <Tooltip title="حذف">
                         <IconButton
                           size="small"
-                          className="branches-action-btn branches-delete-btn"
+                          className={`${styles.branchesActionBtn} ${styles.branchesDeleteBtn}`}
                           onClick={() => handleDeleteClick(branch)}
                         >
                           <DeleteIcon fontSize="small" />
@@ -370,20 +405,21 @@ export default function BranchesManagement() {
         )}
       </Paper>
 
-      {/* Dialog الإضافة / التعديل */}
       <Dialog
         open={formDialog.open}
         onClose={handleCloseFormDialog}
-        PaperProps={{ className: "branches-form-dialog" }}
+        PaperProps={{ className: styles.branchesFormDialog }}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="branches-form-title">
-          {formDialog.mode === "add" ? "إضافة فرع جديد" : "تعديل بيانات الفرع"}
+        <DialogTitle className={styles.branchesFormTitle}>
+          {formDialog.mode === "add"
+            ? "إضافة فرع جديد"
+            : "تعديل بيانات الفرع"}
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <DialogContent className="branches-form-content">
+          <DialogContent className={styles.branchesFormContent}>
             <TextField
               fullWidth
               label="اسم الفرع"
@@ -391,7 +427,7 @@ export default function BranchesManagement() {
               {...register("name")}
               error={!!errors.name}
               helperText={errors.name?.message}
-              className="branches-form-field"
+              className={styles.branchesFormField}
             />
 
             <TextField
@@ -405,7 +441,7 @@ export default function BranchesManagement() {
                 errors.code?.message ||
                 "يُستخدم هذا الكود في توليد الباركود لاحقاً"
               }
-              className="branches-form-field"
+              className={styles.branchesFormField}
               inputProps={{
                 style: { textTransform: "uppercase" },
               }}
@@ -418,7 +454,7 @@ export default function BranchesManagement() {
               {...register("address")}
               error={!!errors.address}
               helperText={errors.address?.message}
-              className="branches-form-field"
+              className={styles.branchesFormField}
             />
 
             <TextField
@@ -428,6 +464,7 @@ export default function BranchesManagement() {
               {...register("phoneNumber", {
                 onChange: (e) => {
                   const digitsOnly = e.target.value.replace(/\D/g, "");
+
                   setValue("phoneNumber", digitsOnly, {
                     shouldValidate: false,
                     shouldDirty: true,
@@ -436,7 +473,7 @@ export default function BranchesManagement() {
               })}
               error={!!errors.phoneNumber}
               helperText={errors.phoneNumber?.message}
-              className="branches-form-field"
+              className={styles.branchesFormField}
               inputProps={{
                 inputMode: "numeric",
                 maxLength: 10,
@@ -457,18 +494,18 @@ export default function BranchesManagement() {
                       />
                     }
                     label="الفرع نشط"
-                    className="branches-form-switch"
+                    className={styles.branchesFormSwitch}
                   />
                 )}
               />
             )}
           </DialogContent>
 
-          <DialogActions className="branches-form-actions">
+          <DialogActions className={styles.branchesFormActions}>
             <Button
               onClick={handleCloseFormDialog}
               disabled={saving}
-              className="branches-form-cancel"
+              className={styles.branchesFormCancel}
               startIcon={<CloseIcon />}
               type="button"
             >
@@ -479,7 +516,7 @@ export default function BranchesManagement() {
               type="submit"
               disabled={saving}
               variant="contained"
-              className="branches-form-save"
+              className={styles.branchesFormSave}
               startIcon={
                 saving ? (
                   <CircularProgress size={16} sx={{ color: "#fff" }} />
@@ -491,25 +528,24 @@ export default function BranchesManagement() {
               {saving
                 ? "جاري الحفظ..."
                 : formDialog.mode === "add"
-                ? "إضافة"
-                : "حفظ التعديلات"}
+                  ? "إضافة"
+                  : "حفظ التعديلات"}
             </Button>
           </DialogActions>
         </form>
       </Dialog>
 
-      {/* Dialog الحذف */}
       <Dialog
         open={deleteDialog.open}
         onClose={handleCloseDeleteDialog}
-        PaperProps={{ className: "branches-dialog" }}
+        PaperProps={{ className: styles.branchesDialog }}
       >
-        <DialogTitle className="branches-dialog-title">
+        <DialogTitle className={styles.branchesDialogTitle}>
           تأكيد الحذف
         </DialogTitle>
 
         <DialogContent>
-          <DialogContentText className="branches-dialog-text">
+          <DialogContentText className={styles.branchesDialogText}>
             هل أنت متأكد من حذف الفرع{" "}
             <strong>{deleteDialog.branch?.name}</strong>؟
             <br />
@@ -517,11 +553,11 @@ export default function BranchesManagement() {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions className="branches-dialog-actions">
+        <DialogActions className={styles.branchesDialogActions}>
           <Button
             onClick={handleCloseDeleteDialog}
             disabled={deleting}
-            className="branches-dialog-cancel"
+            className={styles.branchesDialogCancel}
           >
             إلغاء
           </Button>
@@ -530,7 +566,7 @@ export default function BranchesManagement() {
             onClick={handleConfirmDelete}
             disabled={deleting}
             variant="contained"
-            className="branches-dialog-confirm"
+            className={styles.branchesDialogConfirm}
           >
             {deleting ? (
               <CircularProgress size={18} sx={{ color: "#fff" }} />

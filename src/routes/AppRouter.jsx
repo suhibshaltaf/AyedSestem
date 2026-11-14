@@ -23,6 +23,11 @@ import OperatorDashboard from "../pages/repairs/OperatorDashboard.jsx";
 import PickupDelivery from "../pages/repairs/PickupDelivery.jsx";
 import RepresentativesSummary from "../pages/repairs/RepresentativesSummary.jsx";
 
+// Old Maintenance Orders
+import OldMaintenanceOrders from "../pages/oldMaintenanceOrders/OldMaintenanceOrders.jsx";
+import OldMaintenanceOrderForm from "../pages/oldMaintenanceOrders/OldMaintenanceOrderForm.jsx";
+import OldMaintenanceOrderDetails from "../pages/oldMaintenanceOrders/OldMaintenanceOrderDetails.jsx";
+
 import ProtectedRoute from "../components/auth/ProtectedRoute.jsx";
 import MainLayout from "../components/layout/MainLayout.jsx";
 
@@ -52,10 +57,7 @@ export default function AppRouter() {
         path="/login"
         element={
           token ? (
-            <Navigate
-              to="/dashboard"
-              replace
-            />
+            <Navigate to="/dashboard" replace />
           ) : (
             <Login />
           )
@@ -150,6 +152,42 @@ export default function AppRouter() {
             <Route
               path="/branches/:id"
               element={<BranchDetails />}
+            />
+          </Route>
+
+          {/* ===============================
+              أرشيف التصاليح القديمة
+              SuperAdmin + Admin + BranchManager
+          =============================== */}
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={[
+                  "SuperAdmin",
+                  "Admin",
+                  "BranchManager",
+                ]}
+              />
+            }
+          >
+            <Route
+              path="/old-maintenance-orders"
+              element={<OldMaintenanceOrders />}
+            />
+
+            <Route
+              path="/old-maintenance-orders/create"
+              element={<OldMaintenanceOrderForm />}
+            />
+
+            <Route
+              path="/old-maintenance-orders/edit/:id"
+              element={<OldMaintenanceOrderForm />}
+            />
+
+            <Route
+              path="/old-maintenance-orders/:id"
+              element={<OldMaintenanceOrderDetails />}
             />
           </Route>
 
@@ -336,12 +374,7 @@ export default function AppRouter() {
       =============================== */}
       <Route
         path="*"
-        element={
-          <Navigate
-            to="/"
-            replace
-          />
-        }
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   );

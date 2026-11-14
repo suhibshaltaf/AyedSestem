@@ -36,7 +36,6 @@ const normalizePagedResponse = (result) => {
         totalPages: payload.length ? 1 : 0,
       };
     }
-
     if (typeof payload !== "object") break;
 
     const items =

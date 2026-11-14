@@ -1,4 +1,5 @@
-.dashboard-container {
+
+.dashboardContainer {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
@@ -8,19 +9,20 @@
 /* ===============================
    Welcome
    =============================== */
-.dashboard-welcome {
+
+.dashboardWelcome {
   text-align: center;
   margin: 16px 0 32px;
 }
 
-.dashboard-welcome-sub {
+.dashboardWelcomeSub {
   font-size: 0.9rem !important;
   color: var(--text-muted) !important;
   font-family: "Cairo", sans-serif !important;
   margin-bottom: 4px !important;
 }
 
-.dashboard-welcome-title {
+.dashboardWelcomeTitle {
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.9rem !important;
   font-weight: 700 !important;
@@ -31,14 +33,16 @@
 /* ===============================
    Grid
    =============================== */
-.dashboard-grid {
+
+.dashboardGrid {
   justify-content: center;
 }
 
 /* ===============================
    Card
    =============================== */
-.dashboard-card {
+
+.dashboardCard {
   border-radius: 14px !important;
   padding: 24px 16px !important;
   text-align: center;
@@ -49,13 +53,13 @@
   transition: all 0.3s ease !important;
 }
 
-.dashboard-card:hover {
+.dashboardCard:hover {
   transform: translateY(-4px);
   box-shadow: var(--shadow-medium) !important;
   border-color: var(--border-gold-strong) !important;
 }
 
-.dashboard-card-circle {
+.dashboardCardCircle {
   width: 64px;
   height: 64px;
   border-radius: 50%;
@@ -69,11 +73,11 @@
   transition: transform 0.3s ease;
 }
 
-.dashboard-card:hover .dashboard-card-circle {
+.dashboardCard:hover .dashboardCardCircle {
   transform: scale(1.06);
 }
 
-.dashboard-card-title {
+.dashboardCardTitle {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.9rem !important;
   font-weight: 700 !important;
@@ -84,17 +88,18 @@
 /* ===============================
    Responsive
    =============================== */
+
 @media (max-width: 600px) {
-  .dashboard-welcome-title {
+  .dashboardWelcomeTitle {
     font-size: 1.5rem !important;
   }
 
-  .dashboard-card-circle {
+  .dashboardCardCircle {
     width: 54px;
     height: 54px;
   }
 
-  .dashboard-card-title {
+  .dashboardCardTitle {
     font-size: 0.82rem !important;
   }
 }

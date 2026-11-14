@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Box } from "@mui/material";
 import { Outlet, useNavigate } from "react-router-dom";
@@ -5,28 +6,36 @@ import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar.jsx";
 import Header from "./Header.jsx";
 import useAuthStore from "../../store/useAuthStore.js";
-import "../../styles/layout.css";
+
+import styles from "../../styles/Layout/Layout.module.css";
 
 export default function MainLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
+
   const navigate = useNavigate();
-  const syncFromStorage = useAuthStore((state) => state.syncFromStorage);
 
-  const handleDrawerToggle = () => setMobileOpen((prev) => !prev);
-  const handleDrawerClose = () => setMobileOpen(false);
+  const syncFromStorage = useAuthStore(
+    (state) => state.syncFromStorage
+  );
 
-  // ✅ مراقبة localStorage كل ثانية — للكشف عن الحذف اليدوي
+  const handleDrawerToggle = () => {
+    setMobileOpen((prev) => !prev);
+  };
+
+  const handleDrawerClose = () => {
+    setMobileOpen(false);
+  };
+
+  // مراقبة localStorage للكشف عن حذف التوكن
   useEffect(() => {
     const interval = setInterval(() => {
       const hasToken = !!localStorage.getItem("AccessToken");
       const storeToken = useAuthStore.getState().token;
 
       if (!hasToken && storeToken) {
-        // المستخدم حذف التوكن يدوياً
         useAuthStore.getState().logout();
         navigate("/login", { replace: true });
       } else if (hasToken !== !!storeToken) {
-        // أي اختلاف → زامن
         syncFromStorage();
       }
     }, 1000);
@@ -35,13 +44,19 @@ export default function MainLayout() {
   }, [navigate, syncFromStorage]);
 
   return (
-    <div className="main-layout">
+    <div className={styles.mainLayout}>
       <Header onMenuClick={handleDrawerToggle} />
 
-      <div className="main-body">
-        <Sidebar mobileOpen={mobileOpen} onClose={handleDrawerClose} />
+      <div className={styles.mainBody}>
+        <Sidebar
+          mobileOpen={mobileOpen}
+          onClose={handleDrawerClose}
+        />
 
-        <Box component="main" className="main-content">
+        <Box
+          component="main"
+          className={styles.mainContent}
+        >
           <Outlet />
         </Box>
       </div>

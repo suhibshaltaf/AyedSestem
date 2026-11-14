@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+
 import {
   Box,
   Typography,
@@ -24,6 +25,7 @@ import {
   FormControlLabel,
   Switch,
 } from "@mui/material";
+
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -42,12 +44,14 @@ import {
   useUpdateWorkshop,
   useDeleteWorkshop,
 } from "../../hooks/useWorkshops.js";
+
 import workshopSchema from "./workshopSchema.js";
-import "../../styles/workshops.css";
+import styles from "../../styles/Workshop/WorkshopsManagement.module.css";
 
 // ===============================
 // القيم الافتراضية
 // ===============================
+
 const emptyForm = {
   name: "",
   address: "",
@@ -57,11 +61,13 @@ const emptyForm = {
 
 export default function WorkshopsManagement() {
   const [searchQuery, setSearchQuery] = useState("");
+
   const [formDialog, setFormDialog] = useState({
     open: false,
     mode: "add",
     workshop: null,
   });
+
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     workshop: null,
@@ -69,6 +75,7 @@ export default function WorkshopsManagement() {
 
   // React Query
   const { data: workshops = [], isLoading, refetch } = useWorkshops();
+
   const createMutation = useCreateWorkshop();
   const updateMutation = useUpdateWorkshop();
   const deleteMutation = useDeleteWorkshop();
@@ -92,9 +99,12 @@ export default function WorkshopsManagement() {
   // ===============================
   // فلترة
   // ===============================
+
   const filteredWorkshops = useMemo(() => {
     if (!searchQuery.trim()) return workshops;
+
     const q = searchQuery.toLowerCase();
+
     return workshops.filter((w) => {
       return (
         (w.name || "").toLowerCase().includes(q) ||
@@ -108,6 +118,7 @@ export default function WorkshopsManagement() {
   // ===============================
   // فتح Dialog الإضافة
   // ===============================
+
   const handleAddClick = () => {
     reset(emptyForm);
     setFormDialog({ open: true, mode: "add", workshop: null });
@@ -116,6 +127,7 @@ export default function WorkshopsManagement() {
   // ===============================
   // فتح Dialog التعديل
   // ===============================
+
   const handleEditClick = (workshop) => {
     reset({
       name: workshop.name || "",
@@ -123,12 +135,14 @@ export default function WorkshopsManagement() {
       phoneNumber: workshop.phoneNumber || "",
       isActive: workshop.isActive ?? true,
     });
+
     setFormDialog({ open: true, mode: "edit", workshop });
   };
 
   // ===============================
   // إغلاق Dialog
   // ===============================
+
   const handleCloseFormDialog = () => {
     if (!saving) {
       setFormDialog({ open: false, mode: "add", workshop: null });
@@ -139,6 +153,7 @@ export default function WorkshopsManagement() {
   // ===============================
   // حفظ
   // ===============================
+
   const onSubmit = async (data) => {
     const payload = {
       name: data.name.trim(),
@@ -149,6 +164,7 @@ export default function WorkshopsManagement() {
 
     if (formDialog.mode === "add") {
       const result = await createMutation.mutateAsync(payload);
+
       if (result?.success) {
         handleCloseFormDialog();
       }
@@ -157,6 +173,7 @@ export default function WorkshopsManagement() {
         id: formDialog.workshop.id,
         data: payload,
       });
+
       if (result?.success) {
         handleCloseFormDialog();
       }
@@ -166,15 +183,18 @@ export default function WorkshopsManagement() {
   // ===============================
   // حذف
   // ===============================
+
   const handleDeleteClick = (workshop) => {
     setDeleteDialog({ open: true, workshop });
   };
 
   const handleConfirmDelete = async () => {
     const workshop = deleteDialog.workshop;
+
     if (!workshop) return;
 
     const result = await deleteMutation.mutateAsync(workshop.id);
+
     if (result?.success) {
       setDeleteDialog({ open: false, workshop: null });
     }
@@ -187,28 +207,30 @@ export default function WorkshopsManagement() {
   };
 
   return (
-    <div className="workshops-container">
+    <div className={styles.workshopsContainer}>
       {/* Header */}
-      <div className="workshops-header">
-        <div className="workshops-header-icon">
+      <div className={styles.workshopsHeader}>
+        <div className={styles.workshopsHeaderIcon}>
           <BuildIcon sx={{ fontSize: 34 }} />
         </div>
 
-        <Typography className="workshops-title">إدارة الورش</Typography>
+        <Typography className={styles.workshopsTitle}>
+          إدارة الورش
+        </Typography>
 
-        <Typography className="workshops-subtitle">
+        <Typography className={styles.workshopsSubtitle}>
           إدارة الورش وبياناتها
         </Typography>
       </div>
 
       {/* Toolbar */}
-      <div className="workshops-toolbar">
+      <div className={styles.workshopsToolbar}>
         <TextField
           placeholder="البحث عن ورشة..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           size="small"
-          className="workshops-search"
+          className={styles.workshopsSearch}
           slotProps={{
             input: {
               startAdornment: (
@@ -220,11 +242,11 @@ export default function WorkshopsManagement() {
           }}
         />
 
-        <div className="workshops-actions">
+        <div className={styles.workshopsActions}>
           <Tooltip title="تحديث">
             <IconButton
               onClick={() => refetch()}
-              className="workshops-refresh-btn"
+              className={styles.workshopsRefreshBtn}
             >
               <RefreshIcon />
             </IconButton>
@@ -233,7 +255,7 @@ export default function WorkshopsManagement() {
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            className="workshops-add-btn"
+            className={styles.workshopsAddBtn}
             onClick={handleAddClick}
           >
             إضافة ورشة
@@ -242,13 +264,13 @@ export default function WorkshopsManagement() {
       </div>
 
       {/* Table */}
-      <Paper elevation={0} className="workshops-table-paper">
+      <Paper elevation={0} className={styles.workshopsTablePaper}>
         {isLoading ? (
-          <Box className="workshops-loading">
+          <Box className={styles.workshopsLoading}>
             <CircularProgress sx={{ color: "#b8860b" }} />
           </Box>
         ) : filteredWorkshops.length === 0 ? (
-          <Box className="workshops-empty">
+          <Box className={styles.workshopsEmpty}>
             <Typography>
               {searchQuery
                 ? "لا توجد نتائج مطابقة للبحث"
@@ -259,14 +281,33 @@ export default function WorkshopsManagement() {
           <TableContainer>
             <Table>
               <TableHead>
-                <TableRow className="workshops-table-head-row">
-                  <TableCell className="workshops-th">#</TableCell>
-                  <TableCell className="workshops-th">اسم الورشة</TableCell>
-                  <TableCell className="workshops-th">العنوان</TableCell>
-                  <TableCell className="workshops-th">الهاتف</TableCell>
-                  <TableCell className="workshops-th">المسؤول</TableCell>
-                  <TableCell className="workshops-th">الحالة</TableCell>
-                  <TableCell className="workshops-th" align="center">
+                <TableRow className={styles.workshopsTableHeadRow}>
+                  <TableCell className={styles.workshopsTh}>#</TableCell>
+
+                  <TableCell className={styles.workshopsTh}>
+                    اسم الورشة
+                  </TableCell>
+
+                  <TableCell className={styles.workshopsTh}>
+                    العنوان
+                  </TableCell>
+
+                  <TableCell className={styles.workshopsTh}>
+                    الهاتف
+                  </TableCell>
+
+                  <TableCell className={styles.workshopsTh}>
+                    المسؤول
+                  </TableCell>
+
+                  <TableCell className={styles.workshopsTh}>
+                    الحالة
+                  </TableCell>
+
+                  <TableCell
+                    className={styles.workshopsTh}
+                    align="center"
+                  >
                     الإجراءات
                   </TableCell>
                 </TableRow>
@@ -274,53 +315,65 @@ export default function WorkshopsManagement() {
 
               <TableBody>
                 {filteredWorkshops.map((workshop, index) => (
-                  <TableRow key={workshop.id} className="workshops-table-row">
-                    <TableCell className="workshops-td">
+                  <TableRow
+                    key={workshop.id}
+                    className={styles.workshopsTableRow}
+                  >
+                    <TableCell className={styles.workshopsTd}>
                       {index + 1}
                     </TableCell>
 
-                    <TableCell className="workshops-td workshops-td-name">
+                    <TableCell
+                      className={`${styles.workshopsTd} ${styles.workshopsTdName}`}
+                    >
                       {workshop.name || "—"}
                     </TableCell>
 
-                    <TableCell className="workshops-td">
+                    <TableCell className={styles.workshopsTd}>
                       {workshop.address || "—"}
                     </TableCell>
 
-                    <TableCell className="workshops-td workshops-td-phone">
+                    <TableCell
+                      className={`${styles.workshopsTd} ${styles.workshopsTdPhone}`}
+                    >
                       {workshop.phoneNumber || "—"}
                     </TableCell>
 
-                    {/* ✅ المسؤول */}
-                    <TableCell className="workshops-td workshops-td-manager">
+                    {/* المسؤول */}
+                    <TableCell
+                      className={`${styles.workshopsTd} ${styles.workshopsTdManager}`}
+                    >
                       {workshop.managerName ? (
                         <Chip
                           label={workshop.managerName}
                           size="small"
-                          className="workshops-manager-chip"
+                          className={styles.workshopsManagerChip}
                         />
                       ) : (
-                        <span className="workshops-td-empty">—</span>
+                        <span className={styles.workshopsTdEmpty}>—</span>
                       )}
                     </TableCell>
 
-                    <TableCell className="workshops-td">
+                    <TableCell className={styles.workshopsTd}>
                       <Chip
                         label={workshop.isActive ? "نشطة" : "معطلة"}
                         size="small"
-                        className={`workshops-status-chip ${
+                        className={`${styles.workshopsStatusChip} ${
                           workshop.isActive
-                            ? "workshops-status-chip-active"
-                            : "workshops-status-chip-inactive"
+                            ? styles.workshopsStatusChipActive
+                            : styles.workshopsStatusChipInactive
                         }`}
                       />
                     </TableCell>
 
-                    <TableCell className="workshops-td" align="center">
+                    <TableCell
+                      className={styles.workshopsTd}
+                      align="center"
+                    >
                       <Tooltip title="تعديل">
                         <IconButton
                           size="small"
-                          className="workshops-action-btn workshops-edit-btn"
+                          className={`${styles.workshopsActionBtn} ${styles.workshopsEditBtn}`}
                           onClick={() => handleEditClick(workshop)}
                         >
                           <EditIcon fontSize="small" />
@@ -330,7 +383,7 @@ export default function WorkshopsManagement() {
                       <Tooltip title="حذف">
                         <IconButton
                           size="small"
-                          className="workshops-action-btn workshops-delete-btn"
+                          className={`${styles.workshopsActionBtn} ${styles.workshopsDeleteBtn}`}
                           onClick={() => handleDeleteClick(workshop)}
                         >
                           <DeleteIcon fontSize="small" />
@@ -348,21 +401,22 @@ export default function WorkshopsManagement() {
       {/* ===============================
           Dialog الإضافة / التعديل
       =============================== */}
+
       <Dialog
         open={formDialog.open}
         onClose={handleCloseFormDialog}
-        PaperProps={{ className: "workshops-form-dialog" }}
+        PaperProps={{ className: styles.workshopsFormDialog }}
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle className="workshops-form-title">
+        <DialogTitle className={styles.workshopsFormTitle}>
           {formDialog.mode === "add"
             ? "إضافة ورشة جديدة"
             : "تعديل بيانات الورشة"}
         </DialogTitle>
 
         <form onSubmit={handleSubmit(onSubmit)} noValidate>
-          <DialogContent className="workshops-form-content">
+          <DialogContent className={styles.workshopsFormContent}>
             {/* Name */}
             <TextField
               fullWidth
@@ -371,7 +425,7 @@ export default function WorkshopsManagement() {
               {...register("name")}
               error={!!errors.name}
               helperText={errors.name?.message}
-              className="workshops-form-field"
+              className={styles.workshopsFormField}
             />
 
             {/* Address */}
@@ -382,7 +436,7 @@ export default function WorkshopsManagement() {
               {...register("address")}
               error={!!errors.address}
               helperText={errors.address?.message}
-              className="workshops-form-field"
+              className={styles.workshopsFormField}
             />
 
             {/* Phone */}
@@ -393,6 +447,7 @@ export default function WorkshopsManagement() {
               {...register("phoneNumber", {
                 onChange: (e) => {
                   const digitsOnly = e.target.value.replace(/\D/g, "");
+
                   setValue("phoneNumber", digitsOnly, {
                     shouldValidate: false,
                     shouldDirty: true,
@@ -401,7 +456,7 @@ export default function WorkshopsManagement() {
               })}
               error={!!errors.phoneNumber}
               helperText={errors.phoneNumber?.message}
-              className="workshops-form-field"
+              className={styles.workshopsFormField}
               inputProps={{
                 inputMode: "numeric",
                 maxLength: 10,
@@ -423,18 +478,18 @@ export default function WorkshopsManagement() {
                       />
                     }
                     label="الورشة نشطة"
-                    className="workshops-form-switch"
+                    className={styles.workshopsFormSwitch}
                   />
                 )}
               />
             )}
           </DialogContent>
 
-          <DialogActions className="workshops-form-actions">
+          <DialogActions className={styles.workshopsFormActions}>
             <Button
               onClick={handleCloseFormDialog}
               disabled={saving}
-              className="workshops-form-cancel"
+              className={styles.workshopsFormCancel}
               startIcon={<CloseIcon />}
               type="button"
             >
@@ -445,7 +500,7 @@ export default function WorkshopsManagement() {
               type="submit"
               disabled={saving}
               variant="contained"
-              className="workshops-form-save"
+              className={styles.workshopsFormSave}
               startIcon={
                 saving ? (
                   <CircularProgress size={16} sx={{ color: "#fff" }} />
@@ -467,17 +522,18 @@ export default function WorkshopsManagement() {
       {/* ===============================
           Dialog الحذف
       =============================== */}
+
       <Dialog
         open={deleteDialog.open}
         onClose={handleCloseDeleteDialog}
-        PaperProps={{ className: "workshops-dialog" }}
+        PaperProps={{ className: styles.workshopsDialog }}
       >
-        <DialogTitle className="workshops-dialog-title">
+        <DialogTitle className={styles.workshopsDialogTitle}>
           تأكيد الحذف
         </DialogTitle>
 
         <DialogContent>
-          <DialogContentText className="workshops-dialog-text">
+          <DialogContentText className={styles.workshopsDialogText}>
             هل أنت متأكد من حذف الورشة{" "}
             <strong>{deleteDialog.workshop?.name}</strong>؟
             <br />
@@ -485,11 +541,11 @@ export default function WorkshopsManagement() {
           </DialogContentText>
         </DialogContent>
 
-        <DialogActions className="workshops-dialog-actions">
+        <DialogActions className={styles.workshopsDialogActions}>
           <Button
             onClick={handleCloseDeleteDialog}
             disabled={deleting}
-            className="workshops-dialog-cancel"
+            className={styles.workshopsDialogCancel}
           >
             إلغاء
           </Button>
@@ -498,7 +554,7 @@ export default function WorkshopsManagement() {
             onClick={handleConfirmDelete}
             disabled={deleting}
             variant="contained"
-            className="workshops-dialog-confirm"
+            className={styles.workshopsDialogConfirm}
           >
             {deleting ? (
               <CircularProgress size={18} sx={{ color: "#fff" }} />

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -24,7 +25,8 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 
 import authService from "../../services/authService.js";
 import changePasswordSchema from "../../pages/profile/changePasswordSchema.js";
-import "../../styles/change-password.css";
+
+import styles from "../../styles/profile/ChangePassword.module.css";
 
 export default function ChangePassword() {
   const navigate = useNavigate();
@@ -47,9 +49,10 @@ export default function ChangePassword() {
     },
   });
 
-  // ===============================
+  // ======================================
   // إرسال الطلب
-  // ===============================
+  // ======================================
+
   const onSubmit = async (data) => {
     try {
       const payload = {
@@ -62,7 +65,9 @@ export default function ChangePassword() {
 
       if (result?.success) {
         toast.success(result?.message || "تم تغيير كلمة المرور بنجاح");
+
         reset();
+
         setTimeout(() => navigate("/dashboard"), 1500);
       } else {
         toast.error(result?.message || "فشل تغيير كلمة المرور");
@@ -97,178 +102,158 @@ export default function ChangePassword() {
     }
   };
 
-  return (
-    <div className="change-password-container">
-      {/* ===============================
-          Header
-      =============================== */}
-      <div className="change-password-header">
-        <div className="change-password-icon-wrapper">
-          <LockResetIcon sx={{ fontSize: 32 }} />
-        </div>
+  // ======================================
+  // إظهار / إخفاء كلمة المرور
+  // ======================================
 
-        <Typography className="change-password-title">
+  const renderPasswordToggle = (visible, toggle) => (
+    <InputAdornment position="end">
+      <IconButton
+        onClick={toggle}
+        edge="end"
+        size="small"
+        type="button"
+        aria-label={visible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+      >
+        {visible ? (
+          <VisibilityOffIcon />
+        ) : (
+          <VisibilityIcon />
+        )}
+      </IconButton>
+    </InputAdornment>
+  );
+
+  return (
+    <Box className={styles.changePasswordContainer} dir="rtl">
+
+      {/* Header */}
+
+      <Box className={styles.changePasswordHeader}>
+        <Box className={styles.changePasswordIconWrapper}>
+          <LockResetIcon />
+        </Box>
+
+        <Typography className={styles.changePasswordTitle}>
           تغيير كلمة المرور
         </Typography>
 
-        <Typography className="change-password-subtitle">
-          أدخل كلمة المرور الحالية والجديدة
+        <Typography className={styles.changePasswordSubtitle}>
+          قم بتحديث كلمة المرور الخاصة بحسابك للحفاظ على أمانه
         </Typography>
-      </div>
 
-      {/* ===============================
-          Card
-      =============================== */}
-      <Paper elevation={0} className="change-password-card">
+        <Box className={styles.changePasswordTitleDecor}>
+          <span className={styles.changePasswordTitleLine} />
+
+          <Typography className={styles.changePasswordDecorText}>
+            إعدادات الأمان
+          </Typography>
+
+          <span className={styles.changePasswordTitleLine} />
+        </Box>
+      </Box>
+
+      {/* Form Card */}
+
+      <Paper
+        elevation={0}
+        className={styles.changePasswordCard}
+      >
         <Box
           component="form"
           onSubmit={handleSubmit(onSubmit)}
           noValidate
-          sx={{ textAlign: "right" }}
+          className={styles.changePasswordForm}
         >
-          {/* ===============================
-              Current Password
-          =============================== */}
-          <TextField
-            fullWidth
-            type={showCurrent ? "text" : "password"}
-            label="كلمة المرور الحالية"
-            margin="normal"
-            autoComplete="current-password"
-            {...register("currentPassword")}
-            error={!!errors.currentPassword}
-            helperText={errors.currentPassword?.message}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <LockOutlinedIcon
-                      sx={{ color: "#c9a44c", fontSize: 20 }}
-                    />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowCurrent((p) => !p)}
-                      edge="end"
-                      size="small"
-                      type="button"
-                    >
-                      {showCurrent ? (
-                        <VisibilityOffIcon
-                          sx={{ fontSize: 20, color: "#b0b0b0" }}
-                        />
-                      ) : (
-                        <VisibilityIcon
-                          sx={{ fontSize: 20, color: "#b0b0b0" }}
-                        />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
 
-          {/* ===============================
-              New Password
-          =============================== */}
-          <TextField
-            fullWidth
-            type={showNew ? "text" : "password"}
-            label="كلمة المرور الجديدة"
-            margin="normal"
-            autoComplete="new-password"
-            {...register("newPassword")}
-            error={!!errors.newPassword}
-            helperText={errors.newPassword?.message}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <CheckCircleIcon
-                      sx={{ color: "#c9a44c", fontSize: 20 }}
-                    />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowNew((p) => !p)}
-                      edge="end"
-                      size="small"
-                      type="button"
-                    >
-                      {showNew ? (
-                        <VisibilityOffIcon
-                          sx={{ fontSize: 20, color: "#b0b0b0" }}
-                        />
-                      ) : (
-                        <VisibilityIcon
-                          sx={{ fontSize: 20, color: "#b0b0b0" }}
-                        />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          {/* Current Password */}
 
-          {/* ===============================
-              Confirm Password
-          =============================== */}
-          <TextField
-            fullWidth
-            type={showConfirm ? "text" : "password"}
-            label="تأكيد كلمة المرور الجديدة"
-            margin="normal"
-            autoComplete="new-password"
-            {...register("confirmNewPassword")}
-            error={!!errors.confirmNewPassword}
-            helperText={errors.confirmNewPassword?.message}
-            slotProps={{
-              input: {
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <CheckCircleIcon
-                      sx={{ color: "#c9a44c", fontSize: 20 }}
-                    />
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      onClick={() => setShowConfirm((p) => !p)}
-                      edge="end"
-                      size="small"
-                      type="button"
-                    >
-                      {showConfirm ? (
-                        <VisibilityOffIcon
-                          sx={{ fontSize: 20, color: "#b0b0b0" }}
-                        />
-                      ) : (
-                        <VisibilityIcon
-                          sx={{ fontSize: 20, color: "#b0b0b0" }}
-                        />
-                      )}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
+          <Box className={styles.changePasswordField}>
+            <TextField
+              fullWidth
+              type={showCurrent ? "text" : "password"}
+              label="كلمة المرور الحالية"
+              autoComplete="current-password"
+              {...register("currentPassword")}
+              error={!!errors.currentPassword}
+              helperText={errors.currentPassword?.message}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <LockOutlinedIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: renderPasswordToggle(
+                    showCurrent,
+                    () => setShowCurrent((prev) => !prev)
+                  ),
+                },
+              }}
+            />
+          </Box>
 
-          {/* ===============================
-              Actions
-          =============================== */}
-          <div className="change-password-actions">
+          {/* New Password */}
+
+          <Box className={styles.changePasswordField}>
+            <TextField
+              fullWidth
+              type={showNew ? "text" : "password"}
+              label="كلمة المرور الجديدة"
+              autoComplete="new-password"
+              {...register("newPassword")}
+              error={!!errors.newPassword}
+              helperText={errors.newPassword?.message}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CheckCircleIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: renderPasswordToggle(
+                    showNew,
+                    () => setShowNew((prev) => !prev)
+                  ),
+                },
+              }}
+            />
+          </Box>
+
+          {/* Confirm Password */}
+
+          <Box className={styles.changePasswordField}>
+            <TextField
+              fullWidth
+              type={showConfirm ? "text" : "password"}
+              label="تأكيد كلمة المرور الجديدة"
+              autoComplete="new-password"
+              {...register("confirmNewPassword")}
+              error={!!errors.confirmNewPassword}
+              helperText={errors.confirmNewPassword?.message}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <CheckCircleIcon />
+                    </InputAdornment>
+                  ),
+                  endAdornment: renderPasswordToggle(
+                    showConfirm,
+                    () => setShowConfirm((prev) => !prev)
+                  ),
+                },
+              }}
+            />
+          </Box>
+
+          {/* Actions */}
+
+          <Box className={styles.changePasswordActions}>
             <Button
               variant="outlined"
               onClick={() => navigate("/dashboard")}
-              className="change-password-cancel"
+              className={styles.changePasswordCancel}
               disabled={isSubmitting}
             >
               إلغاء
@@ -278,10 +263,13 @@ export default function ChangePassword() {
               type="submit"
               variant="contained"
               disabled={isSubmitting}
-              className="change-password-submit"
+              className={styles.changePasswordSubmit}
               startIcon={
                 isSubmitting ? (
-                  <CircularProgress size={16} sx={{ color: "#fff" }} />
+                  <CircularProgress
+                    size={17}
+                    sx={{ color: "#fff" }}
+                  />
                 ) : (
                   <ArrowForwardIcon />
                 )
@@ -289,9 +277,9 @@ export default function ChangePassword() {
             >
               {isSubmitting ? "جاري الحفظ..." : "حفظ التغييرات"}
             </Button>
-          </div>
+          </Box>
         </Box>
       </Paper>
-    </div>
+    </Box>
   );
 }

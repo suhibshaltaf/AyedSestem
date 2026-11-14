@@ -1,0 +1,523 @@
+
+/* =========================================
+   REPAIR ORDERS LIST
+   RTL - Arabic Layout
+   CSS Modules
+   ========================================= */
+
+.repairsListContainer {
+  width: 100%;
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 24px 16px 45px;
+  direction: rtl;
+  font-family: "Cairo", sans-serif;
+  overflow-x: hidden;
+}
+
+.repairsListContainer *,
+.repairsListContainer *::before,
+.repairsListContainer *::after {
+  box-sizing: border-box;
+}
+
+/* =========================================
+   Header
+   ========================================= */
+
+.repairsListHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 26px;
+  text-align: center;
+}
+
+.repairsListHeaderIcon {
+  width: 62px;
+  height: 62px;
+  border-radius: 18px;
+  border: 1px solid var(--border-gold-strong);
+  background: rgba(184, 134, 11, 0.07);
+  color: var(--gold-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.repairsListTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.85rem !important;
+  font-weight: 700 !important;
+  color: #8b6914 !important;
+}
+
+:global([data-theme="dark"]) .repairsListTitle {
+  color: #e6c878 !important;
+}
+
+.repairsListSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.92rem !important;
+  color: var(--text-secondary) !important;
+}
+
+/* =========================================
+   Filters
+   ========================================= */
+
+.repairsFiltersPaper {
+  width: 100%;
+  padding: 20px !important;
+  margin-bottom: 20px;
+  border-radius: 14px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.repairsFiltersFields {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+}
+
+.repairsFilterField {
+  min-width: 0;
+}
+
+.repairsFilterFieldWide {
+  grid-column: span 2;
+}
+
+.repairsFiltersPaper :global(.MuiOutlinedInput-root) {
+  border-radius: 10px;
+  font-family: "Cairo", sans-serif;
+  background-color: rgba(184, 134, 11, 0.03);
+}
+
+.repairsFiltersPaper :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--border-gold-strong);
+}
+
+.repairsFiltersPaper
+  :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--gold-primary);
+}
+
+.repairsFiltersPaper
+  :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--gold-primary);
+  border-width: 1.5px;
+}
+
+.repairsFiltersPaper :global(.MuiInputLabel-root) {
+  font-family: "Cairo", sans-serif;
+  color: var(--text-secondary);
+}
+
+.repairsFiltersPaper :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--gold-primary);
+}
+
+.repairsFiltersPaper :global(.MuiInputBase-input) {
+  font-family: "Cairo", sans-serif;
+  color: var(--text-primary);
+}
+
+.repairsBranchPlaceholder {
+  color: var(--text-secondary);
+}
+
+.repairsFiltersActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-gold);
+}
+
+.repairsFiltersActions > span {
+  display: inline-flex;
+}
+
+.repairsFiltersActions :global(.MuiButton-root) {
+  min-height: 40px;
+  border-radius: 9px !important;
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+  font-size: 0.85rem !important;
+  text-transform: none !important;
+  padding: 7px 18px !important;
+  gap: 8px;
+}
+
+.repairsFiltersActions :global(.MuiButton-startIcon) {
+  margin-inline-start: 0 !important;
+  margin-inline-end: 0 !important;
+}
+
+.repairsRefreshBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--border-gold-strong) !important;
+  border-radius: 9px !important;
+  color: var(--gold-primary) !important;
+}
+
+.repairsRefreshBtn:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+}
+
+.repairsClearBtn,
+.repairsExportExcelBtn,
+.repairsPrintTableBtn {
+  color: var(--text-secondary) !important;
+  border-color: var(--border-gold-strong) !important;
+}
+
+.repairsClearBtn:hover,
+.repairsExportExcelBtn:hover,
+.repairsPrintTableBtn:hover {
+  background-color: rgba(184, 134, 11, 0.08) !important;
+  border-color: var(--gold-primary) !important;
+}
+
+.repairsExportExcelBtn {
+  color: #2e7d32 !important;
+}
+
+:global([data-theme="dark"]) .repairsExportExcelBtn {
+  color: #81c784 !important;
+}
+
+.repairsAddBtn {
+  margin-inline-start: auto;
+  background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
+  color: #fff !important;
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.2) !important;
+}
+
+.repairsAddBtn:hover {
+  background: linear-gradient(90deg, #b8860b, #8b6914) !important;
+}
+
+/* =========================================
+   Table
+   ========================================= */
+
+.repairsTablePaper {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 14px !important;
+  background-color: var(--bg-paper) !important;
+  border: 1px solid var(--border-gold-strong) !important;
+  box-shadow: var(--shadow-soft) !important;
+}
+
+.repairsLoading,
+.repairsEmpty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 260px;
+  padding: 30px 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-family: "Cairo", sans-serif;
+}
+
+.repairsEmpty :global(.MuiTypography-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+}
+
+.repairsTablePaper :global(.MuiTableContainer-root) {
+  overflow-x: auto;
+}
+
+.repairsTableHeadRow {
+  background: rgba(184, 134, 11, 0.09);
+}
+
+:global([data-theme="dark"]) .repairsTableHeadRow {
+  background: rgba(230, 200, 120, 0.08);
+}
+
+.repairsTh {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.85rem !important;
+  font-weight: 700 !important;
+  color: #8b6914 !important;
+  text-align: right;
+  white-space: nowrap;
+  padding: 14px 14px !important;
+  border-bottom: 1px solid var(--border-gold-strong) !important;
+}
+
+:global([data-theme="dark"]) .repairsTh {
+  color: #e6c878 !important;
+}
+
+.repairsTh[align="center"] {
+  text-align: center;
+}
+
+.repairsTableRow {
+  transition: background-color 0.2s ease;
+}
+
+.repairsTableRow:hover {
+  background-color: rgba(184, 134, 11, 0.045);
+}
+
+.repairsTd {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  color: var(--text-primary) !important;
+  text-align: right;
+  padding: 12px 14px !important;
+  border-bottom: 1px solid var(--border-gold) !important;
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+
+.repairsTd[align="center"] {
+  text-align: center;
+}
+
+.repairsTdName {
+  font-weight: 700 !important;
+}
+
+.repairsTdPhone {
+  direction: ltr;
+  text-align: right;
+  unicode-bidi: plaintext;
+  white-space: nowrap;
+}
+
+/* =========================================
+   Barcode
+   ========================================= */
+
+.repairsBarcodeChip {
+  font-family: "Courier New", monospace !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.5px !important;
+  direction: ltr;
+  background-color: rgba(184, 134, 11, 0.13) !important;
+  color: #8b6914 !important;
+}
+
+:global([data-theme="dark"]) .repairsBarcodeChip {
+  color: #e6c878 !important;
+  background-color: rgba(230, 200, 120, 0.12) !important;
+}
+
+/* =========================================
+   Actions
+   ========================================= */
+
+.repairsActionBtn {
+  border-radius: 8px !important;
+}
+
+.repairsViewBtn {
+  color: var(--gold-primary) !important;
+  background: rgba(184, 134, 11, 0.09) !important;
+}
+
+.repairsViewBtn:hover {
+  background: rgba(184, 134, 11, 0.18) !important;
+}
+
+/* =========================================
+   Pagination
+   ========================================= */
+
+.repairsPagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border-gold);
+}
+
+.repairsPaginationInfo {
+  font-family: "Cairo", sans-serif;
+  font-size: 0.84rem;
+  color: var(--text-secondary);
+}
+
+.repairsPaginationControl :global(.MuiPaginationItem-root) {
+  font-family: "Cairo", sans-serif;
+  color: var(--text-secondary);
+}
+
+.repairsPaginationControl
+  :global(.MuiPaginationItem-root.Mui-selected) {
+  background-color: rgba(184, 134, 11, 0.18);
+  color: #8b6914;
+  font-weight: 700;
+}
+
+:global([data-theme="dark"])
+  .repairsPaginationControl
+  :global(.MuiPaginationItem-root.Mui-selected) {
+  color: #e6c878;
+}
+
+/* =========================================
+   Tablet
+   ========================================= */
+
+@media (max-width: 900px) {
+  .repairsListContainer {
+    padding: 18px 12px 35px;
+  }
+
+  .repairsListTitle {
+    font-size: 1.65rem !important;
+  }
+
+  .repairsFilterFieldWide {
+    grid-column: 1 / -1;
+  }
+}
+
+/* =========================================
+   Mobile: Table Rows Become Cards
+   ========================================= */
+
+@media (max-width: 768px) {
+  .repairsTablePaper :global(.MuiTable-root),
+  .repairsTablePaper :global(.MuiTableBody-root) {
+    display: block;
+    width: 100%;
+  }
+
+  .repairsTablePaper :global(.MuiTableHead-root) {
+    display: none;
+  }
+
+  .repairsTableRow {
+    display: block;
+    margin: 12px;
+    border: 1px solid var(--border-gold);
+    border-radius: 12px;
+    background: rgba(184, 134, 11, 0.03);
+    overflow: hidden;
+  }
+
+  .repairsTd {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    width: 100%;
+    padding: 10px 14px !important;
+    text-align: right;
+  }
+
+  .repairsTd::before {
+    content: attr(data-label);
+    flex-shrink: 0;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+  }
+
+  .repairsTd[align="center"] {
+    justify-content: space-between;
+  }
+
+  .repairsTdPhone {
+    text-align: left;
+  }
+
+  .repairsTableRow .repairsTd:last-child {
+    border-bottom: 0 !important;
+  }
+}
+
+/* =========================================
+   Mobile
+   ========================================= */
+
+@media (max-width: 600px) {
+  .repairsListContainer {
+    padding: 12px 8px 30px;
+  }
+
+  .repairsListHeader {
+    margin-bottom: 20px;
+  }
+
+  .repairsListHeaderIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+  }
+
+  .repairsListTitle {
+    font-size: 1.5rem !important;
+  }
+
+  .repairsFiltersPaper {
+    padding: 14px !important;
+    border-radius: 11px !important;
+  }
+
+  .repairsFiltersFields {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .repairsFiltersFieldsDates {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .repairsFiltersActions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .repairsFiltersActions > span {
+    display: block;
+  }
+
+  .repairsFiltersActions :global(.MuiButton-root) {
+    width: 100%;
+    min-width: 0;
+    padding: 8px 8px !important;
+    font-size: 0.78rem !important;
+  }
+
+  .repairsRefreshBtn {
+    width: 100%;
+  }
+
+  .repairsAddBtn {
+    grid-column: 1 / -1;
+    margin-inline-start: 0;
+  }
+
+  .repairsPagination {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+}
+
+@media (max-width: 360px) {
+  .repairsFiltersActions {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,4 +1,6 @@
+
 import { useEffect, useState } from "react";
+
 import {
   Box,
   Typography,
@@ -6,6 +8,7 @@ import {
   Divider,
   CircularProgress,
 } from "@mui/material";
+
 import { toast } from "react-toastify";
 
 import PersonIcon from "@mui/icons-material/Person";
@@ -16,7 +19,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 import authService from "../../services/authService.js";
 import useAuthStore from "../../store/useAuthStore.js";
-import "../../styles/profile.css";
+
+import styles from "../../styles/profile/Profile.module.css";
 
 export default function Profile() {
   const userFromStore = useAuthStore((state) => state.user);
@@ -25,15 +29,17 @@ export default function Profile() {
   const [loading, setLoading] = useState(!userFromStore);
   const [user, setLocalUser] = useState(userFromStore || null);
 
-  // ===============================
+  // ======================================
   // جلب بيانات المستخدم
-  // ===============================
+  // ======================================
+
   useEffect(() => {
     let mounted = true;
 
     const fetchUser = async () => {
       try {
         setLoading(true);
+
         const result = await authService.getCurrentUser();
 
         if (!mounted) return;
@@ -42,17 +48,23 @@ export default function Profile() {
           setLocalUser(result.data);
           setUser(result.data);
         } else {
-          toast.error(result?.message || "تعذر جلب بيانات المستخدم");
+          toast.error(
+            result?.message || "تعذر جلب بيانات المستخدم"
+          );
         }
       } catch (error) {
         console.error("Fetch User Error:", error);
+
         if (mounted) {
           toast.error(
-            error?.response?.data?.message || "حدث خطأ أثناء جلب البيانات"
+            error?.response?.data?.message ||
+            "حدث خطأ أثناء جلب البيانات"
           );
         }
       } finally {
-        if (mounted) setLoading(false);
+        if (mounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -63,28 +75,41 @@ export default function Profile() {
     };
   }, [setUser]);
 
-  // ===============================
-  // استخراج الصلاحية الأولى
-  // ===============================
+  // ======================================
+  // استخراج الصلاحية
+  // ======================================
+
   const getRoleDisplayName = () => {
-    if (!user?.roles || user.roles.length === 0) return "—";
-    return user.roles[0]?.displayName || user.roles[0]?.name || "—";
+    if (!user?.roles || user.roles.length === 0) {
+      return "—";
+    }
+
+    return (
+      user.roles[0]?.displayName ||
+      user.roles[0]?.name ||
+      "—"
+    );
   };
 
-  // ===============================
+  // ======================================
   // Loading
-  // ===============================
+  // ======================================
+
   if (loading) {
     return (
-      <Box className="profile-loading">
-        <CircularProgress sx={{ color: "#b8860b" }} />
+      <Box className={styles.profileLoading}>
+        <CircularProgress />
+        <Typography>
+          جاري تحميل بيانات الحساب...
+        </Typography>
       </Box>
     );
   }
 
-  // ===============================
-  // البيانات للعرض
-  // ===============================
+  // ======================================
+  // بيانات المستخدم
+  // ======================================
+
   const profileData = [
     {
       label: "اسم الموظف",
@@ -98,7 +123,7 @@ export default function Profile() {
     },
     {
       label: "البريد الإلكتروني",
-      value: user?.email ? user.email : "—",
+      value: user?.email || "—",
       icon: <TagIcon />,
       isId: true,
     },
@@ -110,54 +135,96 @@ export default function Profile() {
   ];
 
   return (
-    <div className="profile-container">
-      {/* ===============================
-          العنوان الرئيسي
-      =============================== */}
-      <div className="profile-header">
-        <div className="profile-header-icon">
-          <AccountCircleIcon sx={{ fontSize: 36 }} />
-        </div>
+    <Box className={styles.profileContainer} dir="rtl">
 
-        <Typography className="profile-title">حسابي</Typography>
+      {/* Header */}
 
-        {/* خطان زخرفيان حول العنوان */}
-        <div className="profile-title-decor">
-          <span className="profile-title-line" />
-          <Typography className="profile-subtitle">
+      <Box className={styles.profileHeader}>
+        <Box className={styles.profileHeaderIcon}>
+          <AccountCircleIcon />
+        </Box>
+
+        <Typography className={styles.profileTitle}>
+          حسابي
+        </Typography>
+
+        <Typography className={styles.profileDescription}>
+          عرض وإدارة معلومات حسابك الشخصي
+        </Typography>
+
+        <Box className={styles.profileTitleDecor}>
+          <span className={styles.profileTitleLine} />
+
+          <Typography className={styles.profileSubtitle}>
             معلومات المستخدم
           </Typography>
-          <span className="profile-title-line" />
-        </div>
-      </div>
 
-      {/* ===============================
-          كارت المعلومات
-      =============================== */}
-      <Paper elevation={0} className="profile-card">
-        {profileData.map((item, index) => (
-          <div key={item.label}>
-            <div className="profile-row">
-              {/* القيمة (يمين) */}
-              <Typography
-                className={`profile-value ${item.isId ? "profile-value-id" : ""}`}
-              >
-                {item.value}
-              </Typography>
+          <span className={styles.profileTitleLine} />
+        </Box>
+      </Box>
 
-              {/* الليبل (يسار) */}
-              <div className="profile-label">
-                <span className="profile-label-text">{item.label}:</span>
-                <span className="profile-label-icon">{item.icon}</span>
-              </div>
-            </div>
+      {/* Profile Card */}
 
-            {index < profileData.length - 1 && (
-              <Divider className="profile-divider" />
-            )}
-          </div>
-        ))}
+      <Paper
+        elevation={0}
+        className={styles.profileCard}
+      >
+        <Box className={styles.profileCardHeader}>
+          <Box className={styles.profileCardHeaderIcon}>
+            <PersonIcon />
+          </Box>
+
+          <Box>
+            <Typography className={styles.profileCardTitle}>
+              البيانات الشخصية
+            </Typography>
+
+            <Typography className={styles.profileCardSubtitle}>
+              المعلومات المسجلة في النظام
+            </Typography>
+          </Box>
+        </Box>
+
+        <Divider className={styles.profileMainDivider} />
+
+        {/* Profile Information */}
+
+        <Box className={styles.profileDataList}>
+          {profileData.map((item, index) => (
+            <Box key={item.label}>
+              <Box className={styles.profileRow}>
+
+                {/* Label */}
+
+                <Box className={styles.profileLabel}>
+                  <Box className={styles.profileLabelIcon}>
+                    {item.icon}
+                  </Box>
+
+                  <Typography className={styles.profileLabelText}>
+                    {item.label}
+                  </Typography>
+                </Box>
+
+                {/* Value */}
+
+                <Typography
+                  className={`${styles.profileValue} ${
+                    item.isId ? styles.profileValueId : ""
+                  }`}
+                  dir={item.isId ? "ltr" : "auto"}
+                >
+                  {item.value}
+                </Typography>
+              </Box>
+
+              {index < profileData.length - 1 && (
+                <Divider className={styles.profileDivider} />
+              )}
+            </Box>
+          ))}
+        </Box>
       </Paper>
-    </div>
+    </Box>
   );
 }

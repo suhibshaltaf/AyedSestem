@@ -1,0 +1,563 @@
+
+/* =========================================
+   GOLD SYSTEM — SCAN REPAIR
+   Independent CSS Module
+   Light / Dark Mode
+   Responsive RTL Design
+   ========================================= */
+
+/* =========================================
+   1. Main Page — Light Mode
+   ========================================= */
+
+.scanRepairPage {
+  --scan-bg: #faf6ee;
+  --scan-card: rgba(255, 255, 255, 0.88);
+  --scan-text: #2b2b2b;
+  --scan-muted: #858585;
+
+  --scan-gold: #b8860b;
+  --scan-gold-dark: #8b6914;
+  --scan-gold-light: #c9a44c;
+
+  --scan-border: rgba(184, 134, 11, 0.2);
+  --scan-input-bg: #ffffff;
+  --scan-input-border: rgba(184, 134, 11, 0.25);
+
+  --scan-hover: rgba(184, 134, 11, 0.07);
+  --scan-hint-bg: rgba(184, 134, 11, 0.055);
+
+  --scan-shadow: 0 20px 60px rgba(93, 67, 15, 0.09);
+
+  width: 100%;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 12px 45px;
+
+  direction: rtl;
+
+  color: var(--scan-text);
+
+  transition:
+    background-color 0.35s ease,
+    color 0.35s ease;
+}
+
+.lightMode {
+  --scan-bg: #faf6ee;
+  --scan-card: rgba(255, 255, 255, 0.88);
+  --scan-text: #2b2b2b;
+  --scan-muted: #858585;
+
+  --scan-gold: #b8860b;
+  --scan-gold-dark: #8b6914;
+  --scan-gold-light: #c9a44c;
+
+  --scan-border: rgba(184, 134, 11, 0.2);
+  --scan-input-bg: #ffffff;
+  --scan-input-border: rgba(184, 134, 11, 0.25);
+
+  --scan-hover: rgba(184, 134, 11, 0.07);
+  --scan-hint-bg: rgba(184, 134, 11, 0.055);
+
+  --scan-shadow: 0 20px 60px rgba(93, 67, 15, 0.09);
+}
+
+/* =========================================
+   2. Dark Mode
+   ========================================= */
+
+.darkMode {
+  --scan-bg: #1a1510;
+  --scan-card: rgba(43, 33, 19, 0.94);
+  --scan-text: #f1e8d7;
+  --scan-muted: #aaa18f;
+
+  --scan-gold: #d4af6a;
+  --scan-gold-dark: #e6c878;
+  --scan-gold-light: #e6c878;
+
+  --scan-border: rgba(212, 175, 106, 0.22);
+  --scan-input-bg: rgba(255, 255, 255, 0.045);
+  --scan-input-border: rgba(212, 175, 106, 0.22);
+
+  --scan-hover: rgba(212, 175, 106, 0.1);
+  --scan-hint-bg: rgba(212, 175, 106, 0.07);
+
+  --scan-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+/* =========================================
+   3. Main Card
+   ========================================= */
+
+.scanRepairCard {
+  width: 100%;
+  padding: 32px 24px !important;
+
+  border: 1px solid var(--scan-border) !important;
+  border-radius: 20px !important;
+
+  background: var(--scan-card) !important;
+  color: var(--scan-text) !important;
+
+  box-shadow: var(--scan-shadow) !important;
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    box-shadow 0.35s ease;
+}
+
+/* =========================================
+   4. Header
+   ========================================= */
+
+.scanRepairHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  gap: 8px;
+  margin-bottom: 27px;
+
+  text-align: center;
+}
+
+.headerIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 76px;
+  height: 76px;
+  margin-bottom: 5px;
+
+  border: 1px solid var(--scan-border);
+  border-radius: 23px;
+
+  color: #fff;
+
+  background: linear-gradient(
+    135deg,
+    #c9a44c,
+    #98701c
+  );
+
+  box-shadow: 0 7px 20px rgba(184, 134, 11, 0.2);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.headerIcon:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(184, 134, 11, 0.25);
+}
+
+.headerIcon svg {
+  font-size: 39px;
+}
+
+.scanRepairTitle {
+  margin-top: 5px !important;
+
+  color: var(--scan-gold-dark) !important;
+
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.9rem !important;
+  font-weight: 800 !important;
+
+  text-align: center;
+
+  transition: color 0.35s ease;
+}
+
+.scanRepairSubtitle {
+  max-width: 490px;
+  margin-top: 3px !important;
+
+  color: var(--scan-muted) !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 500 !important;
+
+  line-height: 1.9 !important;
+  text-align: center;
+
+  transition: color 0.35s ease;
+}
+
+/* =========================================
+   5. Scanner Reader Hint
+   ========================================= */
+
+.scanReaderHint {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  width: 100%;
+  min-height: 48px;
+
+  margin-bottom: 20px;
+  padding: 11px 14px;
+
+  border: 1px solid var(--scan-border);
+  border-radius: 11px;
+
+  color: var(--scan-gold-dark);
+  background: var(--scan-hint-bg);
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+
+  line-height: 1.7;
+  text-align: center;
+
+  transition:
+    background-color 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
+}
+
+.scanReaderHint svg {
+  flex-shrink: 0;
+  font-size: 21px;
+  color: var(--scan-gold);
+}
+
+/* =========================================
+   6. Camera Button
+   ========================================= */
+
+.scanCameraButton {
+  min-height: 51px !important;
+  padding: 13px 20px !important;
+
+  border: none !important;
+  border-radius: 12px !important;
+
+  color: #fff !important;
+
+  background: linear-gradient(
+    110deg,
+    #b8860b,
+    #8b6914
+  ) !important;
+
+  box-shadow: 0 5px 15px rgba(139, 105, 20, 0.2) !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.92rem !important;
+  font-weight: 800 !important;
+
+  text-transform: none !important;
+
+  transition:
+    transform 0.25s ease,
+    box-shadow 0.25s ease,
+    background 0.25s ease !important;
+}
+
+.scanCameraButton:hover {
+  background: linear-gradient(
+    110deg,
+    #a67c2e,
+    #72540e
+  ) !important;
+
+  box-shadow: 0 7px 20px rgba(139, 105, 20, 0.28) !important;
+
+  transform: translateY(-2px);
+}
+
+.scanCameraButton:active {
+  transform: translateY(0);
+}
+
+.scanCameraButton:global(.Mui-disabled) {
+  color: #fff !important;
+  background: #b9a16e !important;
+  box-shadow: none !important;
+}
+
+/* =========================================
+   7. Divider
+   ========================================= */
+
+.scanDivider {
+  position: relative;
+
+  margin: 25px 0;
+
+  text-align: center;
+}
+
+.scanDivider::before {
+  content: "";
+
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+
+  height: 1px;
+
+  background: var(--scan-border);
+}
+
+.scanDivider span {
+  position: relative;
+  display: inline-block;
+
+  padding: 0 15px;
+
+  color: var(--scan-muted);
+  background: var(--scan-card);
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.82rem;
+  font-weight: 600;
+
+  transition:
+    color 0.35s ease,
+    background-color 0.35s ease;
+}
+
+/* =========================================
+   8. Manual Input
+   ========================================= */
+
+.scanForm {
+  display: flex;
+  flex-direction: column;
+  gap: 17px;
+  width: 100%;
+}
+
+.scanInput {
+  width: 100%;
+}
+
+.scanInput :global(.MuiOutlinedInput-root) {
+  min-height: 53px;
+
+  border-radius: 12px;
+
+  color: var(--scan-text);
+  background: var(--scan-input-bg);
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.87rem;
+
+  transition: all 0.25s ease;
+}
+
+.scanInput :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: var(--scan-input-border);
+}
+
+.scanInput :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--scan-gold);
+}
+
+.scanInput :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: var(--scan-gold);
+  border-width: 1.5px;
+}
+
+.scanInput :global(.MuiInputLabel-root) {
+  color: var(--scan-muted);
+  font-family: "Cairo", sans-serif !important;
+}
+
+.scanInput :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--scan-gold);
+}
+
+.scanInput :global(.MuiInputBase-input) {
+  color: var(--scan-text);
+  font-family: "Cairo", sans-serif;
+}
+
+.scanInput :global(.MuiInputBase-input::placeholder) {
+  color: var(--scan-muted);
+  opacity: 0.8;
+}
+
+.scanInput :global(.MuiInputBase-input.Mui-disabled) {
+  -webkit-text-fill-color: var(--scan-muted);
+}
+
+.keyboardIcon {
+  flex-shrink: 0;
+  margin-left: 8px;
+
+  color: var(--scan-gold);
+  font-size: 21px !important;
+}
+
+/* =========================================
+   9. Submit Button
+   ========================================= */
+
+.scanSubmitButton {
+  min-height: 49px !important;
+
+  padding: 11px 20px !important;
+
+  border: 1px solid var(--scan-border) !important;
+  border-radius: 12px !important;
+
+  color: var(--scan-gold) !important;
+  background: transparent !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  font-weight: 800 !important;
+
+  text-transform: none !important;
+
+  transition:
+    color 0.25s ease,
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    transform 0.25s ease !important;
+}
+
+.scanSubmitButton:hover {
+  border-color: var(--scan-gold) !important;
+  color: var(--scan-gold-dark) !important;
+  background: var(--scan-hover) !important;
+
+  transform: translateY(-1px);
+}
+
+.scanSubmitButton:global(.Mui-disabled) {
+  border-color: var(--scan-border) !important;
+  color: var(--scan-muted) !important;
+  opacity: 0.65;
+}
+
+.loadingIcon {
+  color: var(--scan-gold) !important;
+}
+
+/* =========================================
+   10. Error Alert
+   ========================================= */
+
+.scanAlert {
+  margin-top: 19px !important;
+
+  border-radius: 12px !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.82rem !important;
+
+  text-align: right;
+}
+
+.scanAlert :global(.MuiAlert-message) {
+  font-family: "Cairo", sans-serif !important;
+  line-height: 1.8;
+}
+
+/* =========================================
+   11. Responsive
+   ========================================= */
+
+@media (max-width: 700px) {
+  .scanRepairPage {
+    padding: 16px 8px 32px;
+  }
+
+  .scanRepairCard {
+    padding: 25px 17px !important;
+    border-radius: 17px !important;
+  }
+
+  .headerIcon {
+    width: 67px;
+    height: 67px;
+    border-radius: 20px;
+  }
+
+  .headerIcon svg {
+    font-size: 34px;
+  }
+
+  .scanRepairHeader {
+    margin-bottom: 23px;
+  }
+
+  .scanRepairTitle {
+    font-size: 1.55rem !important;
+  }
+
+  .scanRepairSubtitle {
+    font-size: 0.8rem !important;
+  }
+
+  .scanReaderHint {
+    font-size: 0.73rem;
+    padding: 10px;
+  }
+
+  .scanDivider {
+    margin: 21px 0;
+  }
+
+  .scanCameraButton {
+    min-height: 49px !important;
+    font-size: 0.86rem !important;
+  }
+
+  .scanSubmitButton {
+    min-height: 47px !important;
+  }
+}
+
+@media (max-width: 380px) {
+  .scanRepairPage {
+    padding-right: 5px;
+    padding-left: 5px;
+  }
+
+  .scanRepairCard {
+    padding: 22px 13px !important;
+  }
+
+  .scanRepairTitle {
+    font-size: 1.4rem !important;
+  }
+
+  .scanReaderHint {
+    gap: 7px;
+    font-size: 0.68rem;
+  }
+}
+
+/* =========================================
+   12. Reduced Motion
+   ========================================= */
+
+@media (prefers-reduced-motion: reduce) {
+  .scanRepairPage,
+  .scanRepairCard,
+  .headerIcon,
+  .scanCameraButton,
+  .scanSubmitButton,
+  .scanInput,
+  .scanReaderHint {
+    transition: none !important;
+  }
+}

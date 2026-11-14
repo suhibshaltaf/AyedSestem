@@ -1,0 +1,319 @@
+/* Pickup & Delivery — CSS Module */
+.pageContainer {
+    width: 100%;
+    max-width: 1450px;
+    margin: 0 auto;
+    padding: 20px 12px 40px;
+    direction: rtl;
+    box-sizing: border-box;
+}
+
+.pageHeader {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.pageHeaderIcon {
+    width: 62px;
+    height: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid var(--gold-primary);
+    color: var(--gold-primary);
+    border-radius: 50%;
+    margin-bottom: 10px;
+}
+
+.pageTitle {
+    font-family: "Amiri", "Cairo", serif !important;
+    font-size: 1.9rem !important;
+    font-weight: 700 !important;
+    color: #8b6914 !important;
+}
+
+:global([data-theme="dark"]) .pageTitle {
+    color: #e6c878 !important;
+}
+
+.pageSubtitle {
+    font-family: "Cairo", sans-serif !important;
+    font-size: .85rem !important;
+    color: var(--text-muted) !important;
+}
+
+.tabsPaper {
+    margin-bottom: 16px;
+    overflow: hidden;
+    border-radius: 14px !important;
+    background: var(--bg-paper) !important;
+    border: 1px solid var(--border-gold-strong) !important;
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.tabs :global(.MuiTab-root) {
+    font-family: "Cairo", sans-serif !important;
+    font-weight: 700 !important;
+    font-size: .9rem !important;
+    color: var(--text-secondary) !important;
+    text-transform: none !important;
+    padding: 14px 20px !important;
+    min-height: 60px !important;
+}
+
+.tabs :global(.Mui-selected) {
+    color: var(--gold-primary) !important;
+}
+
+.tabs :global(.MuiTabs-indicator) {
+    background: var(--gold-primary) !important;
+    height: 3px !important;
+}
+
+.tabLabel {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.tabCount {
+    font-family: "Cairo", sans-serif !important;
+    font-size: .72rem !important;
+    font-weight: 700 !important;
+    background: rgba(184, 134, 11, .15) !important;
+    color: #b8860b !important;
+    border-radius: 10px !important;
+    height: 20px !important;
+    min-width: 24px !important;
+}
+
+.tabs :global(.Mui-selected) .tabCount {
+    background: var(--gold-primary) !important;
+    color: #fff !important;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.searchField {
+    flex: 1;
+    min-width: 220px;
+    max-width: 440px;
+}
+
+.searchField :global(.MuiOutlinedInput-root) {
+    border-radius: 10px;
+    background: var(--bg-paper);
+}
+
+.searchField :global(.MuiOutlinedInput-notchedOutline) {
+    border-color: var(--border-gold-strong);
+}
+
+.searchField :global(.MuiInputBase-input) {
+    font-family: "Cairo", sans-serif;
+}
+
+.refreshButton {
+    width: 42px;
+    height: 42px;
+    color: var(--gold-primary) !important;
+    border: 1px solid var(--border-gold-strong) !important;
+    border-radius: 10px !important;
+}
+
+.tablePaper {
+    width: 100%;
+    overflow: hidden;
+    border-radius: 14px !important;
+    background: var(--bg-paper) !important;
+    border: 1px solid var(--border-gold-strong) !important;
+    box-shadow: var(--shadow-soft) !important;
+}
+
+.loading,
+.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 55px 20px;
+    min-height: 150px;
+    color: var(--text-muted);
+    font-family: "Cairo", sans-serif;
+}
+
+.loading :global(.MuiCircularProgress-root) {
+    color: var(--gold-primary);
+}
+
+.tablePaper :global(.MuiTable-root) {
+    min-width: 1000px;
+}
+
+.tablePaper :global(.MuiTableHead-root) {
+    background: #faf6ee;
+}
+
+:global([data-theme="dark"]) .tablePaper :global(.MuiTableHead-root) {
+    background: #34302a;
+}
+
+.tableHeadCell {
+    color: #8b6914 !important;
+    font-family: "Cairo", sans-serif !important;
+    font-weight: 800 !important;
+    white-space: nowrap;
+    padding: 15px 12px !important;
+}
+
+:global([data-theme="dark"]) .tableHeadCell {
+    color: #e6c878 !important;
+}
+
+.tableCell {
+    color: var(--text-primary) !important;
+    font-family: "Cairo", sans-serif !important;
+    padding: 14px 12px !important;
+    border-color: var(--border-gold) !important;
+}
+
+.nameCell {
+    font-weight: 700 !important;
+}
+
+.phoneCell,
+.dateCell {
+    white-space: nowrap;
+    direction: ltr;
+}
+
+.barcodeChip {
+    font-family: "Courier New", monospace !important;
+    font-weight: 700 !important;
+    background: rgba(184, 134, 11, .12) !important;
+    color: var(--gold-primary) !important;
+}
+
+.statusChip {
+    font-family: "Cairo", sans-serif !important;
+    font-weight: 700 !important;
+}
+
+.actionButton {
+    color: var(--gold-primary) !important;
+    border: 1px solid var(--border-gold) !important;
+}
+
+.viewButton:hover {
+    background: rgba(184, 134, 11, .1) !important;
+}
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    padding: 16px 18px;
+    border-top: 1px solid var(--border-gold);
+}
+
+.paginationInfo {
+    color: var(--text-secondary);
+    font: .82rem "Cairo", sans-serif;
+}
+
+.paginationControl :global(.MuiPaginationItem-root) {
+    font-family: "Cairo", sans-serif;
+}
+
+.paginationControl :global(.Mui-selected) {
+    background: rgba(184, 134, 11, .16) !important;
+    color: var(--gold-primary) !important;
+}
+
+@media(max-width:700px) {
+    .pageContainer {
+        padding: 14px 8px 30px;
+    }
+
+    .pageTitle {
+        font-size: 1.55rem !important;
+    }
+
+    .tabs :global(.MuiTab-root) {
+        min-width: 0;
+        padding: 10px 8px !important;
+        font-size: .78rem !important;
+    }
+
+    .tabLabel {
+        gap: 5px;
+    }
+
+    .toolbar {
+        align-items: stretch;
+    }
+
+    .searchField {
+        max-width: none;
+    }
+
+    .pagination {
+        justify-content: center;
+    }
+
+    .paginationInfo {
+        width: 100%;
+        text-align: center;
+    }
+}
+
+/* Status tones */
+.statusSuccess {
+    background: rgba(22, 163, 74, .14) !important;
+    color: #16a34a !important;
+}
+
+.statusWarning {
+    background: rgba(217, 119, 6, .14) !important;
+    color: #d97706 !important;
+}
+
+.statusError {
+    background: rgba(220, 38, 38, .14) !important;
+    color: #dc2626 !important;
+}
+
+.statusInfo {
+    background: rgba(37, 99, 235, .14) !important;
+    color: #2563eb !important;
+}
+
+.statusGreen {
+    background: rgba(22, 163, 74, .14) !important;
+    color: #16a34a !important;
+}
+
+.statusOrange {
+    background: rgba(217, 119, 6, .14) !important;
+    color: #d97706 !important;
+}
+
+.statusBlue {
+    background: rgba(37, 99, 235, .14) !important;
+    color: #2563eb !important;
+}
+
+.statusRed {
+    background: rgba(220, 38, 38, .14) !important;
+    color: #dc2626 !important;
+}

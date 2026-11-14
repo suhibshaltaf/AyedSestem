@@ -1,4 +1,6 @@
+
 import { useMemo } from "react";
+
 import {
   Box,
   List,
@@ -10,6 +12,7 @@ import {
   Drawer,
   Tooltip,
 } from "@mui/material";
+
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 
@@ -20,18 +23,17 @@ import StorefrontIcon from "@mui/icons-material/Storefront";
 import BuildIcon from "@mui/icons-material/Build";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
-import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import SettingsIcon from "@mui/icons-material/Settings";
 import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import GroupIcon from "@mui/icons-material/Group";
+import ArchiveIcon from "@mui/icons-material/Archive";
 
 import useAuthStore from "../../store/useAuthStore.js";
 import companyLogo from "../../assets/Logo.svg";
-import "../../styles/sidebar.css";
+import styles from "../../styles/Sidebar/Sidebar.module.css";
 
 const SIDEBAR_WIDTH = 240;
 
-// ✅ العناصر الجاهزة
 const READY_ITEMS = [
   {
     label: "الصفحة الرئيسية",
@@ -72,11 +74,25 @@ const READY_ITEMS = [
       "BranchAccountant",
     ],
   },
+
+  // أرشيف التصاليح القديمة
+  {
+    label: "أرشيف التصاليح القديمة",
+    icon: <ArchiveIcon fontSize="small" />,
+    path: "/old-maintenance-orders",
+    roles: ["SuperAdmin", "Admin", "BranchManager"],
+  },
+
   {
     label: "الاستلام والتسليم",
     icon: <SwapHorizIcon fontSize="small" />,
     path: "/repairs/pickup-delivery",
-    roles: ["SuperAdmin", "Admin", "BranchManager", "BranchAccountant"],
+    roles: [
+      "SuperAdmin",
+      "Admin",
+      "BranchManager",
+      "BranchAccountant",
+    ],
   },
   {
     label: "ملخص المندوبين",
@@ -84,12 +100,6 @@ const READY_ITEMS = [
     path: "/repairs/representatives-summary",
     roles: ["SuperAdmin", "Admin"],
   },
-  /*{
-    label: "لوحة المندوب",
-    icon: <LocalShippingIcon fontSize="small" />,
-    path: "/repairs/representative",
-    roles: ["SuperAdmin", "Admin","Representative"],
-  },*/
   {
     label: "لوحة المشغّل",
     icon: <BuildIcon fontSize="small" />,
@@ -138,6 +148,7 @@ function SidebarContent({ onClose }) {
 
   const handleNavigate = (path) => {
     navigate(path);
+
     if (onClose) onClose();
   };
 
@@ -149,50 +160,63 @@ function SidebarContent({ onClose }) {
   };
 
   const isActive = (path) =>
-    location.pathname === path || location.pathname.startsWith(path + "/");
+    location.pathname === path ||
+    location.pathname.startsWith(path + "/");
 
   const visibleReadyItems = READY_ITEMS.filter((item) => {
     if (!item.roles || item.roles.length === 0) return true;
+
     if (roles.length === 0) return false;
-    return item.roles.some((r) => roles.includes(r));
+
+    return item.roles.some((role) => roles.includes(role));
   });
 
   const visibleDisabledItems = DISABLED_ITEMS.filter((item) => {
     if (!item.roles || item.roles.length === 0) return true;
+
     if (roles.length === 0) return false;
-    return item.roles.some((r) => roles.includes(r));
+
+    return item.roles.some((role) => roles.includes(role));
   });
 
-  const branchPath = user?.branchId ? `/branches/${user.branchId}` : null;
+  const branchPath = user?.branchId
+    ? `/branches/${user.branchId}`
+    : null;
 
   return (
-    <div className="sidebar-content">
-      <div className="sidebar-header">
+    <div className={styles.sidebarContent}>
+      <div className={styles.sidebarHeader}>
         <img
           src={companyLogo}
           alt="مجموعة عايد دعنا"
-          className="sidebar-logo"
+          className={styles.sidebarLogo}
         />
 
-        <Typography className="sidebar-title">مجموعة عايد دعنا</Typography>
+        <Typography className={styles.sidebarTitle}>
+          مجموعة عايد دعنا
+        </Typography>
       </div>
 
-      <List className="sidebar-list">
-        {/* ✅ رابط "فرعي" لمدير/محاسب الفرع */}
+      <List className={styles.sidebarList}>
         {isBranchRole && branchPath && (
           <ListItemButton
             onClick={() => handleNavigate(branchPath)}
-            className={`sidebar-item ${
-              isActive(branchPath) ? "sidebar-item-active" : ""
+            className={`${styles.sidebarItem} ${
+              isActive(branchPath)
+                ? styles.sidebarItemActive
+                : ""
             }`}
           >
             <ListItemIcon
-              className={`sidebar-icon ${
-                isActive(branchPath) ? "sidebar-icon-active" : ""
+              className={`${styles.sidebarIcon} ${
+                isActive(branchPath)
+                  ? styles.sidebarIconActive
+                  : ""
               }`}
             >
               <StorefrontIcon fontSize="small" />
             </ListItemIcon>
+
             <ListItemText
               primary="فرعي"
               primaryTypographyProps={{
@@ -205,21 +229,23 @@ function SidebarContent({ onClose }) {
 
         {visibleReadyItems.map((item) => {
           const active = isActive(item.path);
+
           return (
             <ListItemButton
               key={item.path}
               onClick={() => handleNavigate(item.path)}
-              className={`sidebar-item ${
-                active ? "sidebar-item-active" : ""
+              className={`${styles.sidebarItem} ${
+                active ? styles.sidebarItemActive : ""
               }`}
             >
               <ListItemIcon
-                className={`sidebar-icon ${
-                  active ? "sidebar-icon-active" : ""
+                className={`${styles.sidebarIcon} ${
+                  active ? styles.sidebarIconActive : ""
                 }`}
               >
                 {item.icon}
               </ListItemIcon>
+
               <ListItemText
                 primary={item.label}
                 primaryTypographyProps={{
@@ -234,13 +260,13 @@ function SidebarContent({ onClose }) {
 
       {visibleDisabledItems.length > 0 && (
         <>
-          <Divider className="sidebar-divider" />
+          <Divider className={styles.sidebarDivider} />
 
-          <Typography className="sidebar-section-title">
+          <Typography className={styles.sidebarSectionTitle}>
             قيد التطوير
           </Typography>
 
-          <List className="sidebar-list">
+          <List className={styles.sidebarList}>
             {visibleDisabledItems.map((item) => (
               <Tooltip
                 key={item.label}
@@ -252,11 +278,14 @@ function SidebarContent({ onClose }) {
                   <ListItemButton
                     disabled
                     onClick={handleDisabledClick}
-                    className="sidebar-item sidebar-item-disabled"
+                    className={`${styles.sidebarItem} ${styles.sidebarItemDisabled}`}
                   >
-                    <ListItemIcon className="sidebar-icon sidebar-icon-disabled">
+                    <ListItemIcon
+                      className={`${styles.sidebarIcon} ${styles.sidebarIconDisabled}`}
+                    >
                       {item.icon}
                     </ListItemIcon>
+
                     <ListItemText
                       primary={item.label}
                       primaryTypographyProps={{
@@ -280,7 +309,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
     <>
       <Box
         component="aside"
-        className="sidebar-desktop"
+        className={styles.sidebarDesktop}
         sx={{
           width: { md: SIDEBAR_WIDTH },
           display: { xs: "none", md: "block" },

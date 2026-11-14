@@ -29,11 +29,11 @@ import {
   useTrackRepairOrdersByPhone,
 } from "../../hooks/usePublicTracking.js";
 
-import "../../styles/public-tracking.css";
+import styles from "../../styles/Repairs/PublicTracking.module.css";
 
-// ======================================
-// تحديد نوع البحث
-// ======================================
+// ===============================
+// Validation
+// ===============================
 
 const isBarcode = (value) =>
   /^[A-Za-z0-9]{2,10}-\d{4}-\d{6}$/.test(value);
@@ -41,24 +41,34 @@ const isBarcode = (value) =>
 const isValidPhone = (value) =>
   /^[0-9]{7,20}$/.test(value);
 
-// ======================================
-// تنسيق السعر
-// ======================================
+// ===============================
+// Formatting
+// ===============================
 
 const formatPrice = (price) => {
-  if (price === null || price === undefined) return "—";
+  if (price === null || price === undefined || price === "") {
+    return "—";
+  }
 
-  return `${Number(price).toFixed(2)} دينار`;
+  const numericPrice = Number(price);
+
+  if (Number.isNaN(numericPrice)) {
+    return "—";
+  }
+
+  return `${numericPrice.toFixed(2)} دينار`;
 };
 
-// ======================================
-// تحديد حالة التصليحة
-// ======================================
+// ===============================
+// Status
+// ===============================
 
-const getOrderStatus = (status) => {
-  const normalizedStatus = String(status ?? "").toLowerCase();
+const getOrderStatus = (status, statusName) => {
+  const isReadyForPickup =
+    String(status ?? "").trim() === "6" ||
+    String(statusName ?? "").trim() === "جاهزة للتسليم للزبون";
 
-  if (normalizedStatus === "readyforpickup") {
+  if (isReadyForPickup) {
     return {
       label: "جاهزة للاستلام",
       color: "success",
@@ -71,9 +81,9 @@ const getOrderStatus = (status) => {
   };
 };
 
-// ======================================
-// الصفحة
-// ======================================
+// ===============================
+// Component
+// ===============================
 
 export default function PublicTracking() {
   const [params, setParams] = useSearchParams();
@@ -89,8 +99,8 @@ export default function PublicTracking() {
     (params.get("barcode")
       ? "barcode"
       : params.get("phone")
-      ? "phone"
-      : "");
+        ? "phone"
+        : "");
 
   const [searchValue, setSearchValue] = useState(queryValue);
 
@@ -98,9 +108,9 @@ export default function PublicTracking() {
     setSearchValue(queryValue);
   }, [queryValue]);
 
-  // ======================================
-  // البحث بالباركود
-  // ======================================
+  // ===============================
+  // Barcode Search
+  // ===============================
 
   const {
     data: barcodeOrder,
@@ -113,9 +123,9 @@ export default function PublicTracking() {
     queryType === "barcode" && !!queryValue
   );
 
-  // ======================================
-  // البحث برقم الهاتف
-  // ======================================
+  // ===============================
+  // Phone Search
+  // ===============================
 
   const {
     data: phoneOrders = [],
@@ -134,17 +144,17 @@ export default function PublicTracking() {
     queryType === "barcode"
       ? barcodeIsError
       : queryType === "phone"
-      ? phoneIsError
-      : false;
+        ? phoneIsError
+        : false;
 
   const error =
     queryType === "barcode"
       ? barcodeError
       : phoneError;
 
-  // ======================================
-  // تجهيز النتائج وإخفاء المستلمة
-  // ======================================
+  // ===============================
+  // Orders
+  // ===============================
 
   const orders = (
     queryType === "barcode"
@@ -152,17 +162,26 @@ export default function PublicTracking() {
         ? [barcodeOrder]
         : []
       : queryType === "phone"
-      ? phoneOrders
-      : []
-  ).filter(
-    (order) =>
-      String(order.status ?? "").toLowerCase() !==
-      "deliveredtocustomer"
-  );
+        ? Array.isArray(phoneOrders)
+          ? phoneOrders
+          : []
+        : []
+  ).filter((order) => {
+    const status = String(order.status ?? "").trim();
+    const statusName = String(order.statusName ?? "").trim();
 
-  // ======================================
-  // البحث
-  // ======================================
+    // إخفاء القطع التي تم تسليمها للزبون
+    return (
+      status.toLowerCase() !== "deliveredtocustomer" &&
+      status !== "7" &&
+      statusName !== "تم التسليم للزبون" &&
+      statusName !== "تم التسليم"
+    );
+  });
+
+  // ===============================
+  // Search
+  // ===============================
 
   const submit = (event) => {
     event.preventDefault();
@@ -191,74 +210,47 @@ export default function PublicTracking() {
       return;
     }
 
-    setParams({
-      type,
-      value,
-    });
+    setParams({ type, value });
   };
 
-  // ======================================
-  // واجهة الصفحة
-  // ======================================
+  // ===============================
+  // Render
+  // ===============================
 
   return (
-    <Box
-      className="tracking-container"
-      dir="rtl"
-      sx={{
-        minHeight: "100vh",
-        py: { xs: 4, md: 8 },
-        px: 2,
-      }}
-    >
-      <Box
-        sx={{
-          width: "100%",
-          maxWidth: 1100,
-          mx: "auto",
-        }}
-      >
+    <Box className={styles.trackingContainer} dir="rtl">
+      <Box className={styles.trackingContent}>
+
         {/* Header */}
 
-        <Box className="tracking-header">
-          <Box className="tracking-header-icon">
+        <Box className={styles.trackingHeader}>
+          <Box className={styles.trackingHeaderIcon}>
             <ReceiptLongIcon sx={{ fontSize: 38 }} />
           </Box>
 
-          <Typography variant="h4" className="tracking-title">
+          <Typography variant="h4" className={styles.trackingTitle}>
             تتبع قطع الصيانة
           </Typography>
 
-          <Typography className="tracking-subtitle">
+          <Typography className={styles.trackingSubtitle}>
             أدخل رقم الهاتف أو رقم الباركود للاستعلام عن قطعك
           </Typography>
         </Box>
 
-        {/* Search Form */}
+        {/* Search */}
 
         <Paper
           component="form"
           onSubmit={submit}
           elevation={0}
-          className="tracking-form-card"
-          sx={{
-            display: "flex",
-            flexDirection: {
-              xs: "column",
-              sm: "row",
-            },
-            gap: 2,
-            alignItems: "stretch",
-          }}
+          className={styles.trackingFormCard}
         >
           <TextField
             fullWidth
             label="رقم الهاتف أو رقم الباركود"
             placeholder="0791234567 أو BN-2026-000001"
             value={searchValue}
-            onChange={(event) =>
-              setSearchValue(event.target.value)
-            }
+            onChange={(event) => setSearchValue(event.target.value)}
             inputProps={{
               dir: "ltr",
               "aria-label": "رقم الهاتف أو رقم الباركود",
@@ -270,13 +262,7 @@ export default function PublicTracking() {
             variant="contained"
             startIcon={<SearchIcon />}
             disabled={!searchValue.trim() || isLoading}
-            className="tracking-search-btn"
-            sx={{
-              minWidth: {
-                xs: "100%",
-                sm: 130,
-              },
-            }}
+            className={styles.trackingSearchBtn}
           >
             بحث
           </Button>
@@ -285,7 +271,7 @@ export default function PublicTracking() {
         {/* Loading */}
 
         {isLoading && (
-          <Box className="tracking-loading">
+          <Box className={styles.trackingLoading}>
             <CircularProgress />
           </Box>
         )}
@@ -295,10 +281,10 @@ export default function PublicTracking() {
         {isError && !isLoading && (
           <Paper
             elevation={0}
-            className="tracking-result-card tracking-error"
+            className={`${styles.trackingResultCard} ${styles.trackingError}`}
             role="alert"
           >
-            <Typography className="tracking-error-text">
+            <Typography className={styles.trackingErrorText}>
               {error?.response?.data?.message ||
                 "تعذر إتمام البحث. يرجى التحقق من الرقم والمحاولة مرة أخرى."}
             </Typography>
@@ -307,146 +293,148 @@ export default function PublicTracking() {
 
         {/* Results */}
 
-        {queryValue &&
-          queryType &&
-          !isLoading &&
-          !isError && (
-            <>
-              {orders.length > 0 ? (
-                <>
-                  <Box className="tracking-results-header">
-                    <Box>
-                      <Typography
-                        variant="h6"
-                        fontWeight={800}
-                      >
-                        قطع الصيانة غير المستلمة
-                      </Typography>
+        {queryValue && queryType && !isLoading && !isError && (
+          <>
+            {orders.length > 0 ? (
+              <>
+                {/* Results Header */}
 
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mt: 0.5 }}
-                      >
-                        {queryType === "phone"
-                          ? "جميع القطع المرتبطة برقم الهاتف"
-                          : "نتيجة البحث بالباركود"}
-                      </Typography>
-                    </Box>
+                <Box className={styles.trackingResultsHeader}>
+                  <Box>
+                    <Typography variant="h6" fontWeight={800}>
+                      قطع الصيانة غير المستلمة
+                    </Typography>
 
-                    <Box className="tracking-count">
-                      {orders.length} قطعة
-                    </Box>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 0.5 }}
+                    >
+                      {queryType === "phone"
+                        ? "جميع القطع المرتبطة برقم الهاتف"
+                        : "نتيجة البحث بالباركود"}
+                    </Typography>
                   </Box>
 
-                  <TableContainer
-                    component={Paper}
-                    elevation={0}
-                    className="tracking-table-container"
-                  >
-                    <Table>
-                      <TableHead>
-                        <TableRow>
-                          <TableCell align="center">
-                            رقم الباركود
-                          </TableCell>
+                  <Box className={styles.trackingCount}>
+                    {orders.length} قطعة
+                  </Box>
+                </Box>
 
-                          <TableCell align="center">
-                            رقم الهاتف
-                          </TableCell>
+                {/* Table */}
 
-                          <TableCell align="center">
-                            السعر
-                          </TableCell>
-
-                          <TableCell align="center">
-                            فرع الاستلام
-                          </TableCell>
-
-                          <TableCell align="center">
-                            الحالة
-                          </TableCell>
-                        </TableRow>
-                      </TableHead>
-
-                      <TableBody>
-                        {orders.map((order) => {
-                          const status = getOrderStatus(order.status);
-
-                          return (
-                            <TableRow key={order.barcode} hover>
-                              <TableCell
-                                align="center"
-                                dir="ltr"
-                                className="tracking-barcode"
-                              >
-                                {order.barcode || "—"}
-                              </TableCell>
-
-                              <TableCell align="center" dir="ltr">
-                                <Box className="tracking-phone-cell">
-                                  <PhoneIcon />
-                                  {order.customerPhone || "—"}
-                                </Box>
-                              </TableCell>
-
-                              <TableCell
-                                align="center"
-                                className="tracking-price"
-                              >
-                                {formatPrice(order.price)}
-                              </TableCell>
-
-                              <TableCell align="center">
-                                <Box className="tracking-branch-cell">
-                                  <StorefrontIcon />
-                                  <Typography>
-                                    {order.deliveryBranchName || "—"}
-                                  </Typography>
-                                </Box>
-                              </TableCell>
-
-                              <TableCell align="center">
-                                <Chip
-                                  label={status.label}
-                                  color={status.color}
-                                  size="small"
-                                  sx={{
-                                    fontFamily: "Cairo",
-                                    fontWeight: 700,
-                                    minWidth: 120,
-                                  }}
-                                />
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </TableContainer>
-                </>
-              ) : (
-                <Paper
+                <TableContainer
+                  component={Paper}
                   elevation={0}
-                  className="tracking-result-card tracking-empty"
+                  className={styles.trackingTableContainer}
                 >
-                  <ReceiptLongIcon />
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell align="center">
+                          رقم الباركود
+                        </TableCell>
 
-                  <Typography variant="h6" fontWeight={800}>
-                    لا توجد قطع صيانة غير مستلمة
-                  </Typography>
+                        <TableCell align="center">
+                          رقم الهاتف
+                        </TableCell>
 
-                  <Typography color="text.secondary">
-                    لا توجد قطع مرتبطة بالرقم المدخل أو أن جميع القطع تم تسليمها.
-                  </Typography>
-                </Paper>
-              )}
-            </>
-          )}
+                        <TableCell align="center">
+                          السعر
+                        </TableCell>
+
+                        <TableCell align="center">
+                          فرع الاستلام
+                        </TableCell>
+
+                        <TableCell align="center">
+                          الحالة
+                        </TableCell>
+                      </TableRow>
+                    </TableHead>
+
+                    <TableBody>
+                      {orders.map((order) => {
+                        const status = getOrderStatus(
+                          order.status,
+                          order.statusName
+                        );
+
+                        return (
+                          <TableRow key={order.barcode} hover>
+                            <TableCell
+                              align="center"
+                              dir="ltr"
+                              className={styles.trackingBarcode}
+                            >
+                              {order.barcode || "—"}
+                            </TableCell>
+
+                            <TableCell align="center" dir="ltr">
+                              <Box className={styles.trackingPhoneCell}>
+                                <PhoneIcon />
+                                {order.customerPhone || "—"}
+                              </Box>
+                            </TableCell>
+
+                            <TableCell
+                              align="center"
+                              className={styles.trackingPrice}
+                            >
+                              {formatPrice(order.price)}
+                            </TableCell>
+
+                            <TableCell align="center">
+                              <Box className={styles.trackingBranchCell}>
+                                <StorefrontIcon />
+
+                                <Typography>
+                                  {order.deliveryBranchName || "—"}
+                                </Typography>
+                              </Box>
+                            </TableCell>
+
+                            <TableCell align="center">
+                              <Chip
+                                label={status.label}
+                                color={status.color}
+                                size="small"
+                                sx={{
+                                  fontFamily: "Cairo",
+                                  fontWeight: 700,
+                                  minWidth: 120,
+                                }}
+                              />
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </TableContainer>
+              </>
+            ) : (
+              <Paper
+                elevation={0}
+                className={`${styles.trackingResultCard} ${styles.trackingEmpty}`}
+              >
+                <ReceiptLongIcon />
+
+                <Typography variant="h6" fontWeight={800}>
+                  لا توجد قطع صيانة غير مستلمة
+                </Typography>
+
+                <Typography color="text.secondary">
+                  لا توجد قطع مرتبطة بالرقم المدخل أو أن جميع القطع تم تسليمها.
+                </Typography>
+              </Paper>
+            )}
+          </>
+        )}
 
         {/* Back */}
 
-        <Box className="tracking-back">
+        <Box className={styles.trackingBack}>
           <Button
             component={Link}
             to="/"
@@ -455,6 +443,7 @@ export default function PublicTracking() {
             العودة للرئيسية
           </Button>
         </Box>
+
       </Box>
     </Box>
   );

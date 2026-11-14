@@ -1,31 +1,26 @@
-/* ===============================
-   Container
-   =============================== */
-.branch-details-container {
+
+.branchDetailsContainer {
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
   padding: 16px 8px 40px;
 }
 
-.branch-details-loading {
+.branchDetailsLoading {
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 60vh;
 }
 
-/* ===============================
-   Header
-   =============================== */
-.branch-details-header {
+.branchDetailsHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.branch-details-header-icon {
+.branchDetailsHeaderIcon {
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -37,7 +32,7 @@
   margin-bottom: 10px;
 }
 
-.branch-details-title {
+.branchDetailsTitle {
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
@@ -46,11 +41,11 @@
   text-align: center;
 }
 
-[data-theme="dark"] .branch-details-title {
+:global([data-theme="dark"]) .branchDetailsTitle {
   color: #e6c878 !important;
 }
 
-.branch-details-title-decor {
+.branchDetailsTitleDecor {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -59,7 +54,7 @@
   max-width: 500px;
 }
 
-.branch-details-title-line {
+.branchDetailsTitleLine {
   flex: 1;
   height: 1px;
   background: linear-gradient(
@@ -71,17 +66,14 @@
   opacity: 0.5;
 }
 
-.branch-details-subtitle {
+.branchDetailsSubtitle {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   color: var(--text-muted) !important;
   white-space: nowrap;
 }
 
-/* ===============================
-   Actions
-   =============================== */
-.branch-details-actions {
+.branchDetailsActions {
   display: flex;
   align-items: center;
   justify-content: flex-end;
@@ -89,8 +81,8 @@
   margin-bottom: 12px;
 }
 
-.branch-details-refresh-btn,
-.branch-details-back-icon-btn {
+.branchDetailsRefreshBtn,
+.branchDetailsBackIconBtn {
   color: var(--gold-primary) !important;
   border: 1px solid var(--border-gold-strong) !important;
   border-radius: 10px !important;
@@ -99,15 +91,12 @@
   height: 44px;
 }
 
-.branch-details-refresh-btn:hover,
-.branch-details-back-icon-btn:hover {
+.branchDetailsRefreshBtn:hover,
+.branchDetailsBackIconBtn:hover {
   background-color: rgba(184, 134, 11, 0.08) !important;
 }
 
-/* ===============================
-   Card
-   =============================== */
-.branch-details-card {
+.branchDetailsCard {
   border-radius: 14px !important;
   padding: 12px 24px !important;
   background-color: var(--bg-paper) !important;
@@ -116,7 +105,7 @@
   margin-bottom: 32px;
 }
 
-.branch-details-status-row {
+.branchDetailsStatusRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -124,14 +113,14 @@
   gap: 12px;
 }
 
-.branch-details-status-label {
+.branchDetailsStatusLabel {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.95rem !important;
   font-weight: 600 !important;
   color: var(--text-secondary) !important;
 }
 
-.branch-details-status-chip {
+.branchDetailsStatusChip {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.82rem !important;
   font-weight: 700 !important;
@@ -140,27 +129,27 @@
   justify-content: center !important;
 }
 
-.branch-details-status-chip-active {
+.branchDetailsStatusChipActive {
   background-color: rgba(46, 125, 50, 0.15) !important;
   color: #2e7d32 !important;
 }
 
-[data-theme="dark"] .branch-details-status-chip-active {
+:global([data-theme="dark"]) .branchDetailsStatusChipActive {
   background-color: rgba(102, 187, 106, 0.2) !important;
   color: #66bb6a !important;
 }
 
-.branch-details-status-chip-inactive {
+.branchDetailsStatusChipInactive {
   background-color: rgba(211, 47, 47, 0.12) !important;
   color: #d32f2f !important;
 }
 
-[data-theme="dark"] .branch-details-status-chip-inactive {
+:global([data-theme="dark"]) .branchDetailsStatusChipInactive {
   background-color: rgba(239, 83, 80, 0.15) !important;
   color: #ef5350 !important;
 }
 
-.branch-details-row {
+.branchDetailsRow {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -168,30 +157,30 @@
   gap: 16px;
 }
 
-.branch-details-label {
+.branchDetailsLabel {
   display: flex;
   align-items: center;
   gap: 10px;
   color: var(--text-secondary);
 }
 
-.branch-details-label-text {
+.branchDetailsLabelText {
   font-family: "Cairo", sans-serif;
   font-size: 0.9rem;
   color: var(--text-secondary);
 }
 
-.branch-details-label-icon {
+.branchDetailsLabelIcon {
   color: var(--gold-primary);
   display: flex;
   align-items: center;
 }
 
-.branch-details-label-icon svg {
+.branchDetailsLabelIcon svg {
   font-size: 20px;
 }
 
-.branch-details-value {
+.branchDetailsValue {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.95rem !important;
   font-weight: 700 !important;
@@ -200,31 +189,28 @@
   flex: 1;
 }
 
-[data-theme="dark"] .branch-details-value {
+:global([data-theme="dark"]) .branchDetailsValue {
   color: #e6c878 !important;
 }
 
-.branch-details-value-mono {
+.branchDetailsValueMono {
   font-family: "Courier New", monospace !important;
   font-size: 0.9rem !important;
   letter-spacing: 1px;
   font-weight: 700 !important;
 }
 
-.branch-details-value-ltr {
+.branchDetailsValueLtr {
   direction: ltr;
   text-align: right;
 }
 
-.branch-details-divider {
+.branchDetailsDivider {
   border-color: var(--border-gold) !important;
   opacity: 0.6;
 }
 
-/* ===============================
-   Empty / Error
-   =============================== */
-.branch-details-empty {
+.branchDetailsEmpty {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -233,13 +219,13 @@
   gap: 16px;
 }
 
-.branch-details-empty-text {
+.branchDetailsEmptyText {
   font-family: "Cairo", sans-serif !important;
   font-size: 1rem !important;
   color: var(--text-secondary) !important;
 }
 
-.branch-details-back-btn {
+.branchDetailsBackBtn {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 10px !important;
@@ -249,14 +235,11 @@
   padding: 8px 20px !important;
 }
 
-/* ===============================
-   Employees Section
-   =============================== */
-.branch-employees-section {
+.branchEmployeesSection {
   margin-top: 24px;
 }
 
-.branch-employees-header {
+.branchEmployeesHeader {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -264,24 +247,24 @@
   padding: 0 8px;
 }
 
-.branch-employees-header-icon {
+.branchEmployeesHeaderIcon {
   color: var(--gold-primary);
   display: flex;
   align-items: center;
 }
 
-.branch-employees-title {
+.branchEmployeesTitle {
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.3rem !important;
   font-weight: 700 !important;
   color: #8b6914 !important;
 }
 
-[data-theme="dark"] .branch-employees-title {
+:global([data-theme="dark"]) .branchEmployeesTitle {
   color: #e6c878 !important;
 }
 
-.branch-employees-paper {
+.branchEmployeesPaper {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
   border: 1px solid var(--border-gold-strong) !important;
@@ -289,7 +272,7 @@
   overflow: hidden;
 }
 
-.branch-employees-toolbar {
+.branchEmployeesToolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -299,14 +282,14 @@
   flex-wrap: wrap;
 }
 
-.branch-employees-count {
+.branchEmployeesCount {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   color: var(--text-secondary) !important;
   font-weight: 600 !important;
 }
 
-.branch-employees-add-btn {
+.branchEmployeesAddBtn {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 10px !important;
@@ -318,12 +301,12 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.branch-employees-add-btn:hover {
+.branchEmployeesAddBtn:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
-.branch-employees-loading,
-.branch-employees-empty {
+.branchEmployeesLoading,
+.branchEmployeesEmpty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -332,12 +315,11 @@
   font-family: "Cairo", sans-serif;
 }
 
-/* Table */
-.branch-employees-head-row {
+.branchEmployeesHeadRow {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.branch-employees-th {
+.branchEmployeesTh {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   font-weight: 700 !important;
@@ -347,15 +329,15 @@
   white-space: nowrap;
 }
 
-.branch-employees-row {
+.branchEmployeesRow {
   transition: background-color 0.2s ease;
 }
 
-.branch-employees-row:hover {
+.branchEmployeesRow:hover {
   background-color: rgba(184, 134, 11, 0.04);
 }
 
-.branch-employees-td {
+.branchEmployeesTd {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.88rem !important;
   color: var(--text-primary) !important;
@@ -363,12 +345,11 @@
   border-bottom: 1px solid var(--border-gold) !important;
 }
 
-.branch-employees-td-name {
+.branchEmployeesTdName {
   font-weight: 600 !important;
 }
 
-/* Action Buttons */
-.branch-employees-action-btn {
+.branchEmployeesActionBtn {
   width: 32px !important;
   height: 32px !important;
   margin: 0 2px !important;
@@ -376,35 +357,32 @@
   transition: all 0.2s ease !important;
 }
 
-.branch-employees-edit-btn {
+.branchEmployeesEditBtn {
   color: #8b6914 !important;
 }
 
-.branch-employees-edit-btn:hover {
+.branchEmployeesEditBtn:hover {
   background-color: rgba(30, 58, 95, 0.08) !important;
 }
 
-[data-theme="dark"] .branch-employees-edit-btn {
+:global([data-theme="dark"]) .branchEmployeesEditBtn {
   color: #e6c878 !important;
 }
 
-.branch-employees-delete-btn {
+.branchEmployeesDeleteBtn {
   color: var(--danger) !important;
 }
 
-.branch-employees-delete-btn:hover {
+.branchEmployeesDeleteBtn:hover {
   background-color: rgba(211, 47, 47, 0.08) !important;
 }
 
-/* ===============================
-   Form Dialog
-   =============================== */
-.branch-employees-form-dialog {
+.branchEmployeesFormDialog {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.branch-employees-form-title {
+.branchEmployeesFormTitle {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--gold-primary) !important;
@@ -413,48 +391,48 @@
   padding-bottom: 12px !important;
 }
 
-.branch-employees-form-content {
+.branchEmployeesFormContent {
   padding: 16px 24px !important;
 }
 
-.branch-employees-form-field .MuiOutlinedInput-root {
+.branchEmployeesFormField :global(.MuiOutlinedInput-root) {
   border-radius: 10px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.branch-employees-form-field .MuiOutlinedInput-root fieldset {
+.branchEmployeesFormField :global(.MuiOutlinedInput-root fieldset) {
   border-color: var(--border-gold-strong) !important;
 }
 
-.branch-employees-form-field .MuiOutlinedInput-root:hover fieldset {
+.branchEmployeesFormField :global(.MuiOutlinedInput-root:hover fieldset) {
   border-color: var(--gold-soft) !important;
 }
 
-.branch-employees-form-field .MuiOutlinedInput-root.Mui-focused fieldset {
+.branchEmployeesFormField :global(.MuiOutlinedInput-root.Mui-focused fieldset) {
   border-color: var(--gold-primary) !important;
 }
 
-.branch-employees-form-field .MuiInputLabel-root {
+.branchEmployeesFormField :global(.MuiInputLabel-root) {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.9rem !important;
 }
 
-.branch-employees-form-field .MuiInputLabel-root.Mui-focused {
+.branchEmployeesFormField :global(.MuiInputLabel-root.Mui-focused) {
   color: var(--gold-primary) !important;
 }
 
-.branch-employees-form-field .MuiFormHelperText-root {
+.branchEmployeesFormField :global(.MuiFormHelperText-root) {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.72rem !important;
 }
 
-.branch-employees-form-actions {
+.branchEmployeesFormActions {
   padding: 12px 24px 20px !important;
   gap: 8px;
   border-top: 1px solid var(--border-gold) !important;
 }
 
-.branch-employees-form-cancel {
+.branchEmployeesFormCancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -462,11 +440,11 @@
   padding: 8px 20px !important;
 }
 
-.branch-employees-form-cancel:hover {
+.branchEmployeesFormCancel:hover {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.branch-employees-form-save {
+.branchEmployeesFormSave {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -477,46 +455,43 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.branch-employees-form-save:hover {
+.branchEmployeesFormSave:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
-.branch-employees-form-save.Mui-disabled {
+.branchEmployeesFormSave:global(.Mui-disabled) {
   background: linear-gradient(90deg, #d4b98a, #c0a068) !important;
   color: #fff !important;
 }
 
-/* ===============================
-   Delete Dialog
-   =============================== */
-.branch-employees-dialog {
+.branchEmployeesDialog {
   border-radius: 14px !important;
   min-width: 340px;
   max-width: 90vw;
 }
 
-.branch-employees-dialog-title {
+.branchEmployeesDialogTitle {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--text-primary) !important;
 }
 
-.branch-employees-dialog-text {
+.branchEmployeesDialogText {
   font-family: "Cairo", sans-serif !important;
   color: var(--text-secondary) !important;
   line-height: 1.8 !important;
 }
 
-.branch-employees-dialog-text strong {
+.branchEmployeesDialogText strong {
   color: var(--gold-primary);
 }
 
-.branch-employees-dialog-actions {
+.branchEmployeesDialogActions {
   padding: 12px 20px 20px !important;
   gap: 8px;
 }
 
-.branch-employees-dialog-cancel {
+.branchEmployeesDialogCancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -524,7 +499,7 @@
   padding: 8px 20px !important;
 }
 
-.branch-employees-dialog-confirm {
+.branchEmployeesDialogConfirm {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -536,61 +511,58 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.branch-employees-dialog-confirm:hover {
+.branchEmployeesDialogConfirm:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
-/* ===============================
-   Responsive
-   =============================== */
 @media (max-width: 900px) {
-  .branch-details-title {
+  .branchDetailsTitle {
     font-size: 1.6rem !important;
   }
 }
 
 @media (max-width: 700px) {
-  .branch-details-container {
+  .branchDetailsContainer {
     padding: 12px 4px 32px;
   }
 
-  .branch-details-title {
+  .branchDetailsTitle {
     font-size: 1.5rem !important;
   }
 
-  .branch-details-card {
+  .branchDetailsCard {
     padding: 8px 16px !important;
   }
 
-  .branch-details-row,
-  .branch-details-status-row {
+  .branchDetailsRow,
+  .branchDetailsStatusRow {
     flex-direction: column-reverse;
     align-items: flex-end;
     gap: 6px;
     padding: 14px 4px;
   }
 
-  .branch-details-value {
+  .branchDetailsValue {
     width: 100%;
     text-align: right;
     font-size: 0.9rem !important;
   }
 
-  .branch-details-label {
+  .branchDetailsLabel {
     align-self: flex-start;
   }
 
-  .branch-employees-toolbar {
+  .branchEmployeesToolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .branch-employees-add-btn {
+  .branchEmployeesAddBtn {
     width: 100%;
   }
 
-  .branch-employees-th,
-  .branch-employees-td {
+  .branchEmployeesTh,
+  .branchEmployeesTd {
     padding: 10px 8px !important;
     font-size: 0.8rem !important;
   }

@@ -1,0 +1,780 @@
+
+/* =========================================================
+   OLD MAINTENANCE ORDERS — CREATE / EDIT
+   GoldSystem — Modern RTL Design
+   MUI + CSS Modules + Light / Dark Theme
+   ========================================================= */
+
+/* =========================================================
+   1. Variables & Container
+   ========================================================= */
+
+.page {
+  --of-gold: #b8860b;
+  --of-gold-light: #c9a44c;
+  --of-gold-dark: #8b6914;
+  --of-gold-soft: rgba(184, 134, 11, 0.07);
+  --of-gold-soft-2: rgba(184, 134, 11, 0.13);
+
+  --of-border: #eee5d0;
+  --of-border-strong: #dfcfaa;
+
+  --of-text: var(--text-primary, #292929);
+  --of-text-muted: var(--text-secondary, #737373);
+  --of-text-faint: var(--text-muted, #a0a0a0);
+
+  --of-paper: var(--bg-paper, #ffffff);
+
+  --of-shadow-soft: 0 3px 12px rgba(45, 35, 10, 0.045);
+  --of-shadow-card: 0 5px 20px rgba(45, 35, 10, 0.055);
+
+  --of-radius: 16px;
+  --of-radius-sm: 11px;
+
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 22px 12px 45px;
+  box-sizing: border-box;
+
+  font-family: "Cairo", sans-serif;
+  direction: rtl;
+}
+
+/* =========================================================
+   2. Dark Theme
+   ========================================================= */
+
+:global([data-theme="dark"]) .page {
+  --of-border: rgba(230, 200, 120, 0.13);
+  --of-border-strong: rgba(230, 200, 120, 0.28);
+
+  --of-text: #eeeeee;
+  --of-text-muted: #b0b0b0;
+  --of-text-faint: #858585;
+
+  --of-paper: #202020;
+
+  --of-gold-soft: rgba(230, 200, 120, 0.07);
+  --of-gold-soft-2: rgba(230, 200, 120, 0.13);
+
+  --of-shadow-soft: 0 3px 12px rgba(0, 0, 0, 0.20);
+  --of-shadow-card: 0 5px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================================================
+   3. Header
+   ========================================================= */
+
+.header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.headerIcon {
+  width: 62px;
+  height: 62px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+  border: 1px solid var(--of-border-strong);
+
+  color: var(--of-gold);
+  background: var(--of-gold-soft);
+
+  margin-bottom: 12px;
+  box-shadow: var(--of-shadow-soft);
+}
+
+.title {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.9rem !important;
+  font-weight: 700 !important;
+
+  color: var(--of-gold-dark) !important;
+
+  margin: 0 0 5px !important;
+  line-height: 1.4 !important;
+  text-align: center;
+}
+
+:global([data-theme="dark"]) .title {
+  color: #e6c878 !important;
+}
+
+.subtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.86rem !important;
+
+  color: var(--of-text-muted) !important;
+  text-align: center;
+
+  line-height: 1.7 !important;
+}
+
+/* =========================================================
+   4. Main Card
+   ========================================================= */
+
+.card {
+  padding: 28px !important;
+
+  border-radius: var(--of-radius) !important;
+  background: var(--of-paper) !important;
+
+  border: 1px solid var(--of-border) !important;
+  box-shadow: var(--of-shadow-card) !important;
+
+  box-sizing: border-box;
+  margin-bottom: 22px;
+
+  overflow: visible;
+}
+
+:global([data-theme="dark"]) .card {
+  background: #202020 !important;
+}
+
+/* =========================================================
+   5. Section Titles
+   ========================================================= */
+
+.sectionTitle {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+
+  color: var(--of-gold-dark) !important;
+
+  margin-top: 8px !important;
+  margin-bottom: 12px !important;
+
+  line-height: 1.8 !important;
+}
+
+:global([data-theme="dark"]) .sectionTitle {
+  color: #e6c878 !important;
+}
+
+.sectionTitle::before {
+  content: "";
+  width: 4px;
+  height: 21px;
+
+  border-radius: 5px;
+  background: var(--of-gold);
+
+  flex-shrink: 0;
+}
+
+.sectionDivider {
+  border-color: var(--of-border) !important;
+  margin-bottom: 19px !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   6. Field Labels — Above Inputs
+   ========================================================= */
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  width: 100%;
+  min-width: 0;
+
+  direction: rtl;
+}
+
+.fieldLabel {
+  display: block;
+
+  width: 100%;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+
+  color: var(--of-text) !important;
+
+  text-align: right;
+  line-height: 1.7 !important;
+
+  margin: 0 !important;
+}
+
+.required {
+  color: #d32f2f;
+  font-weight: 700;
+}
+
+/* =========================================================
+   7. Form Fields
+   ========================================================= */
+
+.formField {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.formField :global(.MuiOutlinedInput-root) {
+  min-height: 49px;
+  width: 100%;
+
+  border-radius: var(--of-radius-sm) !important;
+  background-color: var(--of-paper) !important;
+
+  font-family: "Cairo", sans-serif !important;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.formField :global(.MuiOutlinedInput-root fieldset) {
+  border: 1px solid var(--of-border-strong) !important;
+  transition: border-color 0.2s ease;
+}
+
+.formField :global(.MuiOutlinedInput-root:hover fieldset) {
+  border-color: var(--of-gold) !important;
+}
+
+.formField :global(.MuiOutlinedInput-root.Mui-focused fieldset) {
+  border-color: var(--of-gold) !important;
+  border-width: 1.5px !important;
+}
+
+.formField :global(.MuiOutlinedInput-root.Mui-error fieldset) {
+  border-color: #d32f2f !important;
+}
+
+.formField :global(.MuiOutlinedInput-root.Mui-focused) {
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.08);
+}
+
+/* Input typography */
+
+.formField :global(.MuiInputBase-input),
+.formField :global(.MuiSelect-select) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--of-text) !important;
+}
+
+.formField :global(.MuiInputBase-input) {
+  padding: 13px 14px !important;
+  box-sizing: border-box;
+}
+
+/* Placeholder */
+
+.formField :global(.MuiInputBase-input::placeholder) {
+  direction: rtl !important;
+  text-align: right !important;
+  color: var(--of-text-faint) !important;
+  opacity: 0.85 !important;
+}
+
+/* Number fields */
+
+.formField :global(input[type="number"]) {
+  direction: ltr !important;
+  text-align: right !important;
+}
+
+/* Input icons */
+
+.formField :global(.MuiInputAdornment-root) {
+  color: var(--of-gold-light);
+}
+
+.formField :global(.MuiInputAdornment-positionStart) {
+  margin-left: 8px !important;
+  margin-right: 0 !important;
+}
+
+.formField :global(.MuiInputAdornment-root svg) {
+  color: var(--of-gold-light);
+  font-size: 20px;
+}
+
+/* Date field */
+
+.formField :global(input[type="date"]) {
+  direction: ltr !important;
+  text-align: right !important;
+}
+
+/* =========================================================
+   8. Textarea
+   ========================================================= */
+
+.formFieldTextarea {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+.formFieldTextarea :global(.MuiOutlinedInput-root) {
+  display: flex !important;
+  align-items: flex-start !important;
+
+  width: 100% !important;
+  min-height: 0 !important;
+
+  padding: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.formFieldTextarea :global(.MuiInputBase-inputMultiline) {
+  display: block !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  box-sizing: border-box !important;
+  padding: 13px 14px !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  line-height: 1.8 !important;
+
+  color: var(--of-text) !important;
+
+  direction: rtl !important;
+  text-align: right !important;
+
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+
+  resize: vertical !important;
+  overflow-x: hidden !important;
+}
+
+.formFieldTextarea :global(textarea) {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* =========================================================
+   9. Select Fields
+   ========================================================= */
+
+.formFieldSelect {
+  width: 100%;
+  min-width: 0;
+}
+
+.formFieldSelect :global(.MuiOutlinedInput-root) {
+  min-height: 53px !important;
+  width: 100%;
+  align-items: center !important;
+}
+
+.formFieldSelect :global(.MuiSelect-select) {
+  padding: 14px 14px !important;
+
+  display: flex;
+  align-items: center;
+
+  min-height: 25px;
+  min-width: 0;
+
+  box-sizing: border-box;
+  line-height: 1.6 !important;
+
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.formFieldSelect :global(.MuiSelect-icon) {
+  color: var(--of-gold) !important;
+  left: 9px !important;
+  right: auto !important;
+}
+
+/* =========================================================
+   10. Error Message
+   ========================================================= */
+
+.errorMessage {
+  padding: 12px 15px;
+  margin-bottom: 22px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(211, 47, 47, 0.25);
+
+  background: rgba(211, 47, 47, 0.07);
+  color: #d32f2f;
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.87rem;
+  font-weight: 600;
+
+  line-height: 1.8;
+}
+
+/* =========================================================
+   11. Menu Items
+   ========================================================= */
+
+.page :global(.MuiMenuItem-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+
+  min-height: 45px;
+
+  color: var(--of-text);
+  white-space: normal;
+
+  direction: rtl;
+  text-align: right;
+}
+
+.page :global(.MuiMenuItem-root:hover) {
+  background-color: var(--of-gold-soft) !important;
+}
+
+.page :global(.MuiMenuItem-root.Mui-selected) {
+  background-color: var(--of-gold-soft-2) !important;
+}
+
+.page :global(.MuiMenuItem-root em) {
+  color: var(--of-text-faint);
+  font-style: normal;
+}
+
+/* =========================================================
+   12. Grid Fix
+   ========================================================= */
+
+.card :global(.MuiGrid-container) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.card :global(.MuiGrid-item) {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* =========================================================
+   13. Actions
+   ========================================================= */
+
+.actions {
+  display: flex;
+
+  justify-content: flex-start;
+  align-items: center;
+
+  gap: 12px;
+
+  padding-top: 22px;
+
+  border-top: 1px solid var(--of-border);
+
+  margin-top: 27px;
+
+  flex-wrap: wrap;
+}
+
+.cancelButton {
+  color: var(--of-text-muted) !important;
+
+  border: 1px solid var(--of-border-strong) !important;
+
+  border-radius: 10px !important;
+
+  text-transform: none !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+
+  padding: 9px 25px !important;
+  min-height: 44px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.cancelButton:hover {
+  background-color: var(--of-gold-soft) !important;
+  border-color: var(--of-gold) !important;
+}
+
+.saveButton {
+  background: linear-gradient(
+    110deg,
+    #c79a4b,
+    #a67c2e
+  ) !important;
+
+  color: #ffffff !important;
+
+  border-radius: 10px !important;
+
+  text-transform: none !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+
+  padding: 9px 27px !important;
+  min-height: 44px;
+
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.19) !important;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.saveButton:hover {
+  background: linear-gradient(
+    110deg,
+    #b8860b,
+    #8b6914
+  ) !important;
+
+  box-shadow: 0 5px 15px rgba(184, 134, 11, 0.28) !important;
+
+  transform: translateY(-1px);
+}
+
+.saveButton:global(.Mui-disabled),
+.cancelButton:global(.Mui-disabled) {
+  opacity: 0.55 !important;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   14. Loading
+   ========================================================= */
+
+.loading {
+  display: flex;
+  flex-direction: column;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 15px;
+
+  min-height: 60vh;
+
+  color: var(--of-text-muted);
+
+  font-family: "Cairo", sans-serif;
+}
+
+/* =========================================================
+   15. Responsive — Tablet
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .page {
+    padding: 18px 10px 35px;
+  }
+
+  .card {
+    padding: 23px !important;
+  }
+
+  .title {
+    font-size: 1.7rem !important;
+  }
+}
+
+/* =========================================================
+   16. Responsive — Mobile
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .page {
+    padding: 14px 5px 30px;
+  }
+
+  .header {
+    margin-bottom: 20px;
+  }
+
+  .headerIcon {
+    width: 52px;
+    height: 52px;
+    border-radius: 15px;
+  }
+
+  .title {
+    font-size: 1.5rem !important;
+  }
+
+  .subtitle {
+    font-size: 0.79rem !important;
+    padding: 0 8px;
+  }
+
+  .card {
+    padding: 17px !important;
+    border-radius: 13px !important;
+  }
+
+  .sectionTitle {
+    font-size: 0.94rem !important;
+    margin-bottom: 9px !important;
+  }
+
+  .sectionDivider {
+    margin-bottom: 14px !important;
+  }
+
+  .fieldLabel {
+    font-size: 0.84rem !important;
+  }
+
+  .formField :global(.MuiInputBase-input),
+  .formField :global(.MuiSelect-select) {
+    font-size: 0.86rem !important;
+  }
+
+  .formField :global(.MuiInputBase-input) {
+    padding: 12px !important;
+  }
+
+  .formFieldTextarea :global(.MuiInputBase-inputMultiline) {
+    padding: 11px 12px !important;
+    font-size: 0.86rem !important;
+    line-height: 1.8 !important;
+  }
+
+  .formFieldSelect :global(.MuiOutlinedInput-root) {
+    min-height: 51px !important;
+  }
+
+  .actions {
+    flex-direction: column-reverse;
+
+    gap: 10px;
+
+    margin-top: 20px;
+    padding-top: 17px;
+  }
+
+  .actions > * {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .cancelButton,
+  .saveButton {
+    width: 100% !important;
+    min-height: 45px;
+    padding: 10px 18px !important;
+  }
+}
+
+/* =========================================================
+   17. Small Mobile
+   ========================================================= */
+
+@media (max-width: 400px) {
+  .page {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .title {
+    font-size: 1.35rem !important;
+  }
+
+  .card {
+    padding: 13px !important;
+  }
+
+  .actions {
+    gap: 8px;
+  }
+}
+
+/* =========================================================
+   18. RTL — Inputs
+   ========================================================= */
+
+.page :global(.MuiInputBase-input) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.page :global(.MuiInputBase-input::placeholder) {
+  direction: rtl !important;
+  text-align: right !important;
+  opacity: 0.75;
+}
+
+.page :global(textarea.MuiInputBase-input) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.page :global(.MuiSelect-select) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.page :global(input[type="number"]) {
+  direction: ltr !important;
+  text-align: right !important;
+}
+
+/* =========================================================
+   19. Print
+   ========================================================= */
+
+@media print {
+  .page {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .actions {
+    display: none !important;
+  }
+
+  .card {
+    box-shadow: none !important;
+    border: 1px solid #cccccc !important;
+    padding: 15px !important;
+  }
+
+  .headerIcon {
+    box-shadow: none;
+  }
+}

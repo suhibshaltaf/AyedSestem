@@ -1,24 +1,28 @@
 /* ===============================
    Container
    =============================== */
-.branches-container {
+
+.workshopsContainer {
   width: 100%;
   max-width: 1100px;
   margin: 0 auto;
   padding: 16px 8px 40px;
+  direction: rtl;
+  box-sizing: border-box;
 }
 
 /* ===============================
    Header
    =============================== */
-.branches-header {
+
+.workshopsHeader {
   display: flex;
   flex-direction: column;
   align-items: center;
   margin-bottom: 24px;
 }
 
-.branches-header-icon {
+.workshopsHeaderIcon {
   width: 58px;
   height: 58px;
   border-radius: 50%;
@@ -30,7 +34,7 @@
   margin-bottom: 10px;
 }
 
-.branches-title {
+.workshopsTitle {
   font-family: "Amiri", "Cairo", serif !important;
   font-size: 1.85rem !important;
   font-weight: 700 !important;
@@ -38,11 +42,11 @@
   margin-bottom: 4px !important;
 }
 
-[data-theme="dark"] .branches-title {
+:global([data-theme="dark"]) .workshopsTitle {
   color: #e6c878 !important;
 }
 
-.branches-subtitle {
+.workshopsSubtitle {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   color: var(--text-muted) !important;
@@ -51,7 +55,8 @@
 /* ===============================
    Toolbar
    =============================== */
-.branches-toolbar {
+
+.workshopsToolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,37 +65,37 @@
   flex-wrap: wrap;
 }
 
-.branches-search {
+.workshopsSearch {
   flex: 1;
   min-width: 220px;
   max-width: 400px;
 }
 
-.branches-search .MuiOutlinedInput-root {
+.workshopsSearch :global(.MuiOutlinedInput-root) {
   background-color: var(--bg-paper);
   border-radius: 10px;
   height: 44px;
 }
 
-.branches-search .MuiOutlinedInput-root fieldset {
+.workshopsSearch :global(.MuiOutlinedInput-root) fieldset {
   border-color: var(--border-gold-strong);
 }
 
-.branches-search .MuiOutlinedInput-root:hover fieldset {
+.workshopsSearch :global(.MuiOutlinedInput-root):hover fieldset {
   border-color: var(--gold-soft);
 }
 
-.branches-search .MuiOutlinedInput-root.Mui-focused fieldset {
+.workshopsSearch :global(.MuiOutlinedInput-root.Mui-focused) fieldset {
   border-color: var(--gold-primary);
 }
 
-.branches-actions {
+.workshopsActions {
   display: flex;
   align-items: center;
   gap: 8px;
 }
 
-.branches-refresh-btn {
+.workshopsRefreshBtn {
   color: var(--gold-primary) !important;
   border: 1px solid var(--border-gold-strong) !important;
   border-radius: 10px !important;
@@ -99,11 +104,11 @@
   height: 44px;
 }
 
-.branches-refresh-btn:hover {
+.workshopsRefreshBtn:hover {
   background-color: rgba(184, 134, 11, 0.08) !important;
 }
 
-.branches-add-btn {
+.workshopsAddBtn {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 10px !important;
@@ -115,14 +120,15 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.branches-add-btn:hover {
+.workshopsAddBtn:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 /* ===============================
    Table Paper
    =============================== */
-.branches-table-paper {
+
+.workshopsTablePaper {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
   border: 1px solid var(--border-gold) !important;
@@ -130,8 +136,8 @@
   overflow: hidden;
 }
 
-.branches-loading,
-.branches-empty {
+.workshopsLoading,
+.workshopsEmpty {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -143,11 +149,12 @@
 /* ===============================
    Table
    =============================== */
-.branches-table-head-row {
+
+.workshopsTableHeadRow {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.branches-th {
+.workshopsTh {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.85rem !important;
   font-weight: 700 !important;
@@ -157,15 +164,15 @@
   white-space: nowrap;
 }
 
-.branches-table-row {
+.workshopsTableRow {
   transition: background-color 0.2s ease;
 }
 
-.branches-table-row:hover {
+.workshopsTableRow:hover {
   background-color: rgba(184, 134, 11, 0.04);
 }
 
-.branches-td {
+.workshopsTd {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.88rem !important;
   color: var(--text-primary) !important;
@@ -173,56 +180,63 @@
   border-bottom: 1px solid var(--border-gold) !important;
 }
 
-.branches-td-name {
+.workshopsTdName {
   font-weight: 600 !important;
 }
 
-.branches-td-phone {
+.workshopsTdPhone {
   direction: ltr;
   text-align: right;
 }
 
+.workshopsTdManager {
+  white-space: nowrap;
+}
+
+.workshopsTdEmpty {
+  color: var(--text-muted);
+}
+
 /* ===============================
-   Chips
+   Manager Chip
    =============================== */
-.branches-code-chip {
-  font-family: "Courier New", monospace !important;
-  font-size: 0.78rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 1px !important;
-  background-color: rgba(30, 58, 95, 0.1) !important;
-  color: #8b6914 !important;
-  border-radius: 6px !important;
+
+.workshopsManagerChip {
+  max-width: 180px;
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.75rem !important;
+  font-weight: 600 !important;
+  color: var(--gold-primary) !important;
+  background-color: rgba(184, 134, 11, 0.12) !important;
 }
 
-[data-theme="dark"] .branches-code-chip {
-  background-color: rgba(128, 169, 212, 0.15) !important;
-  color: #e6c878 !important;
-}
+/* ===============================
+   Status Chip
+   =============================== */
 
-.branches-status-chip {
+.workshopsStatusChip {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.75rem !important;
   font-weight: 600 !important;
   border-radius: 6px !important;
 }
 
-.branches-status-chip-active {
+.workshopsStatusChipActive {
   background-color: rgba(46, 125, 50, 0.15) !important;
   color: #2e7d32 !important;
 }
 
-[data-theme="dark"] .branches-status-chip-active {
+:global([data-theme="dark"]) .workshopsStatusChipActive {
   background-color: rgba(102, 187, 106, 0.15) !important;
   color: #66bb6a !important;
 }
 
-.branches-status-chip-inactive {
+.workshopsStatusChipInactive {
   background-color: rgba(211, 47, 47, 0.12) !important;
   color: #d32f2f !important;
 }
 
-[data-theme="dark"] .branches-status-chip-inactive {
+:global([data-theme="dark"]) .workshopsStatusChipInactive {
   background-color: rgba(239, 83, 80, 0.15) !important;
   color: #ef5350 !important;
 }
@@ -230,7 +244,8 @@
 /* ===============================
    Action Buttons
    =============================== */
-.branches-action-btn {
+
+.workshopsActionBtn {
   width: 34px !important;
   height: 34px !important;
   margin: 0 2px !important;
@@ -238,57 +253,58 @@
   transition: all 0.2s ease !important;
 }
 
-.branches-edit-btn {
+.workshopsEditBtn {
   color: #8b6914 !important;
 }
 
-.branches-edit-btn:hover {
+.workshopsEditBtn:hover {
   background-color: rgba(30, 58, 95, 0.08) !important;
 }
 
-[data-theme="dark"] .branches-edit-btn {
+:global([data-theme="dark"]) .workshopsEditBtn {
   color: #e6c878 !important;
 }
 
-.branches-delete-btn {
+.workshopsDeleteBtn {
   color: var(--danger) !important;
 }
 
-.branches-delete-btn:hover {
+.workshopsDeleteBtn:hover {
   background-color: rgba(211, 47, 47, 0.08) !important;
 }
 
 /* ===============================
-   Dialogs
+   Delete Dialog
    =============================== */
-.branches-dialog {
+
+.workshopsDialog {
   border-radius: 14px !important;
   min-width: 340px;
   max-width: 90vw;
 }
 
-.branches-dialog-title {
+.workshopsDialogTitle {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--text-primary) !important;
 }
 
-.branches-dialog-text {
+.workshopsDialogText {
   font-family: "Cairo", sans-serif !important;
   color: var(--text-secondary) !important;
   line-height: 1.8 !important;
 }
 
-.branches-dialog-text strong {
+.workshopsDialogText strong {
   color: var(--gold-primary);
 }
 
-.branches-dialog-actions {
+.workshopsDialogActions {
   padding: 12px 20px 20px !important;
   gap: 8px;
 }
 
-.branches-dialog-cancel {
+.workshopsDialogCancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -296,7 +312,7 @@
   padding: 8px 20px !important;
 }
 
-.branches-dialog-confirm {
+.workshopsDialogConfirm {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -308,19 +324,20 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.branches-dialog-confirm:hover {
+.workshopsDialogConfirm:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
 /* ===============================
    Form Dialog
    =============================== */
-.branches-form-dialog {
+
+.workshopsFormDialog {
   border-radius: 14px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.branches-form-title {
+.workshopsFormTitle {
   font-family: "Cairo", sans-serif !important;
   font-weight: 700 !important;
   color: var(--gold-primary) !important;
@@ -329,64 +346,69 @@
   padding-bottom: 12px !important;
 }
 
-.branches-form-content {
+.workshopsFormContent {
   padding: 16px 24px !important;
   max-height: 60vh;
   overflow-y: auto;
 }
 
-.branches-form-field {
+.workshopsFormField {
   margin-bottom: 8px !important;
 }
 
-.branches-form-field .MuiOutlinedInput-root {
+.workshopsFormField :global(.MuiOutlinedInput-root) {
   border-radius: 10px !important;
   background-color: var(--bg-paper) !important;
 }
 
-.branches-form-field .MuiOutlinedInput-root fieldset {
+.workshopsFormField :global(.MuiOutlinedInput-root) fieldset {
   border-color: var(--border-gold-strong) !important;
 }
 
-.branches-form-field .MuiOutlinedInput-root:hover fieldset {
+.workshopsFormField
+  :global(.MuiOutlinedInput-root):hover
+  fieldset {
   border-color: var(--gold-soft) !important;
 }
 
-.branches-form-field .MuiOutlinedInput-root.Mui-focused fieldset {
+.workshopsFormField
+  :global(.MuiOutlinedInput-root.Mui-focused)
+  fieldset {
   border-color: var(--gold-primary) !important;
 }
 
-.branches-form-field .MuiInputLabel-root {
+.workshopsFormField :global(.MuiInputLabel-root) {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.9rem !important;
 }
 
-.branches-form-field .MuiInputLabel-root.Mui-focused {
+.workshopsFormField
+  :global(.MuiInputLabel-root.Mui-focused) {
   color: var(--gold-primary) !important;
 }
 
-.branches-form-field .MuiFormHelperText-root {
+.workshopsFormField :global(.MuiFormHelperText-root) {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.72rem !important;
 }
 
-.branches-form-switch {
+.workshopsFormSwitch {
   margin-top: 12px !important;
 }
 
-.branches-form-switch .MuiFormControlLabel-label {
+.workshopsFormSwitch :global(.MuiFormControlLabel-label) {
   font-family: "Cairo", sans-serif !important;
   font-size: 0.88rem !important;
   color: var(--text-primary) !important;
 }
 
-.branches-form-actions {
+.workshopsFormActions {
   padding: 12px 24px 20px !important;
   gap: 8px;
   border-top: 1px solid var(--border-gold) !important;
 }
 
-.branches-form-cancel {
+.workshopsFormCancel {
   color: var(--text-secondary) !important;
   border-radius: 8px !important;
   text-transform: none !important;
@@ -394,11 +416,11 @@
   padding: 8px 20px !important;
 }
 
-.branches-form-cancel:hover {
+.workshopsFormCancel:hover {
   background-color: rgba(184, 134, 11, 0.06) !important;
 }
 
-.branches-form-save {
+.workshopsFormSave {
   background: linear-gradient(90deg, #c79a4b, #a67c2e) !important;
   color: #fff !important;
   border-radius: 8px !important;
@@ -409,11 +431,11 @@
   box-shadow: 0 3px 10px rgba(184, 134, 11, 0.25) !important;
 }
 
-.branches-form-save:hover {
+.workshopsFormSave:hover {
   background: linear-gradient(90deg, #b8860b, #8b6914) !important;
 }
 
-.branches-form-save.Mui-disabled {
+.workshopsFormSave:global(.Mui-disabled) {
   background: linear-gradient(90deg, #d4b98a, #c0a068) !important;
   color: #fff !important;
 }
@@ -421,77 +443,77 @@
 /* ===============================
    Responsive
    =============================== */
+
 @media (max-width: 900px) {
-  .branches-title {
+  .workshopsTitle {
     font-size: 1.6rem !important;
   }
 
-  .branches-th,
-  .branches-td {
+  .workshopsTh,
+  .workshopsTd {
     padding: 12px 10px !important;
     font-size: 0.82rem !important;
   }
 }
 
 @media (max-width: 700px) {
-  .branches-container {
+  .workshopsContainer {
     padding: 12px 4px 32px;
   }
 
-  .branches-title {
+  .workshopsTitle {
     font-size: 1.5rem !important;
   }
 
-  .branches-toolbar {
+  .workshopsToolbar {
     flex-direction: column;
     align-items: stretch;
   }
 
-  .branches-search {
+  .workshopsSearch {
     max-width: 100%;
   }
 
-  .branches-actions {
+  .workshopsActions {
     justify-content: space-between;
   }
 
-  .branches-add-btn {
+  .workshopsAddBtn {
     flex: 1;
   }
 
-  .branches-th,
-  .branches-td {
+  .workshopsTh,
+  .workshopsTd {
     padding: 10px 8px !important;
     font-size: 0.78rem !important;
   }
 
-  .branches-dialog {
+  .workshopsDialog {
     min-width: unset;
     width: 92%;
   }
 
-  .branches-form-content {
+  .workshopsFormContent {
     padding: 12px 16px !important;
     max-height: 55vh;
   }
 
-  .branches-form-actions {
+  .workshopsFormActions {
     padding: 10px 16px 16px !important;
     flex-direction: column-reverse;
   }
 
-  .branches-form-cancel,
-  .branches-form-save {
+  .workshopsFormCancel,
+  .workshopsFormSave {
     width: 100% !important;
     justify-content: center !important;
   }
 
-  .branches-table-paper {
+  .workshopsTablePaper {
     overflow-x: auto;
   }
 
-  .branches-table-paper .MuiTable-root {
-    min-width: 720px;
-
+  .workshopsTablePaper :global(.MuiTable-root) {
+    min-width: 640px;
   }
 }

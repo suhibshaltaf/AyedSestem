@@ -1,0 +1,299 @@
+/* =========================================
+   REPRESENTATIVES SUMMARY
+   CSS Module - RTL
+   ========================================= */
+
+.pageContainer {
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px 16px 40px;
+  box-sizing: border-box;
+  direction: rtl;
+  color: var(--mui-palette-text-primary, #252525);
+}
+
+/* Header */
+
+.pageHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  margin-bottom: 28px;
+}
+
+.pageHeaderIcon {
+  width: 64px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+  color: #b8860b;
+  background: rgba(184, 134, 11, 0.12);
+  margin-bottom: 4px;
+}
+
+.pageTitle {
+  font-size: 27px !important;
+  font-weight: 800 !important;
+  color: var(--mui-palette-text-primary, #252525);
+}
+
+.pageSubtitle {
+  font-size: 14px !important;
+  color: var(--mui-palette-text-secondary, #777);
+}
+
+/* Statistics */
+
+.summaryStats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.summaryStat {
+  min-height: 105px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid rgba(184, 134, 11, 0.18);
+  border-radius: 14px !important;
+  background: var(--mui-palette-background-paper, #fff) !important;
+  box-shadow: 0 3px 14px rgba(0, 0, 0, 0.04) !important;
+}
+
+.summaryStatValue {
+  font-size: 30px !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+  color: #b8860b;
+}
+
+.summaryStatLabel {
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: var(--mui-palette-text-secondary, #777);
+}
+
+/* Toolbar */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.searchField {
+  flex: 1;
+  max-width: 480px;
+}
+
+.searchField :global(.MuiOutlinedInput-root) {
+  min-height: 44px;
+  border-radius: 10px;
+  background: var(--mui-palette-background-paper, #fff);
+}
+
+.searchField :global(.MuiOutlinedInput-notchedOutline) {
+  border-color: rgba(184, 134, 11, 0.25);
+}
+
+.searchField :global(.MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline) {
+  border-color: #b8860b;
+}
+
+.searchField :global(.MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline) {
+  border-color: #b8860b;
+  border-width: 1.5px;
+}
+
+.searchField :global(.MuiInputBase-input) {
+  text-align: right;
+  font-size: 14px;
+}
+
+.refreshButton {
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgba(184, 134, 11, 0.3) !important;
+  border-radius: 10px !important;
+  color: #b8860b !important;
+  background: rgba(184, 134, 11, 0.07) !important;
+  transition: all 0.2s ease !important;
+}
+
+.refreshButton:hover {
+  background: rgba(184, 134, 11, 0.16) !important;
+  transform: rotate(20deg);
+}
+
+/* Table */
+
+.tablePaper {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid var(--mui-palette-divider, #e5e5e5);
+  border-radius: 14px !important;
+  background: var(--mui-palette-background-paper, #fff) !important;
+  box-shadow: 0 3px 16px rgba(0, 0, 0, 0.04) !important;
+}
+
+.tablePaper :global(.MuiTable-root) {
+  min-width: 650px;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.tablePaper :global(.MuiTableCell-root) {
+  font-family: inherit;
+}
+
+.tableHeadCell {
+  padding: 15px 12px !important;
+  text-align: right !important;
+  white-space: nowrap;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  background: #8b6914 !important;
+  border-bottom: none !important;
+}
+
+.tableHeadCell:first-of-type {
+  width: 65px;
+}
+
+.tableCell {
+  padding: 14px 12px !important;
+  text-align: right !important;
+  white-space: nowrap;
+  font-size: 13px !important;
+  color: var(--mui-palette-text-primary, #333) !important;
+  border-bottom: 1px solid var(--mui-palette-divider, #eee) !important;
+}
+
+.nameCell {
+  font-weight: 700 !important;
+}
+
+.tablePaper :global(.MuiTableBody-root .MuiTableRow-root:last-child .MuiTableCell-root) {
+  border-bottom: none !important;
+}
+
+.tablePaper :global(.MuiTableBody-root .MuiTableRow-root:hover) {
+  background: rgba(184, 134, 11, 0.055);
+}
+
+/* Chips */
+
+.countChip {
+  min-width: 42px;
+  font-weight: 800 !important;
+  border-radius: 7px !important;
+}
+
+.countChipActive {
+  color: #8b6914 !important;
+  background: rgba(184, 134, 11, 0.16) !important;
+}
+
+.countChipEmpty {
+  color: #777 !important;
+  background: rgba(120, 120, 120, 0.1) !important;
+}
+
+.branchChip {
+  min-width: 38px;
+  font-weight: 700 !important;
+  color: #1976d2 !important;
+  background: rgba(25, 118, 210, 0.1) !important;
+}
+
+.workshopChip {
+  min-width: 38px;
+  font-weight: 700 !important;
+  color: #8e44ad !important;
+  background: rgba(142, 68, 173, 0.1) !important;
+}
+
+/* Loading & Empty */
+
+.loading,
+.empty {
+  min-height: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.loading :global(.MuiCircularProgress-root) {
+  color: #b8860b;
+}
+
+.empty {
+  color: var(--mui-palette-text-secondary, #777);
+  font-size: 14px;
+  text-align: center;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .pageContainer {
+    padding: 18px 10px 30px;
+  }
+
+  .pageTitle {
+    font-size: 23px !important;
+  }
+
+  .summaryStats {
+    gap: 10px;
+  }
+
+  .summaryStat {
+    min-height: 90px;
+    padding: 14px 8px;
+  }
+
+  .summaryStatValue {
+    font-size: 25px !important;
+  }
+
+  .summaryStatLabel {
+    font-size: 12px !important;
+  }
+
+  .toolbar {
+    gap: 8px;
+  }
+
+  .searchField {
+    max-width: none;
+  }
+}
+
+@media (max-width: 420px) {
+  .pageHeaderIcon {
+    width: 56px;
+    height: 56px;
+  }
+
+  .pageTitle {
+    font-size: 21px !important;
+  }
+
+  .pageSubtitle {
+    font-size: 12px !important;
+  }
+}

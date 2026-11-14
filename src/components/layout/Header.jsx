@@ -1,5 +1,5 @@
-
 import { useState, useEffect } from "react";
+
 import {
   AppBar,
   Toolbar,
@@ -26,7 +26,8 @@ import LogoutIcon from "@mui/icons-material/Logout";
 
 import useAuthStore from "../../store/useAuthStore.js";
 import useThemeStore from "../../store/useThemeStore.js";
-import "../../styles/header.css";
+
+import styles from "../../styles/Header/Header.module.css";
 
 export default function Header({ onMenuClick }) {
   const navigate = useNavigate();
@@ -41,61 +42,56 @@ export default function Header({ onMenuClick }) {
   const [anchorEl, setAnchorEl] = useState(null);
 
   const openMenu = Boolean(anchorEl);
+  const isDark = mode === "dark";
 
-  // تحديث الوقت كل ثانية
   useEffect(() => {
-    const t = setInterval(() => {
+    const timer = setInterval(() => {
       setTime(new Date());
     }, 1000);
 
-    return () => clearInterval(t);
+    return () => clearInterval(timer);
   }, []);
 
-  // تنسيق التاريخ: يوم عربي + تاريخ إنجليزي
-  const formatDate = (d) => {
+  // اليوم بالعربي والتاريخ بالإنجليزي
+  const formatDate = (date) => {
     const day = new Intl.DateTimeFormat("ar-JO", {
       timeZone: "Asia/Amman",
       weekday: "long",
-    }).format(d);
+    }).format(date);
 
-    const date = new Intl.DateTimeFormat("en-GB", {
+    const formattedDate = new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Amman",
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
-    }).format(d);
+    }).format(date);
 
-    return `${day} ${date}`;
+    return `${day} ${formattedDate}`;
   };
 
-  // تنسيق الوقت بالإنجليزي ونظام 24 ساعة
-  const formatTime = (d) => {
-    return new Intl.DateTimeFormat("en-GB", {
+  // الوقت بنظام 24 ساعة
+  const formatTime = (date) =>
+    new Intl.DateTimeFormat("en-GB", {
       timeZone: "Asia/Amman",
       hour: "2-digit",
       minute: "2-digit",
       second: "2-digit",
       hour12: false,
-    }).format(d);
+    }).format(date);
+
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
-  // فتح القائمة
-  const handleOpenMenu = (e) => {
-    setAnchorEl(e.currentTarget);
-  };
-
-  // إغلاق القائمة
   const handleCloseMenu = () => {
     setAnchorEl(null);
   };
 
-  // تغيير كلمة المرور
   const handleChangePassword = () => {
     handleCloseMenu();
     navigate("/change-password");
   };
 
-  // تسجيل الخروج
   const handleLogout = () => {
     handleCloseMenu();
     logout();
@@ -104,76 +100,97 @@ export default function Header({ onMenuClick }) {
   };
 
   return (
-    <AppBar position="sticky" elevation={0} className="app-header">
-      <Toolbar className="app-toolbar">
-
-        {/* FIRST: User */}
+    <AppBar
+      position="sticky"
+      elevation={0}
+      className={`${styles.appHeader} ${
+        isDark ? styles.darkMode : styles.lightMode
+      }`}
+    >
+      <Toolbar className={styles.appToolbar}>
+        {/* User */}
         <Box
-          className="header-user"
+          className={styles.headerUser}
           onClick={handleOpenMenu}
           role="button"
           tabIndex={0}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault();
+              handleOpenMenu(event);
+            }
+          }}
         >
-          <Box className="header-avatar">
-            <PersonIcon sx={{ fontSize: 22 }} />
+          <Box className={styles.headerAvatar}>
+            <PersonIcon />
           </Box>
 
-          <Typography className="header-username">
+          <Typography className={styles.headerUsername}>
             {user?.fullName || user?.userName || "المستخدم"}
           </Typography>
 
           <KeyboardArrowDownIcon
-            className={`header-arrow ${openMenu ? "open" : ""}`}
+            className={`${styles.headerArrow} ${
+              openMenu ? styles.open : ""
+            }`}
           />
         </Box>
 
-        {/* SECOND: Time + Date */}
-        <Box className="header-center">
-          <Typography className="header-time">
+        {/* Date and Time */}
+        <Box className={styles.headerCenter}>
+          <Typography className={styles.headerTime}>
             {formatTime(time)}
           </Typography>
 
-          <div className="header-divider" />
+          <div className={styles.headerDivider} />
 
-          <Typography className="header-date">
+          <Typography className={styles.headerDate}>
             {formatDate(time)}
           </Typography>
         </Box>
 
-        {/* THIRD: Theme + Mobile Menu */}
-        <Box className="header-theme">
-
-          {/* Mobile menu */}
+        {/* Theme and Mobile Menu */}
+        <Box className={styles.headerTheme}>
           <IconButton
             edge="start"
             onClick={onMenuClick}
-            className="menu-btn"
+            className={styles.menuBtn}
+            aria-label="فتح القائمة"
             sx={{ display: { xs: "inline-flex", md: "none" } }}
           >
             <MenuIcon />
           </IconButton>
 
-          {/* Light Mode */}
-          <button
-            className={`theme-btn-sun ${mode === "light" ? "active" : ""}`}
-            onClick={() => setMode("light")}
-            aria-label="الوضع النهاري"
-          >
-            <LightModeIcon sx={{ fontSize: 18 }} />
-          </button>
+          <div className={styles.themeSwitcher}>
+            <button
+              type="button"
+              className={`${styles.themeButton} ${
+                !isDark ? styles.activeTheme : ""
+              }`}
+              onClick={() => setMode("light")}
+              aria-label="الوضع النهاري"
+              aria-pressed={!isDark}
+              title="الوضع النهاري"
+            >
+              <LightModeIcon />
+            </button>
 
-          {/* Dark Mode */}
-          <button
-            className={`theme-btn-moon ${mode === "dark" ? "active" : ""}`}
-            onClick={() => setMode("dark")}
-            aria-label="الوضع الليلي"
-          >
-            <DarkModeIcon sx={{ fontSize: 16 }} />
-          </button>
-
+            <button
+              type="button"
+              className={`${styles.themeButton} ${
+                isDark ? styles.activeTheme : ""
+              }`}
+              onClick={() => setMode("dark")}
+              aria-label="الوضع الليلي"
+              aria-pressed={isDark}
+              title="الوضع الليلي"
+            >
+              <DarkModeIcon />
+            </button>
+          </div>
         </Box>
 
-        {/* Dropdown Menu */}
+        {/* User Menu */}
         <Menu
           anchorEl={anchorEl}
           open={openMenu}
@@ -186,50 +203,52 @@ export default function Header({ onMenuClick }) {
             vertical: "top",
             horizontal: "right",
           }}
-          className="header-menu"
+          className={`${styles.headerMenu} ${
+            isDark ? styles.darkMenu : styles.lightMenu
+          }`}
           MenuListProps={{
-            className: "header-menu-list",
+            className: styles.headerMenuList,
           }}
         >
-
-          {/* Change Password */}
           <MenuItem
             onClick={handleChangePassword}
-            className="header-menu-item"
+            className={styles.headerMenuItem}
           >
-            <ListItemIcon className="header-menu-icon">
+            <ListItemIcon className={styles.headerMenuIcon}>
               <LockResetIcon fontSize="small" />
             </ListItemIcon>
 
             <ListItemText
               primary="تغيير كلمة المرور"
-              primaryTypographyProps={{
-                fontSize: "0.85rem",
-                fontFamily: "'Cairo', sans-serif",
+              slotProps={{
+                primary: {
+                  className: styles.menuText,
+                },
               }}
             />
           </MenuItem>
 
-          <Divider className="header-menu-divider" />
+          <Divider className={styles.headerMenuDivider} />
 
-          {/* Logout */}
           <MenuItem
             onClick={handleLogout}
-            className="header-menu-item logout"
+            className={`${styles.headerMenuItem} ${styles.logout}`}
           >
-            <ListItemIcon className="header-menu-icon logout">
+            <ListItemIcon
+              className={`${styles.headerMenuIcon} ${styles.logout}`}
+            >
               <LogoutIcon fontSize="small" />
             </ListItemIcon>
 
             <ListItemText
               primary="تسجيل الخروج"
-              primaryTypographyProps={{
-                fontSize: "0.85rem",
-                fontFamily: "'Cairo', sans-serif",
+              slotProps={{
+                primary: {
+                  className: styles.menuText,
+                },
               }}
             />
           </MenuItem>
-
         </Menu>
       </Toolbar>
     </AppBar>

@@ -1,0 +1,1296 @@
+/* =========================================================
+   REPAIRS — CREATE / EDIT PAGE
+   CreateRepairOrder.module.css
+   GoldSystem — Modern RTL Design
+   MUI + CSS Modules + Light / Dark Theme
+   ========================================================= */
+
+/* =========================================================
+   1. Variables & Container
+   ========================================================= */
+
+.repairsCreateContainer {
+  --rc-gold: #b8860b;
+  --rc-gold-light: #c9a44c;
+  --rc-gold-dark: #8b6914;
+  --rc-gold-soft: rgba(184, 134, 11, 0.07);
+  --rc-gold-soft-2: rgba(184, 134, 11, 0.13);
+
+  --rc-border: #eee5d0;
+  --rc-border-strong: #dfcfaa;
+
+  --rc-text: var(--text-primary, #292929);
+  --rc-text-muted: var(--text-secondary, #737373);
+  --rc-text-faint: var(--text-muted, #a0a0a0);
+
+  --rc-paper: var(--bg-paper, #ffffff);
+  --rc-background: #faf9f6;
+
+  --rc-shadow-soft: 0 3px 12px rgba(45, 35, 10, 0.045);
+  --rc-shadow-card: 0 5px 20px rgba(45, 35, 10, 0.055);
+
+  --rc-radius: 16px;
+  --rc-radius-sm: 11px;
+
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 22px 12px 45px;
+  box-sizing: border-box;
+
+  font-family: "Cairo", sans-serif;
+  direction: rtl;
+}
+
+/* =========================================================
+   2. Dark Theme
+   ========================================================= */
+
+:global([data-theme="dark"]) .repairsCreateContainer {
+  --rc-border: rgba(230, 200, 120, 0.13);
+  --rc-border-strong: rgba(230, 200, 120, 0.28);
+
+  --rc-text: #eeeeee;
+  --rc-text-muted: #b0b0b0;
+  --rc-text-faint: #858585;
+
+  --rc-paper: #202020;
+  --rc-background: #181818;
+
+  --rc-gold-soft: rgba(230, 200, 120, 0.07);
+  --rc-gold-soft-2: rgba(230, 200, 120, 0.13);
+
+  --rc-shadow-soft: 0 3px 12px rgba(0, 0, 0, 0.20);
+  --rc-shadow-card: 0 5px 20px rgba(0, 0, 0, 0.25);
+}
+
+/* =========================================================
+   3. Header
+   ========================================================= */
+
+.repairsCreateHeader {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 26px;
+}
+
+.repairsCreateHeaderIcon {
+  width: 62px;
+  height: 62px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 18px;
+  border: 1px solid var(--rc-border-strong);
+
+  color: var(--rc-gold);
+  background: var(--rc-gold-soft);
+
+  margin-bottom: 12px;
+  box-shadow: var(--rc-shadow-soft);
+}
+
+.repairsCreateTitle {
+  font-family: "Amiri", "Cairo", serif !important;
+  font-size: 1.9rem !important;
+  font-weight: 700 !important;
+
+  color: var(--rc-gold-dark) !important;
+
+  margin: 0 0 5px !important;
+  line-height: 1.4 !important;
+  text-align: center;
+}
+
+:global([data-theme="dark"]) .repairsCreateTitle {
+  color: #e6c878 !important;
+}
+
+.repairsCreateSubtitle {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.86rem !important;
+
+  color: var(--rc-text-muted) !important;
+  text-align: center;
+
+  line-height: 1.7 !important;
+}
+
+/* =========================================================
+   4. Main Card
+   ========================================================= */
+
+.repairsCreateCard {
+  padding: 28px !important;
+
+  border-radius: var(--rc-radius) !important;
+  background: var(--rc-paper) !important;
+
+  border: 1px solid var(--rc-border) !important;
+  box-shadow: var(--rc-shadow-card) !important;
+
+  box-sizing: border-box;
+  margin-bottom: 22px;
+
+  overflow: visible;
+}
+
+:global([data-theme="dark"]) .repairsCreateCard {
+  background: #202020 !important;
+}
+
+/* =========================================================
+   5. Section Titles
+   ========================================================= */
+
+.repairsSectionTitle {
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  gap: 9px;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 1rem !important;
+  font-weight: 700 !important;
+
+  color: var(--rc-gold-dark) !important;
+
+  margin-top: 8px !important;
+  margin-bottom: 12px !important;
+
+  line-height: 1.8 !important;
+}
+
+:global([data-theme="dark"]) .repairsSectionTitle {
+  color: #e6c878 !important;
+}
+
+.repairsSectionTitle::before {
+  content: "";
+  width: 4px;
+  height: 21px;
+
+  border-radius: 5px;
+  background: var(--rc-gold);
+
+  flex-shrink: 0;
+}
+
+.repairsSectionDivider {
+  border-color: var(--rc-border) !important;
+  margin-bottom: 19px !important;
+  opacity: 1 !important;
+}
+
+/* =========================================================
+   6. Form Fields — General MUI
+   ========================================================= */
+
+.repairsFormField {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.repairsFormField :global(.MuiFormControl-root) {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.repairsFormField :global(.MuiOutlinedInput-root) {
+  min-height: 49px;
+  width: 100%;
+
+  border-radius: var(--rc-radius-sm) !important;
+  background-color: var(--rc-paper) !important;
+
+  font-family: "Cairo", sans-serif !important;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.repairsFormField:not(.repairsFormFieldTextarea)
+  :global(.MuiOutlinedInput-root) {
+  min-height: 49px !important;
+}
+
+/* Border */
+
+.repairsFormField :global(.MuiOutlinedInput-root fieldset) {
+  border: 1px solid var(--rc-border-strong) !important;
+  transition: border-color 0.2s ease;
+}
+
+.repairsFormField :global(.MuiOutlinedInput-root:hover fieldset) {
+  border-color: var(--rc-gold) !important;
+}
+
+.repairsFormField
+  :global(.MuiOutlinedInput-root.Mui-focused fieldset) {
+  border-color: var(--rc-gold) !important;
+  border-width: 1.5px !important;
+}
+
+.repairsFormField
+  :global(.MuiOutlinedInput-root.Mui-error fieldset) {
+  border-color: #d32f2f !important;
+}
+
+/* Focus shadow */
+
+.repairsFormField
+  :global(.MuiOutlinedInput-root.Mui-focused) {
+  box-shadow: 0 0 0 3px rgba(184, 134, 11, 0.08);
+}
+
+/* Labels */
+
+.repairsFormField :global(.MuiInputLabel-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.88rem !important;
+  color: var(--rc-text-muted) !important;
+}
+
+.repairsFormField
+  :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--rc-gold) !important;
+}
+
+/* Input typography */
+
+.repairsFormField :global(.MuiInputBase-input),
+.repairsFormField :global(.MuiSelect-select) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  color: var(--rc-text) !important;
+}
+
+/* Input padding */
+
+.repairsFormField:not(.repairsFormFieldTextarea)
+  :global(.MuiInputBase-input) {
+  padding: 13px 14px !important;
+  box-sizing: border-box;
+}
+
+/* Number fields */
+
+.repairsFormField
+  :global(.MuiInputBase-input[type="number"]) {
+  direction: ltr;
+  text-align: right;
+}
+
+/* Placeholder */
+
+.repairsFormField
+  :global(.MuiInputBase-input::placeholder) {
+  color: var(--rc-text-faint);
+  opacity: 0.8;
+}
+
+/* =========================================================
+   7. Textarea — Full Width
+   ========================================================= */
+
+.repairsFormFieldTextarea {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* TextField root */
+
+.repairsFormFieldTextarea:global(.MuiFormControl-root) {
+  display: block !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+}
+
+/* OutlinedInput */
+
+.repairsFormFieldTextarea :global(.MuiOutlinedInput-root) {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: flex-start !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  height: auto !important;
+  min-height: 0 !important;
+
+  padding: 0 !important;
+  box-sizing: border-box !important;
+
+  border-radius: var(--rc-radius-sm) !important;
+  background-color: var(--rc-paper) !important;
+}
+
+/* Textarea */
+
+.repairsFormFieldTextarea :global(.MuiInputBase-inputMultiline) {
+  display: block !important;
+
+  flex: 1 1 auto !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  box-sizing: border-box !important;
+  padding: 13px 14px !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+  line-height: 1.8 !important;
+
+  color: var(--rc-text) !important;
+
+  direction: rtl !important;
+  text-align: right !important;
+
+  white-space: pre-wrap !important;
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+
+  resize: vertical !important;
+  overflow-x: hidden !important;
+}
+
+/* تأكيد عرض عنصر textarea */
+
+.repairsFormFieldTextarea :global(textarea) {
+  display: block !important;
+
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100% !important;
+
+  box-sizing: border-box !important;
+
+  overflow-wrap: anywhere !important;
+  word-break: break-word !important;
+}
+
+/* Label */
+
+.repairsFormFieldTextarea :global(.MuiInputLabel-root) {
+  transform: translate(14px, 15px) scale(1);
+}
+
+.repairsFormFieldTextarea
+  :global(.MuiInputLabel-root.MuiInputLabel-shrink) {
+  transform: translate(14px, -9px) scale(0.75);
+}
+
+/* =========================================================
+   7.1 Grid Width Fix
+   ========================================================= */
+
+.repairsCreateCard :global(.MuiGrid-container) {
+  min-width: 0 !important;
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+.repairsCreateCard :global(.MuiGrid-item) {
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* أي Grid item يحتوي على Textarea يأخذ السطر كاملاً */
+
+.repairsCreateCard
+  :global(.MuiGrid-item:has(.repairsFormFieldTextarea)) {
+  flex-basis: 100% !important;
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* =========================================================
+   7.2 Textarea Mobile
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .repairsFormFieldTextarea :global(.MuiInputBase-inputMultiline) {
+    padding: 11px 12px !important;
+    font-size: 0.86rem !important;
+    line-height: 1.8 !important;
+  }
+}
+
+/* =========================================================
+   8. Select Fields
+   ========================================================= */
+
+.repairsFormFieldSelect {
+  width: 100%;
+  min-width: 0;
+}
+
+.repairsFormFieldSelect
+  :global(.MuiOutlinedInput-root) {
+  min-height: 53px !important;
+
+  width: 100%;
+
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+
+  align-items: center !important;
+}
+
+.repairsFormFieldSelect
+  :global(.MuiInputAdornment-root) {
+  margin-left: 7px;
+  margin-right: 10px;
+
+  height: auto;
+  max-height: none;
+
+  align-self: center;
+}
+
+.repairsFormFieldSelect
+  :global(.MuiSelect-select) {
+  padding: 14px 14px !important;
+
+  display: flex;
+  align-items: center;
+
+  min-height: 25px;
+  min-width: 0;
+
+  box-sizing: border-box;
+
+  line-height: 1.6 !important;
+
+  white-space: normal;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.repairsFormFieldSelect
+  :global(.MuiSelect-select:focus) {
+  background-color: transparent !important;
+}
+
+.repairsFormFieldSelect
+  :global(.MuiSelect-icon) {
+  color: var(--rc-gold) !important;
+
+  left: 9px !important;
+  right: auto !important;
+}
+
+.repairsSelectPlaceholder {
+  color: var(--rc-text-faint);
+
+  font-family: "Cairo", sans-serif;
+  font-size: 0.88rem;
+}
+
+/* =========================================================
+   9. Helper Text
+   ========================================================= */
+
+.repairsFormField
+  :global(.MuiFormHelperText-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.74rem !important;
+
+  margin-right: 12px !important;
+  margin-left: 0 !important;
+
+  line-height: 1.8 !important;
+  min-height: 20px;
+}
+
+.repairsFormField
+  :global(.MuiInputAdornment-root) {
+  color: var(--rc-gold-light);
+}
+
+/* =========================================================
+   10. Receive / Deliver Fields
+   ========================================================= */
+
+.repairsReceiveGrid {
+  margin-top: 2px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.repairsReceiveGrid > :global(.MuiGrid-item) {
+  min-width: 0;
+}
+
+.repairsReceiveGrid :global(.MuiFormControl-root) {
+  width: 100%;
+  min-width: 0;
+  margin: 0 !important;
+}
+
+.repairsReceiveGrid :global(.MuiOutlinedInput-root) {
+  min-height: 58px !important;
+  width: 100%;
+
+  border-radius: 12px !important;
+  background-color: var(--rc-paper) !important;
+
+  align-items: center !important;
+}
+
+.repairsReceiveGrid :global(.MuiOutlinedInput-root fieldset) {
+  border: 1px solid var(--rc-border-strong) !important;
+  border-radius: 12px !important;
+  transition: border-color 0.2s ease;
+}
+
+.repairsReceiveGrid :global(.MuiOutlinedInput-root:hover fieldset) {
+  border-color: var(--rc-gold) !important;
+}
+
+.repairsReceiveGrid :global(.MuiOutlinedInput-root.Mui-focused fieldset) {
+  border-color: var(--rc-gold) !important;
+  border-width: 1.5px !important;
+}
+
+.repairsReceiveGrid :global(.MuiInputLabel-root) {
+  font-size: 0.95rem !important;
+  font-weight: 700 !important;
+  color: var(--rc-text-muted) !important;
+  transform: translate(14px, 17px) scale(1) !important;
+}
+
+.repairsReceiveGrid :global(.MuiInputLabel-root.MuiInputLabel-shrink) {
+  transform: translate(14px, -9px) scale(0.85) !important;
+  color: var(--rc-gold) !important;
+  font-weight: 700 !important;
+  background-color: var(--rc-paper) !important;
+  padding: 0 4px !important;
+  border-radius: 4px;
+}
+
+.repairsReceiveGrid :global(.MuiInputLabel-root.Mui-focused) {
+  color: var(--rc-gold) !important;
+}
+
+.repairsReceiveGrid :global(.MuiSelect-select) {
+  min-height: 26px !important;
+  min-width: 0;
+
+  padding: 16px 14px !important;
+
+  font-size: 0.95rem !important;
+  font-weight: 600 !important;
+
+  display: flex !important;
+  align-items: center !important;
+
+  box-sizing: border-box !important;
+  color: var(--rc-text) !important;
+}
+
+.repairsReceiveGrid :global(.MuiInputAdornment-root) {
+  margin-left: 8px;
+  margin-right: 12px;
+  height: auto !important;
+}
+
+.repairsReceiveGrid :global(.MuiFormHelperText-root) {
+  margin-top: 4px !important;
+  margin-right: 12px !important;
+  margin-left: 0 !important;
+
+  min-height: 0 !important;
+  font-size: 0.75rem !important;
+}
+
+/* =========================================================
+   10.1 Employee Select
+   ========================================================= */
+
+.repairsEmployeeSelect {
+  width: 100%;
+  min-width: 0;
+}
+
+.repairsEmployeeSelect :global(.MuiOutlinedInput-root) {
+  background: var(--rc-gold-soft) !important;
+}
+
+.repairsEmployeeSelect :global(.MuiSelect-select) {
+  font-weight: 700 !important;
+  white-space: normal !important;
+  overflow: visible !important;
+  text-overflow: clip !important;
+}
+
+.repairsEmployeeSelect .repairsSelectPlaceholder {
+  color: var(--rc-text-muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+/* =========================================================
+   11. Menu Items
+   ========================================================= */
+
+.repairsCreateContainer
+  :global(.MuiMenuItem-root) {
+  font-family: "Cairo", sans-serif !important;
+  font-size: 0.9rem !important;
+
+  min-height: 45px;
+
+  color: var(--rc-text);
+  white-space: normal;
+}
+
+.repairsCreateContainer
+  :global(.MuiMenuItem-root:hover) {
+  background-color: var(--rc-gold-soft) !important;
+}
+
+.repairsCreateContainer
+  :global(.MuiMenuItem-root.Mui-selected) {
+  background-color: var(--rc-gold-soft-2) !important;
+}
+
+.repairsCreateContainer
+  :global(.MuiMenuItem-root em) {
+  color: var(--rc-text-faint);
+  font-style: normal;
+}
+
+/* =========================================================
+   12. Images Upload
+   ========================================================= */
+
+.repairsImagesUploadContainer {
+  display: flex;
+  flex-direction: column;
+
+  gap: 13px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.repairsImagesGrid {
+  display: grid;
+
+  grid-template-columns: repeat(auto-fill, minmax(145px, 1fr));
+
+  gap: 13px;
+
+  width: 100%;
+  min-width: 0;
+}
+
+.repairsImagesGrid > .repairsImagePreviewWrapper,
+.repairsImagesGrid > .repairsImageUploadLabel {
+  position: relative;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
+  width: 100%;
+
+  aspect-ratio: 1 / 1;
+
+  border-radius: 13px;
+  overflow: hidden;
+
+  border: 1px solid var(--rc-border-strong);
+
+  background: #faf8f2;
+
+  box-sizing: border-box;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease;
+}
+
+:global([data-theme="dark"])
+  .repairsImagesGrid
+  > .repairsImagePreviewWrapper,
+:global([data-theme="dark"])
+  .repairsImagesGrid
+  > .repairsImageUploadLabel {
+  background: #292929;
+}
+
+.repairsImagesGrid
+  > .repairsImagePreviewWrapper:hover {
+  border-color: var(--rc-gold);
+
+  box-shadow: 0 5px 15px rgba(184, 134, 11, 0.14);
+
+  transform: translateY(-2px);
+}
+
+.repairsImagesGrid .repairsImagePreview {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+
+  border: none;
+  border-radius: 0;
+
+  box-shadow: none;
+}
+
+/* =========================================================
+   13. Remove Image Button
+   ========================================================= */
+
+.repairsImageRemoveBtn {
+  position: absolute !important;
+
+  top: 7px !important;
+  left: 7px !important;
+
+  width: 30px !important;
+  height: 30px !important;
+
+  z-index: 2;
+
+  background-color: rgba(211, 47, 47, 0.93) !important;
+  color: #ffffff !important;
+
+  box-shadow: 0 2px 7px rgba(0, 0, 0, 0.20);
+
+  transition:
+    transform 0.15s ease,
+    background-color 0.15s ease !important;
+}
+
+.repairsImageRemoveBtn:hover {
+  background-color: #d32f2f !important;
+  transform: scale(1.08);
+}
+
+/* =========================================================
+   14. Upload Label
+   ========================================================= */
+
+.repairsImagesGrid > .repairsImageUploadLabel {
+  border-style: dashed;
+  border-width: 1.5px;
+
+  cursor: pointer;
+
+  padding: 12px;
+
+  text-align: center;
+
+  gap: 8px;
+
+  background: rgba(184, 134, 11, 0.025);
+}
+
+:global([data-theme="dark"])
+  .repairsImagesGrid
+  > .repairsImageUploadLabel {
+  background: rgba(230, 200, 120, 0.045);
+}
+
+.repairsImagesGrid
+  > .repairsImageUploadLabel:hover {
+  border-color: var(--rc-gold);
+
+  background: var(--rc-gold-soft);
+
+  box-shadow: 0 4px 12px rgba(184, 134, 11, 0.10);
+}
+
+.repairsImagesGrid .repairsImageUploadText {
+  font-family: "Cairo", sans-serif !important;
+
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+
+  color: var(--rc-gold-dark) !important;
+
+  line-height: 1.5 !important;
+
+  margin: 0 !important;
+}
+
+:global([data-theme="dark"])
+  .repairsImagesGrid
+  .repairsImageUploadText {
+  color: #e6c878 !important;
+}
+
+.repairsImagesGrid .repairsImageUploadHint {
+  font-family: "Cairo", sans-serif !important;
+
+  font-size: 0.7rem !important;
+
+  color: var(--rc-text-faint) !important;
+
+  line-height: 1.5 !important;
+
+  margin: 0 !important;
+}
+
+/* =========================================================
+   15. Actions
+   ========================================================= */
+
+.repairsCreateActions {
+  display: flex;
+
+  justify-content: flex-end;
+  align-items: center;
+
+  gap: 12px;
+
+  padding-top: 22px;
+
+  border-top: 1px solid var(--rc-border);
+
+  margin-top: 27px;
+
+  flex-wrap: wrap;
+}
+
+.repairsCreateCancel {
+  color: var(--rc-text-muted) !important;
+
+  border: 1px solid var(--rc-border-strong) !important;
+
+  border-radius: 10px !important;
+
+  text-transform: none !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 600 !important;
+
+  padding: 9px 25px !important;
+  min-height: 44px;
+
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.repairsCreateCancel:hover {
+  background-color: var(--rc-gold-soft) !important;
+  border-color: var(--rc-gold) !important;
+}
+
+.repairsCreateSave {
+  background: linear-gradient(
+    110deg,
+    #c79a4b,
+    #a67c2e
+  ) !important;
+
+  color: #ffffff !important;
+
+  border-radius: 10px !important;
+
+  text-transform: none !important;
+
+  font-family: "Cairo", sans-serif !important;
+  font-weight: 700 !important;
+
+  padding: 9px 27px !important;
+  min-height: 44px;
+
+  box-shadow: 0 3px 10px rgba(184, 134, 11, 0.19) !important;
+
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    transform 0.2s ease !important;
+}
+
+.repairsCreateSave:hover {
+  background: linear-gradient(
+    110deg,
+    #b8860b,
+    #8b6914
+  ) !important;
+
+  box-shadow: 0 5px 15px rgba(184, 134, 11, 0.28) !important;
+
+  transform: translateY(-1px);
+}
+
+.repairsCreateSave:global(.Mui-disabled),
+.repairsCreateCancel:global(.Mui-disabled) {
+  opacity: 0.55 !important;
+  cursor: not-allowed;
+}
+
+/* =========================================================
+   16. Loading
+   ========================================================= */
+
+.repairsCreateLoading {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 60vh;
+
+  color: var(--rc-text-muted);
+}
+
+/* =========================================================
+   17. Responsive — Tablet
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .repairsCreateContainer {
+    padding: 18px 10px 35px;
+  }
+
+  .repairsCreateCard {
+    padding: 23px !important;
+  }
+
+  .repairsCreateTitle {
+    font-size: 1.7rem !important;
+  }
+
+  .repairsImagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+}
+
+/* =========================================================
+   18. Responsive — Mobile
+   ========================================================= */
+
+@media (max-width: 700px) {
+  .repairsCreateContainer {
+    padding: 14px 5px 30px;
+  }
+
+  .repairsCreateHeader {
+    margin-bottom: 20px;
+  }
+
+  .repairsCreateHeaderIcon {
+    width: 52px;
+    height: 52px;
+
+    border-radius: 15px;
+  }
+
+  .repairsCreateTitle {
+    font-size: 1.5rem !important;
+  }
+
+  .repairsCreateSubtitle {
+    font-size: 0.79rem !important;
+    padding: 0 8px;
+  }
+
+  .repairsCreateCard {
+    padding: 17px !important;
+    border-radius: 13px !important;
+  }
+
+  .repairsSectionTitle {
+    font-size: 0.94rem !important;
+    margin-bottom: 9px !important;
+  }
+
+  .repairsSectionDivider {
+    margin-bottom: 14px !important;
+  }
+
+  .repairsFormField :global(.MuiInputBase-input),
+  .repairsFormField :global(.MuiSelect-select) {
+    font-size: 0.86rem !important;
+  }
+
+  .repairsFormField:not(.repairsFormFieldTextarea)
+    :global(.MuiInputBase-input) {
+    padding: 12px !important;
+  }
+
+  .repairsFormFieldTextarea
+    :global(.MuiInputBase-inputMultiline) {
+    padding: 11px 12px !important;
+    font-size: 0.86rem !important;
+    line-height: 1.8 !important;
+  }
+
+  .repairsFormFieldSelect
+    :global(.MuiOutlinedInput-root) {
+    min-height: 51px !important;
+  }
+
+  .repairsReceiveGrid
+    :global(.MuiOutlinedInput-root) {
+    min-height: 56px !important;
+  }
+
+  .repairsReceiveGrid
+    :global(.MuiSelect-select) {
+    font-size: 0.87rem !important;
+  }
+
+  .repairsEmployeeSelect
+    :global(.MuiOutlinedInput-root) {
+    min-height: 56px !important;
+  }
+
+  .repairsEmployeeSelect
+    :global(.MuiSelect-select) {
+    padding-top: 14px !important;
+    padding-bottom: 14px !important;
+
+    font-size: 0.84rem !important;
+  }
+
+  .repairsEmployeeSelect .repairsSelectPlaceholder {
+    font-size: 0.8rem;
+  }
+
+  .repairsImagesGrid {
+    grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+    gap: 9px;
+  }
+
+  .repairsImagesGrid > .repairsImagePreviewWrapper,
+  .repairsImagesGrid > .repairsImageUploadLabel {
+    border-radius: 10px;
+  }
+
+  .repairsImagesGrid .repairsImageUploadText {
+    font-size: 0.76rem !important;
+  }
+
+  .repairsImagesGrid .repairsImageUploadHint {
+    display: none;
+  }
+
+  .repairsImagesGrid
+    > .repairsImageUploadLabel
+    :global(svg) {
+    font-size: 30px !important;
+  }
+
+  .repairsImageRemoveBtn {
+    width: 27px !important;
+    height: 27px !important;
+  }
+
+  .repairsCreateActions {
+    flex-direction: column-reverse;
+
+    gap: 10px;
+
+    margin-top: 20px;
+    padding-top: 17px;
+  }
+
+  .repairsCreateActions > * {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  .repairsCreateCancel,
+  .repairsCreateSave {
+    width: 100% !important;
+
+    min-height: 45px;
+    padding: 10px 18px !important;
+  }
+}
+
+/* =========================================================
+   19. Responsive — Small Mobile
+   ========================================================= */
+
+@media (max-width: 400px) {
+  .repairsCreateContainer {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .repairsCreateTitle {
+    font-size: 1.35rem !important;
+  }
+
+  .repairsCreateCard {
+    padding: 13px !important;
+  }
+
+  .repairsImagesGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .repairsImagesGrid .repairsImageUploadText {
+    font-size: 0.73rem !important;
+  }
+
+  .repairsImageRemoveBtn {
+    width: 25px !important;
+    height: 25px !important;
+
+    top: 5px !important;
+    left: 5px !important;
+  }
+
+  .repairsCreateActions {
+    gap: 8px;
+  }
+
+  .repairsEmployeeSelect .repairsSelectPlaceholder {
+    font-size: 0.76rem;
+  }
+}
+
+/* =========================================================
+   20. RTL
+   ========================================================= */
+
+:global([dir="rtl"]) .repairsCreateActions {
+  justify-content: flex-start;
+}
+
+@media (max-width: 700px) {
+  :global([dir="rtl"]) .repairsCreateActions {
+    justify-content: stretch;
+  }
+}
+
+/* =========================================================
+   21. Print
+   ========================================================= */
+
+@media print {
+  .repairsCreateContainer {
+    max-width: 100%;
+    padding: 0;
+  }
+
+  .repairsCreateActions {
+    display: none !important;
+  }
+
+  .repairsCreateCard {
+    box-shadow: none !important;
+    border: 1px solid #cccccc !important;
+    padding: 15px !important;
+  }
+
+  .repairsCreateHeaderIcon {
+    box-shadow: none;
+  }
+
+  .repairsImagesGrid
+    > .repairsImageUploadLabel {
+    display: none !important;
+  }
+}
+
+/* =========================================================
+   22. Arabic RTL — Inputs & Placeholders
+   ========================================================= */
+
+/* جميع الحقول النصية */
+
+.repairsCreateContainer
+  :global(.MuiInputBase-input) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* Placeholder للحقول العادية */
+
+.repairsCreateContainer
+  :global(.MuiInputBase-input::placeholder) {
+  direction: rtl !important;
+  text-align: right !important;
+  text-align-last: right !important;
+  opacity: 0.75;
+}
+
+/* Textarea */
+
+.repairsCreateContainer
+  :global(textarea.MuiInputBase-input) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.repairsCreateContainer
+  :global(textarea.MuiInputBase-input::placeholder) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* Select Placeholder */
+
+.repairsCreateContainer
+  :global(.MuiSelect-select) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* القوائم المنسدلة */
+
+.repairsCreateContainer
+  :global(.MuiMenuItem-root) {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* حقول الأرقام تبقى LTR */
+
+.repairsCreateContainer
+  :global(input[type="number"]) {
+  direction: ltr !important;
+  text-align: right !important;
+}
+
+/* ترتيب الأيقونات داخل الحقول */
+
+.repairsCreateContainer
+  :global(.MuiInputAdornment-positionStart) {
+  margin-left: 8px !important;
+  margin-right: 0 !important;
+}
+
+.repairsCreateContainer
+  :global(.MuiInputAdornment-positionEnd) {
+  margin-right: 8px !important;
+  margin-left: 0 !important;
+}
